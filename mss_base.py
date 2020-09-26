@@ -1,8 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
+# from selenium.common.exceptions import NoSuchElementException
+# import tools
 import requests
+from tools import getIdLinkMSS, getLinkMSS, parseInt
+from mss_circuit import runScriptCircuits
 # import time
 
 # Scraping
@@ -10,6 +13,7 @@ urlBase = "https://results.motorsportstats.com"
 
 
 def runScript(params):
+    ret = {}
     # Before Deploy
     # CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH",
     # "/usr/local/bin/chromedriver")
@@ -33,24 +37,37 @@ def runScript(params):
     data = getDrivers(driver, params)
     r = requests.post(urlApi+"/driver/create", json=data)
     print(r.json())
+    ret["drivers"] = r.json()
 
     data = getTeams(driver, params)
     r = requests.post(urlApi+"/team/create", json=data)
     print(r.json())
+    ret["teams"] = r.json()
 
-    data = getEvents(driver, params)
-    r = requests.post(urlApi+"/event/create", json=data)
+    events = getEvents(driver, params)
+    circuits = runScriptCircuits(params, events)
+
+    r = requests.post(urlApi+"/circuit/create", json=circuits)
     print(r.json())
+    ret["circuits"] = r.json()
+
+    r = requests.post(urlApi+"/event/create", json=events)
+    print(r.json())
+    ret["events"] = r.json()
 
     data = getChampD(driver, params)
     r = requests.post(urlApi+"/champ/create", json=data)
     print(r.json())
+    ret["champD"] = r.json()
 
     # data = getChampT(driver, params)
     # r = requests.post(urlApi+"/champ/create", json=data)
     # print(r.json())
+    # ret["champT"] = r.json()
 
     driver.close()
+
+    return ret
 
 
 def getDrivers(driver, params):
@@ -72,18 +89,14 @@ def getDrivers(driver, params):
                     idTeam = ""
                     strTeam = ""
                     for tr in range(0, len(trs)):
-                        td = trs[tr].find_element_by_xpath("./td[1]")
-                        if (td.text != ""):
-                            print(td.text)
-                            linkTeam = td.find_element_by_xpath(
-                                "./a").get_attribute("href")
-                            idTeam = linkTeam.replace(
-                                "/history", "").replace(urlBase+"/teams/", "")
-                            strTeam = td.text
-                        linkDriver = trs[tr].find_element_by_xpath(
-                            "./td[3]/a").get_attribute("href")
-                        idDriver = linkDriver.replace(
-                            "/career", "").replace(urlBase+"/drivers/", "")
+                        tds = trs[tr].find_elements_by_xpath("./td")
+                        if (tds[0].text != ""):
+                            print(tds[0].text)
+                            linkTeam = getLinkMSS(tds[0])
+                            idTeam = getIdLinkMSS(urlBase, linkTeam, "T")
+                            strTeam = tds[0].text
+                        linkDriver = getLinkMSS(tds[2])
+                        idDriver = getIdLinkMSS(urlBase, linkDriver, "D")
                         pilot = {
                             "idPlayer": params["catRCtrl"].upper() + "-"
                             + idDriver,
@@ -96,31 +109,16 @@ def getDrivers(driver, params):
                                 "./td[2]").text.strip(),
                             "idTeam": idTeam,
                             "strTeam": strTeam,
+                            "numSeason": parseInt(params["year"]),
                             "strRSS": linkDriver,
                         }
                         pilots.append(pilot)
                 break
-        """ for p in range(0, len(pilots)):
-            link = WebDriverWait(driver, 15).until(
-                lambda d: d.find_element_by_xpath(
-                    "//a[contains(@href, '" + pilots[p]["idMss"] + "')]")
-            )
-            driver.execute_script("arguments[0].click()", link)
-            time.sleep(1)
-            pilots[p]["strThumb"] = WebDriverWait(driver, 15).until(
-                lambda d: d.find_element_by_xpath(
-                    "//div[@class='_32UEK']/img").get_attribute("src"))
-            ''' pilots[p]["dateBorn"] = driver.find_element_by_xpath(
-                "//div[@class='_3wj-5']").text
-            pilots[p]["strBirthLocation"] = driver.find_element_by_xpath(
-                "//div[@class='_32UEK']/img").get_attribute("src")
-            pilots[p]["strNationality"] = driver.find_element_by_xpath(
-                "//div[@class='_32UEK']/img").get_attribute("src") '''
-            driver.back() """
         print(pilots)
-        return pilots
         print("::: PROCESS FINISHED :::")
-    except BaseException:
+        return pilots
+    except Exception as e:
+        print(e)
         return "::: ERROR DRIVERS :::"
 
 
@@ -143,13 +141,11 @@ def getTeams(driver, params):
                     idTeam = ""
                     strTeam = ""
                     for tr in range(0, len(trs)):
-                        td = trs[tr].find_element_by_xpath("./td[1]")
-                        if (td.text != ""):
-                            linkTeam = td.find_element_by_xpath(
-                                "./a").get_attribute("href")
-                            idTeam = linkTeam.replace(
-                                "/history", "").replace(urlBase+"/teams/", "")
-                            strTeam = td.text
+                        tds = trs[tr].find_elements_by_xpath("./td")
+                        if (tds[0].text != ""):
+                            linkTeam = getLinkMSS(tds[0])
+                            idTeam = getIdLinkMSS(urlBase, linkTeam, "T")
+                            strTeam = tds[0].text
                             team = {
                                 "idTeam": params["catRCtrl"].upper() + "-" +
                                 idTeam.strip(),
@@ -157,15 +153,17 @@ def getTeams(driver, params):
                                 "idCategory": params["catRCtrl"],
                                 "idRCtrl": idTeam,
                                 "idMss": idTeam,
+                                "numSeason": parseInt(params["year"]),
                                 "strRSS": linkTeam,
                             }
                             teams.append(team)
                             break
                 break
         print(teams)
-        return teams
         print("::: PROCESS FINISHED :::")
-    except Exception:
+        return teams
+    except Exception as e:
+        print(e)
         return "::: ERROR TEAMS :::"
 
 
@@ -183,18 +181,18 @@ def getEvents(driver, params):
                 trs = tables[table].find_elements_by_xpath("./tbody/tr")
                 for tr in range(0, len(trs)):
                     tds = trs[tr].find_elements_by_xpath("./td")
-                    linkEvent = tds[2].find_element_by_xpath(
-                        "./a").get_attribute("href")
-                    idEvent = linkEvent.replace(
-                        "/classification", "").replace(urlBase+"/results/", "")
-                    linkCircuit = ""
-                    try:
-                        linkCircuit = tds[3].find_element_by_xpath(
-                            "./a").get_attribute("href")
-                    except NoSuchElementException:
-                        pass
-                    idCircuit = linkCircuit.replace(urlBase+"/venues/", "")
+                    linkEvent = getLinkMSS(tds[2])
+                    idEvent = getIdLinkMSS(urlBase, linkEvent, "E")
+                    linkCircuit = getLinkMSS(tds[3])
+                    idCircuit = getIdLinkMSS(urlBase, linkCircuit, "C")
+                    linkDriver = getLinkMSS(tds[4])
+                    idDriver = getIdLinkMSS(urlBase, linkDriver, "D")
                     strEvent = tds[2].text
+                    strPostponed = ""
+                    if("Cancelled" in strEvent):
+                        strEvent = strEvent.replace(
+                            " - Cancelled", "").replace("Cancelled", "")
+                        strPostponed = "Cancelled"
                     event = {
                         "idEvent": params["catRCtrl"].upper() + "-" +
                         idEvent.strip(),
@@ -204,17 +202,22 @@ def getEvents(driver, params):
                         "idMss": idEvent,
                         "intRound": tds[0].text,
                         "strDate": tds[1].text,
+                        "idWinner": idDriver,
                         "strResult": tds[4].text,
                         "idCircuit": idCircuit,
                         "strCircuit":  tds[3].text,
+                        "numSeason": parseInt(params["year"]),
+                        "strSeason": params["year"],
+                        "strPostponed": strPostponed,
                         "strRSS": linkEvent,
                     }
                     events.append(event)
                 break
         print(events)
-        return events
         print("::: PROCESS FINISHED :::")
-    except Exception:
+        return events
+    except Exception as e:
+        print(e)
         return "::: ERROR EVENTS :::"
 
 
@@ -243,29 +246,18 @@ def getChampD(driver, params):
                 trs = tables[table].find_elements_by_xpath("./tbody/tr")
                 for tr in range(0, len(trs)):
                     tds = trs[tr].find_elements_by_xpath("./td")
-                    linkDriver = ""
-                    try:
-                        linkDriver = tds[1].find_element_by_xpath(
-                            "./a").get_attribute("href")
-                    except NoSuchElementException:
-                        pass
-                    idDriver = linkDriver.replace(
-                        "/career", "").replace(urlBase+"/drivers/", "")
-                    pts = 0
-                    try:
-                        pts = int(tds[2].text)
-                    except Exception:
-                        pts = 0
-                        pass
+                    linkDriver = getLinkMSS(tds[1])
+                    idDriver = getIdLinkMSS(urlBase, linkDriver, "D")
                     line = {
                         "idPlayer": idDriver,
-                        "position": int(tds[0].text),
-                        "totalPoints": pts,
+                        "position": parseInt(tds[0].text),
+                        "totalPoints": parseInt(tds[2].text),
                     }
                     points += line["totalPoints"]
                     data.append(line)
                 champ = {
-                    "numSeason": int(params["year"]),
+                    "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
+                    "numSeason": parseInt(params["year"]),
                     "strSeason": params["year"],
                     "idCategory": params["catRCtrl"],
                     "idRCtrl": params["catRCtrl"],
@@ -277,8 +269,8 @@ def getChampD(driver, params):
                 champs.append(champ)
                 break
         print(champs)
-        return champs
         print("::: PROCESS FINISHED :::")
+        return champs
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP DRIVERS :::"
@@ -310,30 +302,18 @@ def getChampT(driver, params):
                 trs = tables[table].find_elements_by_xpath("./tbody/tr")
                 for tr in range(0, len(trs)):
                     tds = trs[tr].find_elements_by_xpath("./td")
-                    linkDriver = ""
-                    try:
-                        linkDriver = tds[1].find_element_by_xpath(
-                            "./a").get_attribute("href")
-                    except NoSuchElementException:
-                        linkDriver = tds[1].text
-                        pass
-                    idDriver = linkDriver.replace(
-                        "/history", "").replace(urlBase+"/teams/", "")
-                    pts = 0
-                    try:
-                        pts = int(tds[2].text)
-                    except Exception:
-                        pts = 0
-                        pass
+                    linkDriver = getLinkMSS(tds[1])
+                    idDriver = getIdLinkMSS(urlBase, linkDriver, "T")
                     line = {
                         "idPlayer": idDriver,
-                        "position": int(tds[0].text),
-                        "totalPoints": pts,
+                        "position": parseInt(tds[0].text),
+                        "totalPoints": parseInt(tds[2].text),
                     }
                     points += line["totalPoints"]
                     data.append(line)
                 champ = {
-                    "numSeason": int(params["year"]),
+                    "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
+                    "numSeason": parseInt(params["year"]),
                     "strSeason": params["year"],
                     "idCategory": params["catRCtrl"],
                     "idRCtrl": params["catRCtrl"],
@@ -342,11 +322,12 @@ def getChampT(driver, params):
                     "sumPoints": points,
                     "typeChamp": "T"
                 }
-                champs.append(champ)
+                if(len(data) != 0):
+                    champs.append(champ)
                 break
         print(champs)
-        return champs
         print("::: PROCESS FINISHED :::")
+        return champs
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP TEAMS :::"
