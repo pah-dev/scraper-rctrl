@@ -25,10 +25,38 @@ def getIdLinkMSS(urlBase, link, type):
     return ret
 
 
+def getIdLinkACTC(urlBase, params, link, type):
+    ret = ""
+    if(type == 'D'):        # DRIVER
+        ret = link.replace(".html", "").replace(
+            urlBase+"/"+params["catOrigen"]+"/pilotos/"+params["year"]+"/", "")
+    elif(type == 'T'):      # TEAM
+        ret = link.replace("/history", "").replace(urlBase+"/teams/", "")
+    elif(type == 'E'):       # EVENT
+        ret = link.replace(".html", "").replace(
+            urlBase+"/"+params["catOrigen"]+"/carrera-online/"+params["year"]
+            + "/tanda-finalizada/", "")
+    elif (type == 'C'):     # CIRCUIT
+        ret = link.replace(".html", "").replace(
+            urlBase+"/"+params["catOrigen"]+"/circuitos/", "")
+    elif (type == 'W'):     # COUNTRY
+        ret = link.replace(urlBase+"/countries/", "")
+    return ret
+
+
+def getLinkACTC(td):
+    ret = ""
+    try:
+        ret = td.find_element_by_xpath("./a").get_attribute("href")
+    except Exception:
+        ret = ""
+    return ret
+
+
 def parseInt(txt):
     num = 0
     try:
-        num = int(txt)
+        num = float(txt)
     except Exception:
         pass
     return num

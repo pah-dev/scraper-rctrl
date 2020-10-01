@@ -1,6 +1,7 @@
 from flask import Flask
 from mss_base import runScript
 from mss_driver_detail import runScriptDetails
+from actc import runScriptACTC
 import json
 
 app = Flask(__name__)
@@ -45,6 +46,17 @@ def mss_driver_details():
 
 #     json_data = json.dumps(ans, indent=3)
 #     return str(json_data)
+
+@app.route('/actc', methods=['GET'])
+def actc_driver():
+    params = {}
+    params["catRCtrl"] = "tcp"
+    params["catOrigen"] = "tcp"
+    params["year"] = "2020"
+    ans = runScriptACTC(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
 
 
 if __name__ == '__main__':
