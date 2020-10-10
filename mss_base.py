@@ -260,7 +260,7 @@ def getChampD(driver, params):
                     "numSeason": parseInt(params["year"]),
                     "strSeason": params["year"],
                     "idCategory": params["catRCtrl"],
-                    "idRCtrl": params["catRCtrl"],
+                    "idRCtrl": params["catOrigen"],
                     "idMss": params["catOrigen"],
                     "data": data,
                     "sumPoints": points,

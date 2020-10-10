@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.common.exceptions import NoSuchElementException
 # import tools
 import requests
-from tools import getIdLinkACTC, getLinkACTC, parseInt
+from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt
 # import time
 
 # Scraping
@@ -97,6 +97,8 @@ def getDrivers(driver, params):
                 team.replace(" ", "_", 10),
                 "strTeam": team,
                 "numSeason": parseInt(params["year"]),
+                "strThumb": urlBase + items[it].find_element_by_xpath(
+                    ".//figure/img").get_attribute("data-original"),
                 "strCutout": urlBase + items[it].find_element_by_xpath(
                     ".//figure/img").get_attribute("data-original"),
                 "strFanart4": urlBase + items[it].find_element_by_xpath(
@@ -169,7 +171,7 @@ def getEvents(driver, params):
             idDriver = getIdLinkACTC(urlBase, params, linkDriver, "D")
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" +
-                str(it+1)+"-"+idEvent.strip(),
+                params["year"] + "-" + str(it+1)+"-"+idEvent,
                 "strEvent": items[it].find_element_by_xpath(
                     ".//div[@class='hd']/h2").text,
                 "idCategory": params["catRCtrl"],
@@ -229,7 +231,7 @@ def getChampD(driver, params):
             line = {
                 "idPlayer": idDriver,
                 "position": parseInt(tds[0].text.replace("°", "")),
-                "totalPoints": parseInt(tds[5].text),
+                "totalPoints": parseFloat(tds[5].text),
                 "cups": parseInt(tds[3].text),
             }
             points += line["totalPoints"]
