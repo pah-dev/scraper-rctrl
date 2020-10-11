@@ -1,11 +1,6 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.common.exceptions import NoSuchElementException
-# import tools
+from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt, runChrome
 import requests
-from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt
-# import time
 
 # Scraping
 urlBase = "https://www.actc.org.ar"
@@ -13,19 +8,9 @@ urlBase = "https://www.actc.org.ar"
 
 def runScriptACTC(params):
     ret = {}
-    # Before Deploy
-    # CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH",
-    # "/usr/local/bin/chromedriver")
-    # GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN",
-    # "/usr/bin/google-chrome")
-    CHROMEDRIVER_PATH = "./chromedriver.exe"
-    chrome_options = Options()
-    # chrome_options.binary_location = GOOGLE_CHROME_BIN
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.headless = True
-    driver = webdriver.Chrome(
-        executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+
+    driver = runChrome()
+
     # Params
     catOrigen = params["catOrigen"]
     year = params["year"]

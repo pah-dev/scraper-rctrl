@@ -126,6 +126,31 @@ def getIdLinkCARX(params, link, type):
     return ret
 
 
+def getIdLinkAPTP(params, link, type):
+    ret = ""
+    if(type == 'D'):        # DRIVER 02/riestra
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(
+            ".jpg", "").replace("2020/", "").replace("/", "_", 9).replace("-", "_", 9).replace("ok", "")
+    elif(type == 'E'):       # EVENT
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
+            ".png", "").replace("2020/", "").replace("/", "_", 9).replace("-", "_", 9).replace("ok", "")
+    return ret
+
+
+def getIdLinkAPAT(params, link, type):
+    ret = ""
+    if(type == 'D'):        # DRIVER
+        ret = link.replace(params["urlBase"] + "/img/usuario/thumb/",
+                           "").replace(".jpg", "").replace("/", "_", 9)
+    elif(type == 'E'):       # EVENT
+        ret = link.replace(params["urlBase"] +
+                           "/resultados/", "").replace("/", "_", 9)
+    elif (type == 'C'):     # CIRCUIT
+        ret = link.replace(params["urlBase"] +
+                           "/circuito/", "").replace("/", "_", 9)
+    return ret
+
+
 def getLinkACTC(td):
     ret = ""
     try:
@@ -133,6 +158,11 @@ def getLinkACTC(td):
     except Exception:
         ret = ""
     return ret
+
+
+def parseChars(txt):
+    return txt.replace("á", "a").replace("é", "e").replace("í", "i").replace(
+        "ó", "o").replace("ú", "u").replace("ñ", "ni").replace("ss", "s")
 
 
 def parseInt(txt):

@@ -1,36 +1,13 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.common.exceptions import NoSuchElementException
-# import tools
-import requests
 from tools import getIdLinkTR, parseFloat, parseInt, runChrome
-# import time
+import requests
+
 
 # Scraping
 
-
 def runScriptTR(params):
     ret = {}
-    # # Before Deploy
-    # # CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH",
-    # # "/usr/local/bin/chromedriver")
-    # # GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN",
-    # # "/usr/bin/google-chrome")
-    # CHROMEDRIVER_PATH = "./chromedriver.exe"
-    # chrome_options = Options()
-    # # chrome_options.binary_location = GOOGLE_CHROME_BIN
-    # chrome_options.addArguments("disable-infobars")  # disabling infobars
-    # chrome_options.addArguments("--disable-extensions")  # disabling extensions
-    # # applicable to windows os only
-    # chrome_options.addArguments("--disable-gpu")
-    # # overcome limited resource problems
-    # chrome_options.addArguments("--disable-dev-shm-usage")
-    # chrome_options.addArguments("--no-sandbox")  # Bypass OS security model
 
-    # chrome_options.headless = True
-    # driver = webdriver.Chrome(
-    #     executable_path=CHROMEDRIVER_PATH, options=chrome_options)
     driver = runChrome()
 
     # Params

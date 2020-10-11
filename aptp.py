@@ -1,30 +1,27 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkCARX, parseFloat, parseInt, runChrome
+from tools import getIdLinkAPTP, parseChars, parseFloat, parseInt, runChrome
 import requests
 
 
-def runScriptCARX(params):
+def runScriptAPTP(params):
     ret = {}
 
     driver = runChrome()
 
     # Params
-    catOrigen = params["catOrigen"]
-
     urlBase = params["urlBase"]
+    catOrigen = params["catOrigen"]
+    year = params["year"]
+
+    url = "/pilotos-" + catOrigen + "/"
     urlApi = "http://localhost:3000/v1/api"
-
-    url = "/pilotos/"
     driver.get(urlBase + url)
+    print(urlBase + url)
 
-    data = getDrivers(driver, params)
-    # ret["drivers"] = data
+    pilots = getDrivers(driver, params)
+    # ret["drivers"] = pilots
 
-    r = requests.post(urlApi+"/driver/create", json=data)
-    print(r.json())
-    ret["drivers"] = r.json()
-
-    url = "/calendario/"
+    url = "/calendario-" + year + "/"
     driver.get(urlBase + url)
 
     events = getEvents(driver, params)
@@ -41,14 +38,14 @@ def runScriptCARX(params):
     url = "/campeonato-" + catOrigen + "/"
     driver.get(urlBase + url)
 
-    champ = getChampD(driver, params)
-    # ret["champD"] = champ
+    champ = getChampD(driver, params, pilots)
+    ret["champD"] = champ
 
-    r = requests.post(urlApi+"/driver/create", json=champ[0])
+    r = requests.post(urlApi+"/driver/create", json=champ[1])
     print(r.json())
-    ret["drivers_extra"] = r.json()
+    ret["drivers"] = r.json()
 
-    r = requests.post(urlApi+"/champ/create", json=champ[1])
+    r = requests.post(urlApi+"/champ/create", json=champ[0])
     print(r.json())
     ret["champD"] = r.json()
 
@@ -63,34 +60,34 @@ def getDrivers(driver, params):
         print("::: DRIVERS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
-                "//div[contains(@class, 'kf_roster_dec6')]")
+                "//figure[contains(@class, 'vc_figure')]/div/img")
         )
-        print(str(len(items)))
-        for it in range(0, len(items)):
-            linkDriver = items[it].find_element_by_xpath(
-                ".//h3/a").get_attribute("href")
-            idDriver = getIdLinkCARX(params, linkDriver, "D")
-            thumb = items[it].find_element_by_xpath(
-                ".//figure/img").get_attribute("src")
+        for it in range(0, len(items)-1):
+            linkDriver = items[it].get_attribute("src")
+            idDriver = getIdLinkAPTP(params, linkDriver, "D")
+            text = idDriver.split("_")
+            if(len(text) > 2 and len(text[1]) > 2 and len(text[2]) > 2):
+                nameDriver = text[1] + " " + text[2]
+            elif(len(text[1]) > 2):
+                nameDriver = text[1]
+            elif (text[2]):
+                nameDriver = text[2]
+            else:
+                nameDriver = idDriver
             pilot = {
-                "idPlayer": params["catRCtrl"].upper() + "-" + idDriver,
+                "idPlayer": params["catRCtrl"].upper() + "-"
+                + idDriver,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idDriver,
-                "strPlayer": items[it].find_element_by_xpath(".//h3/a").text.title(),
-                "strNumber": items[it].find_element_by_xpath(".//div[@class='text']/span").text,
+                "strPlayer": nameDriver.title(),
                 "numSeason": parseInt(params["year"]),
-                "strThumb": thumb.replace(".jpg", "-300x300.jpg"),
-                "strCutout": thumb.replace(".jpg", "-180x180.jpg"),
-                "strRender": thumb,
-                "strFanart4": items[it].find_element_by_xpath(
-                    ".//div[@class='cntry-flag']/img").get_attribute("src"),
+                "strThumb": linkDriver,
+                "strCutout": linkDriver.replace(".jpg", "-221x300.jpg"),
+                "strRender": linkDriver.replace("https", "http"),
+                "isOnlyImg": True,
                 "strRSS": linkDriver,
             }
             pilots.append(pilot)
-        # for t in range(0, len(teams)):
-        #     if(teams[t]["strTeam"].upper() == strTeam.upper()):
-        #         pilot["idTeam"] = teams[t]["idTeam"]
-        #         break
         print(pilots)
         print("::: PROCESS FINISHED :::")
         return pilots
@@ -108,32 +105,33 @@ def getEvents(driver, params):
         print("::: EVENTS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
-                "//tbody/tr")
+                "//figure[contains(@class, 'vc_figure')]/div/img")
         )
-        for it in range(0, len(items)):
-            tds = items[it].find_elements_by_xpath("./td")
-            idEvent = tds[2].text.replace(" ", "_", 20)
+        for it in range(0, len(items)-1):
+            linkEvent = items[it].get_attribute("src")
+            idEvent = getIdLinkAPTP(params, linkEvent, "E")
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] +
-                "-" + str(it+1) + "-" + idEvent,
-                "strEvent": tds[2].text,
+                "idEvent": params["catRCtrl"].upper() + "-" +
+                params["year"] + "-" + str(it+1)+"-"+idEvent,
+                "strEvent": "#" + str(it+1),
                 "idCategory": params["catRCtrl"],
-                "idRCtrl": str(it+1) + "_" + idEvent,
+                "idRCtrl": idEvent,
                 "intRound": str(it+1),
-                "strDate": tds[1].text,
-                "idCircuit": "CARX_" + idEvent,
-                "strCircuit": tds[2].text,
+                "idCircuit": idEvent,
+                "strCircuit": "",
                 "numSeason": parseInt(params["year"]),
                 "strSeason": params["year"],
+                "strRSS": linkEvent,
             }
             events.append(event)
             circuit = {
                 "idCircuit": event["idCircuit"],
-                "strCircuit": event["strEvent"],
+                "strCircuit": "",
                 "idRCtrl": event["idCircuit"],
                 "strCountry": "Argentina",
                 "numSeason": parseInt(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
+                "strLogo": linkEvent
             }
             if(circuit["idCircuit"] not in circList):
                 circuits.append(circuit)
@@ -148,39 +146,34 @@ def getEvents(driver, params):
         return "::: ERROR EVENTS :::"
 
 
-def getChampD(driver, params):
+def getChampD(driver, params, plist):
     try:
         champs = []
-        pilots = []
         data = []
         ret = []
         print("::: CHAMPIONSHIP DRIVERS")
         items = WebDriverWait(driver, 30).until(
-            lambda d: d.find_elements_by_xpath("//tbody/tr")
+            lambda d: d.find_elements_by_xpath(
+                "//tbody/tr")
         )
         points = 0
-        for it in range(1, len(items)):
+        for it in range(0, len(items)):
             tds = items[it].find_elements_by_xpath("./td")
-            nameDriver = tds[2].text
-            text = nameDriver.split(",")
-            idDriver = text[1].strip().replace(
-                " ", "-", 9) + "-" + text[0].strip()
+            idDriver = tds[2].text
             line = {
-                "idPlayer": idDriver.lower(),
+                "idPlayer": idDriver,
                 "position": parseInt(tds[0].text),
-                "totalPoints": parseFloat(tds[len(tds)-1].text),
+                "totalPoints": parseFloat(tds[4].text),
+                "cups": parseInt(tds[5].text.replace("x", "")),
             }
+            for p in range(0, len(plist)):
+                if(parseChars(plist[p]["strPlayer"].lower()) in parseChars(line["idPlayer"].lower())):
+                    line["idPlayer"] = plist[p]["idRCtrl"]
+                    plist[p]["strTeam"] = tds[3].text
+                    plist[p]["strNumber"] = tds[1].text
+                    break
             points += line["totalPoints"]
             data.append(line)
-            pilot = {
-                "idPlayer": params["catRCtrl"].upper() + "-" + idDriver.lower(),
-                "idCategory": params["catRCtrl"],
-                "idRCtrl": idDriver.lower(),
-                "strPlayer": (text[1].strip() + " " + text[0].strip()).title(),
-                "strNumber": tds[1].text,
-                "numSeason": parseInt(params["year"]),
-            }
-            pilots.append(pilot)
         champ = {
             "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
             "numSeason": parseInt(params["year"]),
@@ -192,8 +185,8 @@ def getChampD(driver, params):
             "typeChamp": "D"
         }
         champs.append(champ)
-        ret.append(pilots)
         ret.append(champs)
+        ret.append(plist)
         print(champs)
         print("::: PROCESS FINISHED :::")
         return ret

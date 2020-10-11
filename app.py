@@ -6,6 +6,9 @@ from actc import runScriptACTC
 from tc import runScriptTC
 from tr import runScriptTR
 from carx import runScriptCARX
+from cur import runScriptCUR
+from aptp import runScriptAPTP
+from apat import runScriptAPAT
 import json
 
 app = Flask(__name__)
@@ -113,6 +116,48 @@ def carx_base():
     params["urlBase"] = "http://carxrallycross.com"
 
     ans = runScriptCARX(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@app.route('/cur', methods=['GET'])
+def cur_base():
+    params = {}
+    params["catRCtrl"] = "uyrn"
+    params["catOrigen"] = "uyrn"
+    params["year"] = "2020"
+    params["urlBase"] = "https://www.cur.com.uy"
+
+    ans = runScriptCUR(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@app.route('/aptp', methods=['GET'])
+def aptp_base():
+    params = {}
+    params["catRCtrl"] = "tpc2"
+    params["catOrigen"] = "clase-2"
+    params["year"] = "2020"
+    params["urlBase"] = "https://aptpweb.com.ar"
+
+    ans = runScriptAPTP(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@app.route('/apat', methods=['GET'])
+def apat_base():
+    params = {}
+    params["catRCtrl"] = "tnc3"
+    params["catOrigen"] = "3"
+    params["year"] = "2020"
+    params["urlBase"] = "http://www.apat.org.ar"
+
+    ans = runScriptAPAT(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
