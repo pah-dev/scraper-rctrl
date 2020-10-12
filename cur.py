@@ -3,16 +3,33 @@ from tools import parseFloat, parseInt, runChrome
 import requests
 
 
+def loadCUR():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "https://www.cur.com.uy"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/toprace")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idRCtrl"]
+            ans = runScriptCUR(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
+
+
 def runScriptCUR(params):
     ret = {}
 
     driver = runChrome()
 
     # Params
-    catOrigen = params["catOrigen"]
-
-    urlBase = params["urlBase"]
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
 
     url = "http://www.rally.org.uy/rallylive/2020/1/PE1.html"
     driver.get(url)

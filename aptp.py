@@ -3,6 +3,26 @@ from tools import getIdLinkAPTP, parseChars, parseFloat, parseInt, runChrome
 import requests
 
 
+def loadAPTP():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "https://aptpweb.com.ar"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/aptp")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idRCtrl"]
+            ans = runScriptAPTP(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
+
+
 def runScriptAPTP(params):
     ret = {}
 
@@ -14,7 +34,7 @@ def runScriptAPTP(params):
     year = params["year"]
 
     url = "/pilotos-" + catOrigen + "/"
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
     driver.get(urlBase + url)
     print(urlBase + url)
 

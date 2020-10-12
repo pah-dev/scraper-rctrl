@@ -1,14 +1,14 @@
 from flask import Flask
-from mss_base import runScript
+from mss_base import loadMSS
 import mss_driver_detail as mss_d
 import actc_driver_detail as actc_d
-from actc import runScriptACTC
-from tc import runScriptTC
-from tr import runScriptTR
-from carx import runScriptCARX
-from cur import runScriptCUR
-from aptp import runScriptAPTP
-from apat import runScriptAPAT
+from actc import loadACTC
+from tc import loadTC
+from tr import loadTR
+from carx import loadCARX
+from cur import loadCUR
+from aptp import loadAPTP
+from apat import loadAPAT
 import json
 
 app = Flask(__name__)
@@ -19,13 +19,25 @@ def hello_world():
     return 'Hello, World!'
 
 
+@app.route('/all')
+def run_all():
+    ret = []
+    ret.append(loadACTC())
+    ret.append(loadAPAT())
+    ret.append(loadAPTP())
+    ret.append(loadCARX())
+    ret.append(loadCUR())
+    ret.append(loadTC())
+    ret.append(loadTR())
+    # ret.append(loadMSS())
+
+    json_data = json.dumps(ret, indent=3)
+    return str(json_data)
+
+
 @app.route('/mss_base', methods=['GET'])
 def mss_base():
-    params = {}
-    params["catRCtrl"] = "nascarxs"
-    params["catOrigen"] = "nascar-xfinity-series"
-    params["year"] = "2020"
-    ans = runScript(params)
+    ans = loadMSS()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -56,11 +68,7 @@ def mss_driver_details():
 
 @app.route('/actc', methods=['GET'])
 def actc_base():
-    params = {}
-    params["catRCtrl"] = "tcp"
-    params["catOrigen"] = "tcp"
-    params["year"] = "2020"
-    ans = runScriptACTC(params)
+    ans = loadACTC()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -80,14 +88,7 @@ def actc_driver_detail():
 
 @app.route('/tc', methods=['GET'])
 def tc_base():
-    params = {}
-    params["catRCtrl"] = "stc2000"
-    params["catOrigen"] = "supertc"
-    params["year"] = "2020"
-    params["urlBase"] = "http://www.#CAT#.com.ar".replace(
-        "#CAT#", params["catOrigen"])
-
-    ans = runScriptTC(params)
+    ans = loadTC()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -95,13 +96,7 @@ def tc_base():
 
 @app.route('/tr', methods=['GET'])
 def tr_base():
-    params = {}
-    params["catRCtrl"] = "toprace"
-    params["catOrigen"] = "toprace"
-    params["year"] = "2020"
-    params["urlBase"] = "https://www.toprace.com.ar"
-
-    ans = runScriptTR(params)
+    ans = loadTR()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -109,13 +104,7 @@ def tr_base():
 
 @app.route('/carx', methods=['GET'])
 def carx_base():
-    params = {}
-    params["catRCtrl"] = "rxmr"
-    params["catOrigen"] = "maxi-rally"
-    params["year"] = "2020"
-    params["urlBase"] = "http://carxrallycross.com"
-
-    ans = runScriptCARX(params)
+    ans = loadCARX()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -123,13 +112,7 @@ def carx_base():
 
 @app.route('/cur', methods=['GET'])
 def cur_base():
-    params = {}
-    params["catRCtrl"] = "uyrn"
-    params["catOrigen"] = "uyrn"
-    params["year"] = "2020"
-    params["urlBase"] = "https://www.cur.com.uy"
-
-    ans = runScriptCUR(params)
+    ans = loadCUR()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -137,13 +120,7 @@ def cur_base():
 
 @app.route('/aptp', methods=['GET'])
 def aptp_base():
-    params = {}
-    params["catRCtrl"] = "tpc2"
-    params["catOrigen"] = "clase-2"
-    params["year"] = "2020"
-    params["urlBase"] = "https://aptpweb.com.ar"
-
-    ans = runScriptAPTP(params)
+    ans = loadAPTP()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -151,13 +128,7 @@ def aptp_base():
 
 @app.route('/apat', methods=['GET'])
 def apat_base():
-    params = {}
-    params["catRCtrl"] = "tnc3"
-    params["catOrigen"] = "3"
-    params["year"] = "2020"
-    params["urlBase"] = "http://www.apat.org.ar"
-
-    ans = runScriptAPAT(params)
+    ans = loadAPAT()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)

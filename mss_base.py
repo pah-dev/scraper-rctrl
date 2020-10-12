@@ -3,20 +3,39 @@ from tools import getIdLinkMSS, getLinkMSS, parseInt, runChrome
 from mss_circuit import runScriptCircuits
 import requests
 
-# Scraping
-urlBase = "https://results.motorsportstats.com"
+
+def loadMSS():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "https://results.motorsportstats.com"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/toprace")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idMss"]
+            ans = runScriptMSS(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
 
 
-def runScript(params):
+def runScriptMSS(params):
     ret = {}
 
     driver = runChrome()
 
     # Params
+    urlBase = params["urlBase"]
     catOrigen = params["catOrigen"]
     year = params["year"]
     url = "/series/" + catOrigen + "/season/" + year + ""
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
+
     driver.get(urlBase + url)
 
     data = getDrivers(driver, params)

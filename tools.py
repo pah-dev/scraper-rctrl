@@ -71,20 +71,20 @@ def getIdLinkACTC(urlBase, params, link, type):
 
 def getIdLinkTC(params, link, type):
     ret = ""
+    link = link.replace("https", "http").replace("supertc2000", "XXXX").replace(
+        "tc2000", "XXXX").replace("formulas-argentinas", "XXXX").replace("www", "")
     if(type == 'D'):        # DRIVER
-        ret = link.replace(params["urlBase"]+"/equipos.php?accion=detalle",
-                           "").replace("&id", "", 4).replace("=", "-", 4)
+        ret = link.replace("/equipos.php?accion=detalle", "").replace("&id", "", 4).replace(
+            "=", "-", 4).replace("http://XXXX.com.ar", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(".jpg", "").replace(
-            params["urlBase"]+"/images/equipos/equipo-", "")
+            "/images/equipos/equipo-", "").replace("http://XXXX.com.ar", "")
     elif(type == 'E'):       # EVENT
         ret = link.replace("&temp=", "").replace(
-            params["urlBase"]+"/carreras.php?accion=historial&id=", "")
+            "/carreras.php?accion=historial&id=", "").replace("http://XXXX.com.ar", "")
     elif (type == 'C'):     # CIRCUIT
         ret = link.replace(".jpg", "").replace(
-            "/images/autodromos/aut-", "").replace(
-            params["urlBase"], "").replace(params["urlBase"]
-                                           .replace("super", ""), "")
+            "/images/autodromos/aut-", "").replace("http://XXXX.com.ar", "")
     elif (type == 'W'):     # COUNTRY
         ret = link.replace(params["urlBase"]+"/countries/", "")
     return ret
@@ -95,10 +95,10 @@ def getIdLinkTR(params, link, type):
     if(type == 'D'):        # DRIVER
         ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] +
                            "/pilotos/" + params["year"] + "/", "").replace(
-                               ".html", "")
+            ".html", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(".jpg", "").replace(".png", "").replace(
-            "/upload/equipos/", "")
+            "/upload/equipos/", "").replace("/vistas/", "").replace("/images/", "_")
     elif(type == 'E'):       # EVENT
         ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] + "/carrera-online/" +
                            params["year"] + "/tanda-finalizada/", "").replace(".html", "")

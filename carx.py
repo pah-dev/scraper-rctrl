@@ -3,6 +3,26 @@ from tools import getIdLinkCARX, parseFloat, parseInt, runChrome
 import requests
 
 
+def loadCARX():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "http://carxrallycross.com"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/carx")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idRCtrl"]
+            ans = runScriptCARX(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
+
+
 def runScriptCARX(params):
     ret = {}
 
@@ -12,7 +32,7 @@ def runScriptCARX(params):
     catOrigen = params["catOrigen"]
 
     urlBase = params["urlBase"]
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
 
     url = "/pilotos/"
     driver.get(urlBase + url)

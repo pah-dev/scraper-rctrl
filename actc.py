@@ -3,7 +3,26 @@ from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt, runChrome
 import requests
 
 # Scraping
-urlBase = "https://www.actc.org.ar"
+
+
+def loadACTC():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "https://www.actc.org.ar"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/actc")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idRCtrl"]
+            ans = runScriptACTC(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
 
 
 def runScriptACTC(params):
@@ -12,11 +31,12 @@ def runScriptACTC(params):
     driver = runChrome()
 
     # Params
+    urlBase = params["urlBase"]
     catOrigen = params["catOrigen"]
     year = params["year"]
 
     url = "/" + catOrigen + "/pilotos.html"
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
     driver.get(urlBase + url)
 
     data = getDrivers(driver, params)
@@ -66,7 +86,8 @@ def getDrivers(driver, params):
         )
         for it in range(0, len(items)):
             linkDriver = items[it].get_attribute("href")
-            idDriver = getIdLinkACTC(urlBase, params, linkDriver, "D")
+            idDriver = getIdLinkACTC(
+                params["urlBase"], params, linkDriver, "D")
             team = items[it].find_element_by_xpath(
                 ".//div[@class='team']").text
             pilot = {
@@ -75,18 +96,18 @@ def getDrivers(driver, params):
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idDriver,
                 "strPlayer": items[it].find_element_by_xpath(
-                    ".//h2").text.replace(",", ", ").strip(),
+                    ".//h2").text.replace("<br>", "").replace(",", ", ").strip(),
                 "strNumber": items[it].find_element_by_xpath(
                     ".//div[@class='car-data']/span").text,
                 "idTeam": params["catRCtrl"].upper() + "-" +
                 team.replace(" ", "_", 10),
                 "strTeam": team,
                 "numSeason": parseInt(params["year"]),
-                "strThumb": urlBase + items[it].find_element_by_xpath(
+                "strThumb": params["urlBase"] + items[it].find_element_by_xpath(
                     ".//figure/img").get_attribute("data-original"),
-                "strCutout": urlBase + items[it].find_element_by_xpath(
+                "strCutout": params["urlBase"] + items[it].find_element_by_xpath(
                     ".//figure/img").get_attribute("data-original"),
-                "strFanart4": urlBase + items[it].find_element_by_xpath(
+                "strFanart4": params["urlBase"] + items[it].find_element_by_xpath(
                     ".//div[@class='logo']/img").get_attribute("data-original"),
                 "strRSS": linkDriver,
             }
@@ -139,10 +160,11 @@ def getEvents(driver, params):
             linkEvent = getLinkACTC(items[it])
             # linkEvent = items[it].find_element_by_xpath(
             #     "//a[@class='more-txt']").get_attribute("href")
-            idEvent = getIdLinkACTC(urlBase, params, linkEvent, "E")
+            idEvent = getIdLinkACTC(params["urlBase"], params, linkEvent, "E")
             linkCircuit = items[it].find_element_by_xpath(
                 ".//figure[@class='cont-circuit']/a").get_attribute("href")
-            idCircuit = getIdLinkACTC(urlBase, params, linkCircuit, "C")
+            idCircuit = getIdLinkACTC(
+                params["urlBase"], params, linkCircuit, "C")
             strCircuit = items[it].find_element_by_xpath(
                 ".//div[@class='hd']/p").text
             linkDriver, strResult = "", ""
@@ -153,7 +175,8 @@ def getEvents(driver, params):
                     ".//ul[@class='pos']/li[1]/a").text
             except Exception:
                 linkDriver = ""
-            idDriver = getIdLinkACTC(urlBase, params, linkDriver, "D")
+            idDriver = getIdLinkACTC(
+                params["urlBase"], params, linkDriver, "D")
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" +
                 params["year"] + "-" + str(it+1)+"-"+idEvent,
@@ -184,7 +207,7 @@ def getEvents(driver, params):
                 "strCountry": "Argentina",
                 "numSeason": parseInt(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
-                "strLogo": urlBase + thumb,
+                "strLogo": params["urlBase"] + thumb,
             }
             if(circuit["idCircuit"] not in circList):
                 circuits.append(circuit)
@@ -212,7 +235,8 @@ def getChampD(driver, params):
         for it in range(0, len(items)):
             tds = items[it].find_elements_by_xpath("./td")
             linkDriver = getLinkACTC(tds[2])
-            idDriver = getIdLinkACTC(urlBase, params, linkDriver, "D")
+            idDriver = getIdLinkACTC(
+                params["urlBase"], params, linkDriver, "D")
             line = {
                 "idPlayer": idDriver,
                 "position": parseInt(tds[0].text.replace("°", "")),

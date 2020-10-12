@@ -3,6 +3,26 @@ from tools import getIdLinkAPAT, parseFloat, parseInt, runChrome
 import requests
 
 
+def loadAPAT():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "http://www.apat.org.ar"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/apat")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idRCtrl"]
+            ans = runScriptAPAT(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
+
+
 def runScriptAPAT(params):
     ret = {}
 
@@ -14,7 +34,7 @@ def runScriptAPAT(params):
     year = params["year"]
 
     url = "/pilotoslistado" + "/" + catOrigen
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
     driver.get(urlBase + url)
     print(urlBase + url)
 
@@ -156,11 +176,12 @@ def getEvents(driver, params):
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" +
                 params["year"] + "-" + str(it+1)+"-"+idEvent,
-                "strEvent": tds[1].text,
+                "strEvent": tds[2].text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it+1),
-                "strDate": tds[2].text,
+                "strDate": tds[1].text,
+                "strResult": tds[3+idd].text,
                 "idCircuit": idCircuit,
                 "strCircuit": tds[2].text,
                 "numSeason": parseInt(params["year"]),
@@ -168,20 +189,6 @@ def getEvents(driver, params):
                 "strRSS": linkEvent,
             }
             events.append(event)
-            # circuit = {
-            #     "idCircuit": event["idCircuit"],
-            #     "strCircuit": event["strCircuit"],
-            #     "idRCtrl": event["idCircuit"],
-            #     "strCountry": "Argentina",
-            #     "numSeason": parseInt(params["year"]),
-            #     "intSoccerXMLTeamID": "ARG",
-            #     "strLogo": linkEvent
-            # }
-            # if(circuit["idCircuit"] not in circList):
-            #     circuits.append(circuit)
-            #     circList.append(circuit["idCircuit"])
-        # data.append(events)
-        # data.append(circuits)
         print(events)
         print("::: PROCESS FINISHED :::")
         return events
@@ -208,7 +215,6 @@ def getCircuits(driver, params):
             logo = ""
             if(len(thumb) > 0):
                 logo = thumb[0].get_attribute("src")
-            print(logo)
             circuit = {
                 "idCircuit": idCircuit,
                 "strCircuit": items[it].find_element_by_xpath(

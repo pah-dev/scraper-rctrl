@@ -3,7 +3,27 @@ from tools import getIdLinkTC, parseFloat, parseInt, runChrome
 import requests
 
 
-# Scraping
+def loadTC():
+    ret = {}
+    params = {}
+    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlBase"] = "https://#CAT#.com.ar"
+    params["year"] = "2020"
+
+    r = requests.get(params["urlApi"]+"/org/find/tc")
+    data = r.json()
+    if(len(data["categories"]) > 0):
+        cats = data["categories"]
+        for it in range(0, len(cats)):
+            print(cats[it]["idRCtrl"])
+            params["catRCtrl"] = cats[it]["idLeague"]
+            params["catOrigen"] = cats[it]["idRCtrl"]
+            params["urlBase"] = params["urlBase"].replace(
+                "#CAT#", params["catOrigen"])
+            ans = runScriptTC(params)
+            ret[cats[it]["idLeague"]] = ans
+    return ret
+
 
 def runScriptTC(params):
     ret = {}
@@ -15,7 +35,7 @@ def runScriptTC(params):
 
     urlBase = params["urlBase"].replace("#CAT#", catOrigen)
     url = "/equipos.php?accion=pilotos"
-    urlApi = "http://localhost:3000/v1/api"
+    urlApi = params["urlApi"]
     driver.get(urlBase + url)
 
     data = getDrivers(driver, params)
@@ -88,7 +108,6 @@ def getDrivers(driver, params):
                     "strTeamBadge":  linkTeam,
                     "strTeamFanart4":  brand[0].get_attribute("src")
                 }
-                print(team)
                 teams.append(team)
             else:
                 linkDriver = items[it].find_element_by_xpath(
