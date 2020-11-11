@@ -19,7 +19,10 @@ def runChrome():
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
     # chrome_options.add_argument('--remote-debugging-port=9222')
+    chrome_options.add_argument("-incognito")
+    chrome_options.add_argument("--start-maximized")
 
+    # chrome_options.add_argument('log-level=3')
     chrome_options.headless = True
     return webdriver.Chrome(
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
@@ -50,22 +53,24 @@ def getIdLinkMSS(urlBase, link, type):
     return ret
 
 
-def getIdLinkACTC(urlBase, params, link, type):
+def getIdLinkACTC(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(".html", "").replace(
-            urlBase+"/"+params["catOrigen"]+"/pilotos/"+params["year"]+"/", "")
+            params["urlBase"]+"/"+params["catOrigen"]+"/pilotos/"+params["year"]+"/", "")
     elif(type == 'T'):      # TEAM
-        ret = link.replace("/history", "").replace(urlBase+"/teams/", "")
+        ret = link.replace(
+            "/history", "").replace(params["urlBase"]+"/teams/", "")
     elif(type == 'E'):       # EVENT
         ret = link.replace(".html", "").replace(
-            urlBase+"/"+params["catOrigen"]+"/carrera-online/"+params["year"]
+            params["urlBase"]+"/"+params["catOrigen"] +
+            "/carrera-online/"+params["year"]
             + "/tanda-finalizada/", "")
     elif (type == 'C'):     # CIRCUIT
         ret = link.replace(".html", "").replace(
-            urlBase+"/"+params["catOrigen"]+"/circuitos/", "")
+            params["urlBase"]+"/"+params["catOrigen"]+"/circuitos/", "")
     elif (type == 'W'):     # COUNTRY
-        ret = link.replace(urlBase+"/countries/", "")
+        ret = link.replace(params["urlBase"]+"/countries/", "")
     return ret
 
 
@@ -134,6 +139,20 @@ def getIdLinkAPTP(params, link, type):
     elif(type == 'E'):       # EVENT
         ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
             ".png", "").replace("2020/", "").replace("/", "_", 9).replace("-", "_", 9).replace("ok", "")
+    return ret
+
+
+def getIdLinkAUVO(params, link, type):
+    ret = ""
+    if(type == 'D'):        # DRIVER
+        ret = link.replace(params["urlBase"], "").replace(
+            "/", "", 4).replace("-", "_", 9).replace("ok", "")
+    elif(type == 'T'):      # TEAM
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
+            ".png", "").replace("-min", "").replace("/", "_", 9).replace("-", "_", 9)
+    elif(type == 'E'):       # EVENT 2020/09/1-Horarios-blanco-s%C3%A1bado-1.jpg
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
+            ".png", "").replace("Horarios-blanco-", "").replace("/", "_", 9).replace("-", "_", 9)
     return ret
 
 

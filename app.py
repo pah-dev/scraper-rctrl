@@ -9,7 +9,17 @@ from carx import loadCARX
 from cur import loadCUR
 from aptp import loadAPTP
 from apat import loadAPAT
+from auvo import loadAUVO
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 import json
+
+
+sentry_sdk.init(
+    dsn="https://eaef5cda595b4281897db9b2dde23f28@o469906.ingest.sentry.io/5499976",
+    integrations=[FlaskIntegration()],
+    traces_sample_rate=1.0
+)
 
 app = Flask(__name__)
 
@@ -17,6 +27,11 @@ app = Flask(__name__)
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
+
+
+@app.route('/debug-sentry')
+def trigger_error():
+    division_by_zero = 1 / 0
 
 
 @app.route('/all')
@@ -129,6 +144,14 @@ def aptp_base():
 @app.route('/apat', methods=['GET'])
 def apat_base():
     ans = loadAPAT()
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@app.route('/auvo', methods=['GET'])
+def auvo_base():
+    ans = loadAUVO()
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)

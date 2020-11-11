@@ -97,6 +97,8 @@ def getDrivers(driver, params, teams):
             idDriver = getIdLinkTR(params, linkDriver, "D")
             thumb = items[it].find_element_by_xpath(
                 ".//img[@class='pilot-thumb']").get_attribute("src")
+            if("avatar-torso" in thumb):
+                thumb = ""
             strTeam = items[it].find_element_by_xpath(
                 ".//span[@class='display-block']").text
             pilot = {

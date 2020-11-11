@@ -89,6 +89,8 @@ def getDrivers(driver, params):
         for it in range(0, len(items)-1):
             tds = items[it].find_elements_by_xpath("./td")
             thumb = tds[0].find_element_by_xpath(".//img").get_attribute("src")
+            if("sin_foto" in thumb or "sin_foto" in thumb):
+                thumb = ""
             lastre = "Lastre: " + tds[4].text
             text = tds[1].get_attribute('innerHTML').split("\n")
             strPlayer = text[0].strip()

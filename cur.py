@@ -10,7 +10,7 @@ def loadCUR():
     params["urlBase"] = "https://www.cur.com.uy"
     params["year"] = "2020"
 
-    r = requests.get(params["urlApi"]+"/org/find/toprace")
+    r = requests.get(params["urlApi"]+"/org/find/cur")
     data = r.json()
     if(len(data["categories"]) > 0):
         cats = data["categories"]
@@ -91,7 +91,7 @@ def getDrivers(driver, params):
                 "idPlayer": params["catRCtrl"].upper() + "-" + idDriver,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idDriver,
-                "strPlayer": tds[10].text.replace("\n", "<br>"),
+                "strPlayer": tds[10].text.replace("\n", "\n\r"),
                 "strTeam": tds[9].text,
                 "strNumber": tds[8].text,
                 "numSeason": parseInt(params["year"]),

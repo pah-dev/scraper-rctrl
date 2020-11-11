@@ -14,7 +14,7 @@ def loadAPTP():
     data = r.json()
     if(len(data["categories"]) > 0):
         cats = data["categories"]
-        for it in range(0, len(cats)):
+        for it in range(0, len(cats)-2):
             print(cats[it]["idRCtrl"])
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
@@ -41,19 +41,19 @@ def runScriptAPTP(params):
     pilots = getDrivers(driver, params)
     # ret["drivers"] = pilots
 
-    url = "/calendario-" + year + "/"
-    driver.get(urlBase + url)
+    # url = "/calendario-" + year + "/"
+    # driver.get(urlBase + url)
 
-    events = getEvents(driver, params)
-    # ret["events"] = events
+    # events = getEvents(driver, params)
+    # # ret["events"] = events
 
-    r = requests.post(urlApi+"/circuit/create", json=events[1])
-    print(r.json())
-    ret["circuits"] = r.json()
+    # r = requests.post(urlApi+"/circuit/create", json=events[1])
+    # print(r.json())
+    # ret["circuits"] = r.json()
 
-    r = requests.post(urlApi+"/event/create", json=events[0])
-    print(r.json())
-    ret["events"] = r.json()
+    # r = requests.post(urlApi+"/event/create", json=events[0])
+    # print(r.json())
+    # ret["events"] = r.json()
 
     url = "/campeonato-" + catOrigen + "/"
     driver.get(urlBase + url)
@@ -61,13 +61,13 @@ def runScriptAPTP(params):
     champ = getChampD(driver, params, pilots)
     ret["champD"] = champ
 
-    r = requests.post(urlApi+"/driver/create", json=champ[1])
-    print(r.json())
-    ret["drivers"] = r.json()
+    # r = requests.post(urlApi+"/driver/create", json=champ[1])
+    # print(r.json())
+    # ret["drivers"] = r.json()
 
-    r = requests.post(urlApi+"/champ/create", json=champ[0])
-    print(r.json())
-    ret["champD"] = r.json()
+    # r = requests.post(urlApi+"/champ/create", json=champ[0])
+    # print(r.json())
+    # ret["champD"] = r.json()
 
     driver.close()
 

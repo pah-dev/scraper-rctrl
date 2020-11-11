@@ -7,7 +7,7 @@ def loadTC():
     ret = {}
     params = {}
     params["urlApi"] = "http://localhost:3000/v1/api"
-    params["urlBase"] = "https://#CAT#.com.ar"
+    urlBase = "https://#CAT#.com.ar"
     params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/tc")
@@ -18,7 +18,7 @@ def loadTC():
             print(cats[it]["idRCtrl"])
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
-            params["urlBase"] = params["urlBase"].replace(
+            params["urlBase"] = urlBase.replace(
                 "#CAT#", params["catOrigen"])
             ans = runScriptTC(params)
             ret[cats[it]["idLeague"]] = ans
@@ -31,9 +31,7 @@ def runScriptTC(params):
     driver = runChrome()
 
     # Params
-    catOrigen = params["catOrigen"]
-
-    urlBase = params["urlBase"].replace("#CAT#", catOrigen)
+    urlBase = params["urlBase"]
     url = "/equipos.php?accion=pilotos"
     urlApi = params["urlApi"]
     driver.get(urlBase + url)
@@ -114,6 +112,8 @@ def getDrivers(driver, params):
                     ".//a").get_attribute("href")
                 linkImg = items[it].find_element_by_xpath(
                     ".//a/img").get_attribute("src")
+                if("no-piloto" in linkImg):
+                    linkImg = ""
                 idDriver = getIdLinkTC(params, linkDriver, "D")
                 pilot = {
                     "idPlayer": params["catRCtrl"].upper() + idDriver,
