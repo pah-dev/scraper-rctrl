@@ -9,10 +9,8 @@ def getApiURL():
 
 def runChrome():
     # Before Deploy
-    CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH",
-                                       "/usr/local/bin/chromedriver")
-    GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN",
-                                       "/usr/bin/google-chrome")
+    CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+    GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
     # CHROMEDRIVER_PATH = '/app/.apt/usr/bin/google_chrome'
     # GOOGLE_CHROME_BIN = '/app/.chromedriver/bin/chromedriver'
     # CHROMEDRIVER_PATH = "./chromedriver.exe"
