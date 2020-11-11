@@ -1,12 +1,12 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkAPAT, parseFloat, parseInt, runChrome
+from tools import getIdLinkAPAT, parseFloat, parseInt, runChrome, getApiURL
 import requests
 
 
 def loadAPAT():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "http://www.apat.org.ar"
     params["year"] = "2020"
 

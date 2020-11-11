@@ -1,12 +1,12 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import parseFloat, parseInt, runChrome
+from tools import parseFloat, parseInt, runChrome, getApiURL
 import requests
 
 
 def loadCUR():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://www.cur.com.uy"
     params["year"] = "2020"
 

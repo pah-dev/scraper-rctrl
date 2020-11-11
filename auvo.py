@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkAUVO, parseFloat, parseInt, runChrome
+from tools import getIdLinkAUVO, parseFloat, parseInt, runChrome, getApiURL
 import requests
 
 # Scraping
@@ -8,7 +8,7 @@ import requests
 def loadAUVO():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "http://www.auvo.com.uy"
     params["year"] = "2020"
 

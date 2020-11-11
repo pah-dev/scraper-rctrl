@@ -1,12 +1,12 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkTR, parseFloat, parseInt, runChrome
+from tools import getIdLinkTR, parseFloat, parseInt, runChrome, getApiURL
 import requests
 
 
 def loadTR():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://www.toprace.com.ar"
     params["year"] = "2020"
 

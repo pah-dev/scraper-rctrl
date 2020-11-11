@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkMSS, getLinkMSS, parseInt, runChrome
+from tools import getIdLinkMSS, getLinkMSS, parseInt, runChrome, getApiURL
 from mss_circuit import runScriptCircuits
 import requests
 
@@ -7,7 +7,7 @@ import requests
 def loadMSS():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://results.motorsportstats.com"
     params["year"] = "2020"
 

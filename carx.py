@@ -1,12 +1,12 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkCARX, parseFloat, parseInt, runChrome
+from tools import getIdLinkCARX, parseFloat, parseInt, runChrome, getApiURL
 import requests
 
 
 def loadCARX():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "http://carxrallycross.com"
     params["year"] = "2020"
 

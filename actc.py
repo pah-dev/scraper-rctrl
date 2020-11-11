@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt, runChrome
+from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt, runChrome, getApiURL
 import requests
 
 # Scraping
@@ -8,7 +8,7 @@ import requests
 def loadACTC():
     ret = {}
     params = {}
-    params["urlApi"] = "http://localhost:3000/v1/api"
+    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://www.actc.org.ar"
     params["year"] = "2020"
 

@@ -2,15 +2,19 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
+def getApiURL():
+    return "https://api-data-rctrl.herokuapp.com/v1/api"
+
+
 def runChrome():
     # Before Deploy
     CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH",
-    "/usr/local/bin/chromedriver")
+                                       "/usr/local/bin/chromedriver")
     GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN",
-    "/usr/bin/google-chrome")
+                                       "/usr/bin/google-chrome")
     # CHROMEDRIVER_PATH = "./chromedriver.exe"
     chrome_options = Options()
-    # chrome_options.binary_location = GOOGLE_CHROME_BIN
+    chrome_options.binary_location = GOOGLE_CHROME_BIN
     chrome_options.add_argument("disable-infobars")  # disabling infobars
     chrome_options.add_argument("--disable-extensions")  # disabling extensions
     # applicable to windows os only

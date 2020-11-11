@@ -30,7 +30,7 @@ def runScriptDetails(params):
     year = params["year"]
 
     url = "/" + catOrigen + "/pilotos.html"
-    # urlApi = "http://localhost:3000/v1/api"
+    # urlApi = getApiURL()
     driver.get(urlBase + url)
 
     data = getDrivers(driver, params)

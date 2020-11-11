@@ -30,7 +30,7 @@ def runScriptDetails(params):
     catOrigen = params["catOrigen"]
     year = params["year"]
     url = "/series/" + catOrigen + "/season/" + year + ""
-    # urlApi = "http://localhost:3000/v1/api"
+    # urlApi = getApiURL()
     driver.get(urlBase + url)
 
     data = getDrivers(driver, params)

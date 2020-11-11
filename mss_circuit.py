@@ -25,7 +25,7 @@ def runScriptCircuits(params, events):
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
     # Params
     url = "/venues/"
-    # urlApi = "http://localhost:3000/v1/api"
+    # urlApi = getApiURL()
 
     for i in range(0, len(events)):
         uri = events[i]["idCircuit"]
