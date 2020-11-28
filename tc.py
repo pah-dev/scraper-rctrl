@@ -1,14 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkTC, parseFloat, parseInt, runChrome, getApiURL
+from tools import getIdLinkTC, parseFloat, parseInt, runChrome
 import requests
 
 
-def loadTC():
+def loadTC(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     urlBase = "https://#CAT#.com.ar"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/tc")
     data = r.json()
@@ -72,6 +69,16 @@ def runScriptTC(params):
     print(r.json())
     ret["champT"] = r.json()
 
+    champ = getChampC(driver, params)
+
+    r = requests.post(urlApi+"/team/create", json=champ[1])
+    print(r.json())
+    ret["teamsC"] = r.json()
+
+    r = requests.post(urlApi+"/champ/create", json=champ[0])
+    print(r.json())
+    ret["champC"] = r.json()
+
     driver.close()
 
     return ret
@@ -89,6 +96,7 @@ def getDrivers(driver, params):
         )
         print(str(len(items)))
         for it in range(0, len(items)):
+            team = {}
             brand = items[it].find_elements_by_xpath(
                 ".//div/h3[@class='imagen_marca']/img")
             if(len(brand) > 0):
@@ -128,7 +136,6 @@ def getDrivers(driver, params):
                     "numSeason": parseInt(params["year"]),
                     "strThumb": linkImg,
                     "strCutout": linkImg,
-                    # CAMBIAR NOMBRE SACAR TEAM A TODOS
                     "strFanart4": team["strTeamFanart4"],
                     "strRSS": linkDriver,
                 }
@@ -226,7 +233,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, pilots, params):
     try:
-        champs = []
+        champ = {}
         data = []
         print("::: CHAMPIONSHIP DRIVERS")
         items = WebDriverWait(driver, 30).until(
@@ -250,7 +257,7 @@ def getChampD(driver, pilots, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
             "numSeason": parseInt(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],
@@ -259,10 +266,8 @@ def getChampD(driver, pilots, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
-        print(champs)
         print("::: PROCESS FINISHED :::")
-        return champs
+        return champ
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP DRIVERS :::"
@@ -270,7 +275,7 @@ def getChampD(driver, pilots, params):
 
 def getChampT(driver, pilots, params):
     try:
-        champs = []
+        champ = {}
         data = []
         print("::: CHAMPIONSHIP TEAMS")
         items = WebDriverWait(driver, 30).until(
@@ -294,7 +299,7 @@ def getChampT(driver, pilots, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-T",
             "numSeason": parseInt(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],
@@ -303,10 +308,63 @@ def getChampT(driver, pilots, params):
             "sumPoints": points,
             "typeChamp": "T"
         }
-        champs.append(champ)
-        print(champs)
         print("::: PROCESS FINISHED :::")
-        return champs
+        return champ
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP TEAMS :::"
+
+
+def getChampC(driver, params):
+    try:
+        ret = []
+        champ = {}
+        teams = []
+        data = []
+        print("::: CHAMPIONSHIP CONSTRUCTOR")
+        items = WebDriverWait(driver, 30).until(
+            lambda d: d.find_elements_by_xpath(
+                "//div[@id='tabs-2']/div/ul[@class='puntajes']")
+        )
+        points = 0
+        for it in range(0, len(items)):
+            tds = items[it].find_elements_by_xpath("./li")
+            strTeam = tds[2].find_element_by_xpath("./span").text
+            idTeam = params["catRCtrl"].upper() + "-C-" + strTeam.lower()
+            linkTeam = tds[1].find_element_by_xpath(
+                "./img").get_attribute("src")
+            team = {
+                "idTeam": idTeam,
+                "strTeam": strTeam,
+                "idCategory": params["catRCtrl"],
+                "idRCtrl": idTeam,
+                "numSeason": parseInt(params["year"]),
+                "strTeamLogo": linkTeam,
+                "strTeamBadge":  linkTeam,
+                "strTeamFanart4":  linkTeam
+            }
+            teams.append(team)
+            line = {
+                "idTeam": idTeam,
+                "position": parseInt(tds[0].text.replace("°", "")),
+                "totalPoints": parseFloat(tds[3].text),
+            }
+            points += line["totalPoints"]
+            data.append(line)
+        champ = {
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-T",
+            "numSeason": parseInt(params["year"]),
+            "strSeason": params["year"],
+            "idCategory": params["catRCtrl"],
+            "idRCtrl": params["catOrigen"],
+            "data": data,
+            "sumPoints": points,
+            "typeChamp": "T"
+        }
+        print("::: PROCESS FINISHED :::")
+        ret.append(champ)
+        ret.append(teams)
+        return ret
+    except Exception as e:
+        print(e)
+        return "::: ERROR CHAMP CONSTRUCTOR :::"

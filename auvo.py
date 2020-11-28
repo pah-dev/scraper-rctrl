@@ -1,16 +1,14 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkAUVO, parseFloat, parseInt, runChrome, getApiURL
+from selenium.common.exceptions import NoSuchElementException
+from tools import getIdLinkAUVO, parseFloat, parseInt, runChrome
 import requests
 
 # Scraping
 
 
-def loadAUVO():
+def loadAUVO(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "http://www.auvo.com.uy"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/auvo")
     data = r.json()
@@ -32,13 +30,7 @@ def runScriptAUVOCat(params):
 
     driver = runChrome()
 
-    # Params
-    urlBase = params["urlBase"]
-    catOrigen = params["catOrigen"]
-    year = params["year"]
-
     url = "https://speedhive.mylaps.com/Sessions/5866106"
-    urlApi = params["urlApi"]
 
     driver.get("https://speedhive.mylaps.com")
     driver.get("https://speedhive.mylaps.com/Organizations/95827")
@@ -59,11 +51,11 @@ def runScriptAUVOCat(params):
     ret["drivers"] = data
     # t_data = getTeams(driver, params)
 
-    # r = requests.post(urlApi+"/team/create", json=t_data)
+    # r = requests.post(params["urlApi"]+"/team/create", json=t_data)
     # print(r.json())
     # ret["teams"] = r.json()
 
-    # r = requests.post(urlApi+"/driver/create", json=data)
+    # r = requests.post(params["urlApi"]+"/driver/create", json=data)
     # print(r.json())
     # ret["drivers"] = r.json()
 
@@ -77,14 +69,8 @@ def runScriptAUVO(params):
 
     driver = runChrome()
 
-    # Params
-    urlBase = params["urlBase"]
-    catOrigen = params["catOrigen"]
-    year = params["year"]
-    urlApi = params["urlApi"]
-
     url = "/calendario"
-    driver.get(urlBase + url)
+    driver.get(params["urlBase"] + url)
 
     events = getEvents(driver, params)
 
@@ -107,7 +93,7 @@ def getDrivers(driver, params):
     try:
         pilots = []
         print("::: DRIVERS")
-        items = WebDriverWait(driver, 30).until(
+        items = WebDriverWait(driver, 30, 1, (NoSuchElementException)).until(
             lambda d: d.find_elements_by_xpath(
                 "//div[@id='session-results']/a")
         )
@@ -202,7 +188,7 @@ def getTeamsST(driver, params):
                 "strCutout": thumb,
                 "strRSS": linkTeam,
             }
-        teams.append(team)
+            teams.append(team)
         print(teams)
         print("::: PROCESS FINISHED :::")
         return teams
@@ -273,7 +259,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, params):
     try:
-        champs = []
+        champ = {}
         data = []
         print("::: CHAMPIONSHIP DRIVERS")
         items = WebDriverWait(driver, 30).until(
@@ -304,10 +290,8 @@ def getChampD(driver, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
-        print(champs)
         print("::: PROCESS FINISHED :::")
-        return champs
+        return champ
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP DRIVERS :::"

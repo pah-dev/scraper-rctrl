@@ -1,14 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkAPTP, parseChars, parseFloat, parseInt, runChrome, getApiURL
+from tools import getIdLinkAPTP, parseChars, parseFloat, parseInt, runChrome
 import requests
 
 
-def loadAPTP():
+def loadAPTP(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://aptpweb.com.ar"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/aptp")
     data = r.json()
@@ -41,33 +38,33 @@ def runScriptAPTP(params):
     pilots = getDrivers(driver, params)
     # ret["drivers"] = pilots
 
-    # url = "/calendario-" + year + "/"
-    # driver.get(urlBase + url)
+    url = "/calendario-" + year + "/"
+    driver.get(urlBase + url)
 
-    # events = getEvents(driver, params)
-    # # ret["events"] = events
+    events = getEvents(driver, params)
+    # ret["events"] = events
 
-    # r = requests.post(urlApi+"/circuit/create", json=events[1])
-    # print(r.json())
-    # ret["circuits"] = r.json()
+    r = requests.post(urlApi+"/circuit/create", json=events[1])
+    print(r.json())
+    ret["circuits"] = r.json()
 
-    # r = requests.post(urlApi+"/event/create", json=events[0])
-    # print(r.json())
-    # ret["events"] = r.json()
+    r = requests.post(urlApi+"/event/create", json=events[0])
+    print(r.json())
+    ret["events"] = r.json()
 
     url = "/campeonato-" + catOrigen + "/"
     driver.get(urlBase + url)
 
     champ = getChampD(driver, params, pilots)
-    ret["champD"] = champ
+    # ret["champD"] = champ
 
-    # r = requests.post(urlApi+"/driver/create", json=champ[1])
-    # print(r.json())
-    # ret["drivers"] = r.json()
+    r = requests.post(urlApi+"/driver/create", json=champ[1])
+    print(r.json())
+    ret["drivers"] = r.json()
 
-    # r = requests.post(urlApi+"/champ/create", json=champ[0])
-    # print(r.json())
-    # ret["champD"] = r.json()
+    r = requests.post(urlApi+"/champ/create", json=champ[0])
+    print(r.json())
+    ret["champD"] = r.json()
 
     driver.close()
 
@@ -168,7 +165,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, params, plist):
     try:
-        champs = []
+        champ = {}
         data = []
         ret = []
         print("::: CHAMPIONSHIP DRIVERS")
@@ -204,10 +201,8 @@ def getChampD(driver, params, plist):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
-        ret.append(champs)
+        ret.append(champ)
         ret.append(plist)
-        print(champs)
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:

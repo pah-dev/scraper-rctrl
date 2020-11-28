@@ -1,48 +1,31 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkMSS, getLinkMSS, parseInt
-
-# Scraping
-urlBase = "https://results.motorsportstats.com"
+from tools import getIdLinkMSS, getLinkMSS, parseInt, runChrome
 
 
 def runScriptCircuits(params, events):
     circuits = []
 
-    # Before Deploy
-    # CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH",
-    # "/usr/local/bin/chromedriver")
-    # GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN",
-    # "/usr/bin/google-chrome")
-    CHROMEDRIVER_PATH = "./chromedriver.exe"
-    chrome_options = Options()
-    # chrome_options.binary_location = GOOGLE_CHROME_BIN
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.headless = True
-    driver = webdriver.Chrome(
-        executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+    driver = runChrome()
+
     # Params
     url = "/venues/"
-    # urlApi = getApiURL()
 
+    print("::: CIRCUIT DETAIL")
     for i in range(0, len(events)):
         uri = events[i]["idCircuit"]
-        print(uri)
-        driver.get(urlBase + url + uri)
+        # print(uri)
+        driver.get(params["urlBase"] + url + uri)
         circuit = getCircuitDetail(driver, params, events[i])
         circuits.append(circuit)
-
     print(circuits)
     driver.close()
+    print("::: PROCESS FINISHED :::")
 
     return circuits
 
 
 def getCircuitDetail(driver, params, event):
     try:
-        print("::: CIRCUIT DETAIL")
         thumb = WebDriverWait(driver, 30).until(
             lambda d: d.find_element_by_xpath(
                 "//img[@class='_3nEn_']").get_attribute("src")
@@ -63,7 +46,7 @@ def getCircuitDetail(driver, params, event):
             elif("tube" in link):
                 strYoutube = link
         linkCountry = getLinkMSS(trs[0])
-        idCountry = getIdLinkMSS(urlBase, linkCountry, "W")
+        idCountry = getIdLinkMSS(params["urlBase"], linkCountry, "W")
         info = driver.find_elements_by_xpath("//div[@class='ZfXR2']")
         strType, strLength, strCorners = "", "", ""
         strDirection, intFormedYear = "", ""
@@ -96,7 +79,6 @@ def getCircuitDetail(driver, params, event):
             "strYoutube": strYoutube
         }
         # print(circuit)
-        print("::: PROCESS FINISHED :::")
         return circuit
     except Exception as e:
         print(e)

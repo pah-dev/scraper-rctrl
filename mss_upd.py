@@ -1,13 +1,14 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getBrandLogo, getIdLinkMSS, getLinkCMSS, getLinkMSS, parseFloat, parseInt, runChrome
+from tools import getIdLinkMSS, getLinkCMSS, getLinkMSS, parseFloat, parseInt, runChrome
 from mss_circuit import runScriptCircuits
 import requests
 import time
 
 
-def loadMSS(params):
+def updMSS(params):
     ret = {}
     params["urlBase"] = "https://results.motorsportstats.com"
+    params["updType"] = "eveeeents"
 
     r = requests.get(params["urlApi"]+"/org/find/sec/int")
     data = r.json()
@@ -21,8 +22,10 @@ def loadMSS(params):
                         params["catRCtrl"] = cats[it]["idLeague"]
                         params["catOrigen"] = cats[it]["idMss"]
                         params["chTypes"] = cats[it]["chTypes"]
+                        params["catId"] = cats[it]["_id"]
                         ans = runScriptMSS(params)
                         ret[cats[it]["idLeague"]] = ans
+            # break
     except Exception as e:
         print(e)
     return ret
@@ -31,60 +34,112 @@ def loadMSS(params):
 def runScriptMSS(params):
     ret = {}
 
+    # CHAMPIONSHIPS
     driver = runChrome()
 
-    # Params
-    catOrigen = params["catOrigen"]
-    url = "/series/" + catOrigen + "/season/" + params["year"] + ""
-
-    driver.get(params["urlBase"] + url)
-
-    data = getDrivers(driver, params)
-    r = requests.post(params["urlApi"]+"/driver/create", json=data)
-    print(r.json())
-    ret["drivers"] = r.json()
-
-    data = getTeams(driver, params)
-    if(len(data) > 0):
-        r = requests.post(params["urlApi"]+"/team/create", json=data)
-        print(r.json())
-        ret["teams"] = r.json()
-
-    events = getEvents(driver, params)
-    circuits = runScriptCircuits(params, events)
-
-    r = requests.post(params["urlApi"]+"/circuit/create", json=circuits)
-    print(r.json())
-    ret["circuits"] = r.json()
-
-    r = requests.post(params["urlApi"]+"/event/create", json=events)
-    print(r.json())
-    ret["events"] = r.json()
-
     if("D" in params["chTypes"]):
-        data = getChampD(driver, params)
-        r = requests.post(params["urlApi"]+"/champ/create", json=data)
-        print(r.json())
-        ret["champD"] = r.json()
+        r = requests.get(params["urlApi"]+"/champ/cat/" +
+                         params["catId"]+"/"+params["year"]+"/D")
+        res = r.json()
+
+        url = "/series/" + params["catOrigen"] + \
+            "/season/" + params["year"] + ""
+        driver.get(params["urlBase"] + url)
+
+        if(res):
+            champId = res["_id"]
+            sumPoints = res["sumPoints"]
+            data = getChampD(driver, params)
+            if(len(data) > 0 and data["sumPoints"] > sumPoints):
+                r = requests.put(params["urlApi"] +
+                                 "/champ/update/"+champId, json=data)
+                print(r.json())
+                ret["champD"] = r.json()
 
     if("C" in params["chTypes"]):
-        data = getChampC(driver, params)
-        # ret["champC"] = data
+        r = requests.get(params["urlApi"]+"/champ/cat/" +
+                         params["catId"]+"/"+params["year"]+"/C")
+        res = r.json()
 
-        r = requests.post(params["urlApi"]+"/team/create", json=data[1])
-        print(r.json())
-        ret["teamsC"] = r.json()
+        if(res):
+            champId = res["_id"]
+            sumPoints = res["sumPoints"]
 
-        r = requests.post(params["urlApi"]+"/champ/create", json=data[0])
-        print(r.json())
-        ret["champC"] = r.json()
+            data = getChampC(driver, params)
+            if(len(data) > 0 and data["sumPoints"] > sumPoints):
+                r = requests.put(params["urlApi"] +
+                                 "/champ/update/"+champId, json=data)
+                print(r.json())
+                ret["champT"] = r.json()
 
-    if("T" in params["chTypes"]):
-        data = getChampT(driver, params)
-        # ret["champT"] = data
-        r = requests.post(params["urlApi"]+"/champ/create", json=data)
+    if("D" in params["chTypes"]):
+        r = requests.get(params["urlApi"]+"/champ/cat/" +
+                         params["catId"]+"/"+params["year"]+"/T")
+        res = r.json()
+
+        if(res):
+            champId = res["_id"]
+            sumPoints = res["sumPoints"]
+
+            data = getChampT(driver, params)
+            if(len(data) > 0 and data["sumPoints"] > sumPoints):
+                r = requests.put(params["urlApi"] +
+                                 "/champ/update/"+champId, json=data)
+                print(r.json())
+                ret["champT"] = r.json()
+
+    # EVENTS AND CIRCUITS
+    if(params["updType"] == "events" or params["updType"] == "full"):
+        r = requests.get(params["urlApi"]+"/event/cat/" +
+                         params["catId"]+"/"+params["year"])
+        res = r.json()
+
+        events = getEvents(driver, params)
+        ret["events"] = res
+
+        circuits = runScriptCircuits(
+            params, events)
+
+        compared = compareEvents(res, events)
+        ret["compared"] = compared
+
+        r = requests.post(params["urlApi"]+"/circuit/create", json=circuits)
         print(r.json())
-        ret["champT"] = r.json()
+        ret["circuits"] = r.json()
+
+        if(len(compared["news"]) > 0):
+            r = requests.post(params["urlApi"] +
+                              "/event/create", json=compared["news"])
+            print(r.json())
+            ret["newEvents"] = r.json()
+
+        upds = compared["updated"]
+        clds = compared["cancelled"]
+        items = []
+        for it in range(0, len(upds)):
+            r = requests.put(
+                params["urlApi"] + "/event/update/" + upds[it]["id"], json=upds[it]["new"])
+            print(r.json())
+            items.append(r.json())
+        for it in range(0, len(clds)):
+            r = requests.put(
+                params["urlApi"] + "/event/update/" + clds[it]["id"], json=clds[it]["new"])
+            print(r.json())
+            items.append(r.json())
+        ret["updEvents"] = items
+
+    # DRIVERS AND TEAMS
+    if(params["updType"] == "full"):
+        data = getDrivers(driver, params)
+        r = requests.post(params["urlApi"]+"/driver/update", json=data)
+        print(r.json())
+        ret["drivers"] = r.json()
+
+        data = getTeams(driver, params)
+        if(len(data) > 0):
+            r = requests.post(params["urlApi"]+"/team/update", json=data)
+            print(r.json())
+            ret["teams"] = r.json()
 
     driver.close()
 
@@ -178,7 +233,6 @@ def getTeams(driver, params):
                                 "idRCtrl": idTeam,
                                 "idMss": idTeam,
                                 "numSeason": parseInt(params["year"]),
-                                "strGender": "T",
                                 "strRSS": linkTeam,
                             }
                             teams.append(team)
@@ -190,6 +244,37 @@ def getTeams(driver, params):
     except Exception as e:
         print(e)
         return "::: ERROR TEAMS :::"
+
+
+def compareEvents(olds, news):
+    ret = {}
+    upd = []
+    cld = []
+    cant = len(news)
+    for i in range(1, len(olds)):
+        for j in range(0, len(news)):
+            if(olds[i]["idMss"] == news[j]["idMss"]):
+                equal = True
+                equal = (olds[i]["intRound"] == news[j]["intRound"]) and equal
+                equal = (olds[i]["strDate"] == news[j]["strDate"]) and equal
+                equal = (olds[i]["strResult"] == news[j]
+                         ["strResult"]) and equal
+                equal = (olds[i]["strEvent"] == news[j]["strEvent"]) and equal
+                equal = (olds[i]["strCircuit"] == news[j]
+                         ["strCircuit"]) and equal
+                if(not equal):
+                    upd.append({"id": olds[i]["_id"], "new": news[j]})
+                news.pop(j)
+                break
+        if(cant == len(news)):
+            olds[i]["strPostponed"] = "Cancelled"
+            cld.append({"id": olds[i]["_id"], "new": olds[i]})
+        else:
+            cant = len(news)
+    ret["updated"] = upd
+    ret["cancelled"] = cld
+    ret["news"] = news
+    return ret
 
 
 def getEvents(driver, params):
@@ -241,7 +326,7 @@ def getEvents(driver, params):
                     }
                     events.append(event)
                 break
-        print(events)
+        # print(events)
         print("::: PROCESS FINISHED :::")
         return events
     except Exception as e:
@@ -254,15 +339,16 @@ def getChampD(driver, params):
         champ = {}
         data = []
         print("::: CHAMPIONSHIP DRIVERS")
+        time.sleep(5)
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
-                    '//button[@class="hFZZS"]'))
+                    "//button[@class='hFZZS']"))
             btn_show.click()
         except Exception as e:
+            print("ERRORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
             print(e)
             pass
-        time.sleep(5)
         tables = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath("//table")
         )
@@ -295,6 +381,7 @@ def getChampD(driver, params):
                     "typeChamp": "D"
                 }
                 break
+        # print(champs)
         print("::: PROCESS FINISHED :::")
         return champ
     except Exception as e:
@@ -323,7 +410,6 @@ def getChampT(driver, params):
             except Exception as e:
                 print(e)
                 pass
-        time.sleep(3)
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
@@ -332,7 +418,6 @@ def getChampT(driver, params):
         except Exception as e:
             print(e)
             pass
-        time.sleep(3)
         tables = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath("//table")
         )
@@ -369,6 +454,7 @@ def getChampT(driver, params):
                     "typeChamp": "T"
                 }
                 break
+        # print(champs)
         print("::: PROCESS FINISHED :::")
         return champ
     except Exception as e:
@@ -378,10 +464,10 @@ def getChampT(driver, params):
 
 def getChampC(driver, params):
     try:
-        ret = []
-        teams = []
+        champ = {}
         data = []
-        print("::: CHAMPIONSHIP CONSTRUCTORS")
+        print("::: CHAMPIONSHIP TEAMS")
+        time.sleep(5)
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
@@ -416,20 +502,8 @@ def getChampC(driver, params):
                         idTeam = params["catRCtrl"].upper() + "-" + idMss
                         idRCtrl = idMss
                     strTeam = tds[1].text
-                    team = {
-                        "idTeam": idTeam,
-                        "strTeam": strTeam,
-                        "idCategory": params["catRCtrl"],
-                        "idRCtrl": idRCtrl,
-                        "idMss": idMss,
-                        "numSeason": parseInt(params["year"]),
-                        "strTeamFanart4": getBrandLogo(strTeam),
-                        "strGender": "C",
-                        "strRSS": linkTeam
-                    }
-                    teams.append(team)
                     line = {
-                        "idPlayer": idRCtrl,
+                        "idPlayer": idTeam,
                         "position": parseInt(tds[0].text),
                         "totalPoints": parseFloat(tds[2].text),
                     }
@@ -446,11 +520,10 @@ def getChampC(driver, params):
                     "sumPoints": points,
                     "typeChamp": "C"
                 }
-                ret.append(champ)
-                ret.append(teams)
                 break
+        # print(champs)
         print("::: PROCESS FINISHED :::")
-        return ret
+        return champ
     except Exception as e:
         print(e)
-        return "::: ERROR CHAMP CONSTRUCTORS :::"
+        return "::: ERROR CHAMP TEAMS :::"

@@ -1,14 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkAPAT, parseFloat, parseInt, runChrome, getApiURL
+from tools import getBrandLogo, getIdLinkAPAT, parseFloat, parseInt, runChrome
 import requests
 
 
-def loadAPAT():
+def loadAPAT(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "http://www.apat.org.ar"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/apat")
     data = r.json()
@@ -77,7 +74,7 @@ def runScriptAPAT(params):
 def getDrivers(driver, params):
     try:
         pilots = []
-        champs = []
+        champ = {}
         data = []
         ret = []
         print("::: DRIVERS")
@@ -97,6 +94,7 @@ def getDrivers(driver, params):
             idDriver = tds[2].text + "_" + strPlayer.replace(" ", "_", 9)
             text = text[1].strip().replace("  ", "@", 1).split("@")
             strTeam = text[0].strip()
+            strBirth = ""
             if(len(text) > 1):
                 strBirth = text[1].strip()
             pilot = {
@@ -112,6 +110,7 @@ def getDrivers(driver, params):
                 "strBirthLocation": strBirth.title(),
                 "strSide": lastre,
                 "numSeason": parseInt(params["year"]),
+                "strFanart4": getBrandLogo(tds[5].text),
                 "strThumb": thumb,
                 "strCutout": thumb,
                 "strRender": thumb.replace("/thumb/", "/mediana/"),
@@ -135,11 +134,8 @@ def getDrivers(driver, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
         ret.append(pilots)
-        ret.append(champs)
-        print(champs)
-        print(pilots)
+        ret.append(champ)
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:

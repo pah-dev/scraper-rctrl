@@ -1,14 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkCARX, parseFloat, parseInt, runChrome, getApiURL
+from tools import getIdLinkCARX, parseFloat, parseInt, runChrome
 import requests
 
 
-def loadCARX():
+def loadCARX(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "http://carxrallycross.com"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/carx")
     data = r.json()
@@ -170,7 +167,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, params):
     try:
-        champs = []
+        champ = {}
         pilots = []
         data = []
         ret = []
@@ -211,10 +208,8 @@ def getChampD(driver, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
         ret.append(pilots)
-        ret.append(champs)
-        print(champs)
+        ret.append(champ)
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:

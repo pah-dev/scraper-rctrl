@@ -1,16 +1,13 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt, runChrome, getApiURL
+from tools import getIdLinkACTC, getLinkACTC, parseFloat, parseInt, runChrome
 import requests
 
 # Scraping
 
 
-def loadACTC():
+def loadACTC(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://www.actc.org.ar"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/actc")
     data = r.json()
@@ -92,7 +89,7 @@ def getDrivers(driver, params):
             strPlayer = items[it].find_element_by_xpath(
                 ".//h2").text
             thumb = params["urlBase"] + items[it].find_element_by_xpath(
-                ".//figure/img").get_attribute("data-original"),
+                ".//figure/img").get_attribute("data-original")
             if("avatar-torso" in thumb):
                 thumb = ""
             pilot = {
@@ -224,7 +221,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, params):
     try:
-        champs = []
+        champ = {}
         data = []
         print("::: CHAMPIONSHIP DRIVERS")
         items = WebDriverWait(driver, 30).until(
@@ -254,10 +251,8 @@ def getChampD(driver, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
-        print(champs)
         print("::: PROCESS FINISHED :::")
-        return champs
+        return champ
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP DRIVERS :::"

@@ -1,14 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import getIdLinkTR, parseFloat, parseInt, runChrome, getApiURL
+from tools import getIdLinkTR, parseFloat, parseInt, runChrome
 import requests
 
 
-def loadTR():
+def loadTR(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://www.toprace.com.ar"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/toprace")
     data = r.json()
@@ -255,7 +252,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, params):
     try:
-        champs = []
+        champ = {}
         data = []
         print("::: CHAMPIONSHIP DRIVERS")
         items = WebDriverWait(driver, 30).until(
@@ -285,54 +282,8 @@ def getChampD(driver, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        champs.append(champ)
-        print(champs)
         print("::: PROCESS FINISHED :::")
-        return champs
+        return champ
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP DRIVERS :::"
-
-
-def getChampT(driver, pilots, params):
-    try:
-        champs = []
-        data = []
-        print("::: CHAMPIONSHIP TEAMS")
-        items = WebDriverWait(driver, 30).until(
-            lambda d: d.find_elements_by_xpath(
-                "//div[@id='tabs-2']/div/ul[@class='puntajes']")
-        )
-        points = 0
-        for it in range(0, len(items)):
-            tds = items[it].find_elements_by_xpath("./li")
-            nameTeam = tds[2].find_element_by_xpath("./span").text
-            idTeam = ""
-            for p in range(0, len(pilots)):
-                if(pilots[p]["strTeam"].upper() == nameTeam.upper()):
-                    idTeam = pilots[p]["idRCtrl"]
-                    break
-            line = {
-                "idTeam": idTeam,
-                "position": parseInt(tds[0].text.replace("°", "")),
-                "totalPoints": parseInt(tds[3].text),
-            }
-            points += line["totalPoints"]
-            data.append(line)
-        champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
-            "numSeason": parseInt(params["year"]),
-            "strSeason": params["year"],
-            "idCategory": params["catRCtrl"],
-            "idRCtrl": params["catOrigen"],
-            "data": data,
-            "sumPoints": points,
-            "typeChamp": "T"
-        }
-        champs.append(champ)
-        print(champs)
-        print("::: PROCESS FINISHED :::")
-        return champs
-    except Exception as e:
-        print(e)
-        return "::: ERROR CHAMP TEAMS :::"

@@ -1,7 +1,11 @@
-from flask import Flask
+from mss_upd import updMSS
+from settings import API_URL
+from flask import Flask, request
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+import json
+import settings as sets
 from mss_base import loadMSS
-import mss_driver_detail as mss_d
-import actc_driver_detail as actc_d
 from actc import loadACTC
 from tc import loadTC
 from tr import loadTR
@@ -10,9 +14,8 @@ from cur import loadCUR
 from aptp import loadAPTP
 from apat import loadAPAT
 from auvo import loadAUVO
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
-import json
+import mss_driver_detail as mss_d
+import actc_driver_detail as actc_d
 
 
 sentry_sdk.init(
@@ -20,6 +23,7 @@ sentry_sdk.init(
     integrations=[FlaskIntegration()],
     traces_sample_rate=1.0
 )
+
 
 app = Flask(__name__)
 
@@ -37,14 +41,17 @@ def trigger_error():
 @app.route('/all')
 def run_all():
     ret = []
-    ret.append(loadACTC())
-    ret.append(loadAPAT())
-    ret.append(loadAPTP())
-    ret.append(loadCARX())
-    ret.append(loadCUR())
-    ret.append(loadTC())
-    ret.append(loadTR())
-    # ret.append(loadMSS())
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+    ret.append(loadACTC(params))
+    ret.append(loadAPAT(params))
+    ret.append(loadAPTP(params))
+    ret.append(loadCARX(params))
+    ret.append(loadCUR(params))
+    ret.append(loadTC(params))
+    ret.append(loadTR(params))
+    ret.append(loadMSS(params))
 
     json_data = json.dumps(ret, indent=3)
     return str(json_data)
@@ -52,7 +59,23 @@ def run_all():
 
 @app.route('/mss_base', methods=['GET'])
 def mss_base():
-    ans = loadMSS()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadMSS(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@app.route('/mss_upd', methods=['GET'])
+def mss_upd():
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = updMSS(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -83,7 +106,11 @@ def mss_driver_details():
 
 @app.route('/actc', methods=['GET'])
 def actc_base():
-    ans = loadACTC()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadACTC(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -103,7 +130,11 @@ def actc_driver_detail():
 
 @app.route('/tc', methods=['GET'])
 def tc_base():
-    ans = loadTC()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadTC(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -111,7 +142,11 @@ def tc_base():
 
 @app.route('/tr', methods=['GET'])
 def tr_base():
-    ans = loadTR()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadTR(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -119,7 +154,11 @@ def tr_base():
 
 @app.route('/carx', methods=['GET'])
 def carx_base():
-    ans = loadCARX()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadCARX(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -127,7 +166,11 @@ def carx_base():
 
 @app.route('/cur', methods=['GET'])
 def cur_base():
-    ans = loadCUR()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadCUR(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -135,7 +178,11 @@ def cur_base():
 
 @app.route('/aptp', methods=['GET'])
 def aptp_base():
-    ans = loadAPTP()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadAPTP(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -143,7 +190,11 @@ def aptp_base():
 
 @app.route('/apat', methods=['GET'])
 def apat_base():
-    ans = loadAPAT()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadAPAT(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -151,7 +202,11 @@ def apat_base():
 
 @app.route('/auvo', methods=['GET'])
 def auvo_base():
-    ans = loadAUVO()
+    params = {}
+    params["urlApi"] = API_URL
+    params["year"] = request.args.get('year', default="2020")
+
+    ans = loadAUVO(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)

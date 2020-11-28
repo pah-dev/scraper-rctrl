@@ -1,14 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import parseFloat, parseInt, runChrome, getApiURL
+from tools import parseFloat, parseInt, runChrome
 import requests
 
 
-def loadCUR():
+def loadCUR(params):
     ret = {}
-    params = {}
-    params["urlApi"] = getApiURL()
     params["urlBase"] = "https://www.cur.com.uy"
-    params["year"] = "2020"
 
     r = requests.get(params["urlApi"]+"/org/find/cur")
     data = r.json()
@@ -166,7 +163,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, params):
     try:
-        champs = []
+        champ = {}
         pilots = []
         data = []
         ret = []
