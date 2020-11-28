@@ -91,8 +91,8 @@ def getIdLinkACTC(params, link, type):
 
 def getIdLinkTC(params, link, type):
     ret = ""
-    link = link.replace("https", "http").replace("supertc2000", "XXXX").replace(
-        "tc2000", "XXXX").replace("formulas-argentinas", "XXXX").replace("www", "")
+    link = link.replace("https", "http").replace("www.", "").replace("supertc2000", "XXXX").replace(
+        "tc2000", "XXXX").replace("formulas-argentinas", "XXXX")
     if(type == 'D'):        # DRIVER
         ret = link.replace("/equipos.php?accion=detalle", "").replace("&id", "", 4).replace(
             "=", "-", 4).replace("http://XXXX.com.ar", "")
@@ -232,7 +232,7 @@ def getBrandLogo(txt: str):
         ret = urlBase+"logo-bmw-sm.png"
     elif any(word in txt for word in ["CHEV", "CRUZE", "ONIX"]):
         ret = urlBase+"logo-chevrolet-sm.png"
-    elif any(word in txt for word in ["CITROEN", "CITRÖEN", "C4", "DS3"]):
+    elif any(word in txt for word in ["CITROEN", "CITROËN", "C4", "DS3"]):
         ret = urlBase+"logo-citroen-sm.png"
     elif any(word in txt for word in ["DODGE"]):
         ret = urlBase3+"logo-dodge-xs.png"

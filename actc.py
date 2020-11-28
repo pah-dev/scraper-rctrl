@@ -131,6 +131,7 @@ def getTeams(data, params):
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": data[i]["idTeam"],
                 "numSeason": parseInt(params["year"]),
+                "strGender": "T",
                 "strRSS": data[i]["strRSS"],
             }
             if(data[i]["idTeam"] not in teamList):

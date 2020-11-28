@@ -184,6 +184,7 @@ def getTeamsST(driver, params):
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idTeam,
                 "numSeason": parseInt(params["year"]),
+                "strGender": "T",
                 "strThumb": thumb.replace(".jpg", "-300x189.jpg"),
                 "strCutout": thumb,
                 "strRSS": linkTeam,

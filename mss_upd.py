@@ -233,6 +233,7 @@ def getTeams(driver, params):
                                 "idRCtrl": idTeam,
                                 "idMss": idTeam,
                                 "numSeason": parseInt(params["year"]),
+                                "strGender": "T",
                                 "strRSS": linkTeam,
                             }
                             teams.append(team)

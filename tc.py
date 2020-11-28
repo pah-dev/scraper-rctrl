@@ -15,6 +15,7 @@ def loadTC(params):
             print(cats[it]["idRCtrl"])
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
+            params["urlBaseO"] = urlBase
             params["urlBase"] = urlBase.replace(
                 "#CAT#", params["catOrigen"])
             ans = runScriptTC(params)
@@ -33,15 +34,11 @@ def runScriptTC(params):
     urlApi = params["urlApi"]
     driver.get(urlBase + url)
 
-    data = getDrivers(driver, params)
+    pilots = getDrivers(driver, params)
 
-    r = requests.post(urlApi+"/team/create", json=data[1])
+    r = requests.post(urlApi+"/team/create", json=pilots[1])
     print(r.json())
     ret["teams"] = r.json()
-
-    r = requests.post(urlApi+"/driver/create", json=data[0])
-    print(r.json())
-    ret["drivers"] = r.json()
 
     url = "/carreras.php?evento=calendario"
     driver.get(urlBase + url)
@@ -59,17 +56,24 @@ def runScriptTC(params):
     url = "/estadisticas.php?accion=posiciones"
     driver.get(urlBase + url)
 
-    champ = getChampD(driver, data[0], params)
-    r = requests.post(urlApi+"/champ/create", json=champ)
+    champ = getChampD(driver, pilots[0], params)
+    # ret["champD"] = champ
+
+    r = requests.post(urlApi+"/driver/create", json=champ[1])
+    print(r.json())
+    ret["drivers"] = r.json()
+
+    r = requests.post(urlApi+"/champ/create", json=champ[0])
     print(r.json())
     ret["champD"] = r.json()
 
-    champ = getChampT(driver, data[1], params)
+    champ = getChampT(driver, pilots[1], params)
     r = requests.post(urlApi+"/champ/create", json=champ)
     print(r.json())
     ret["champT"] = r.json()
 
     champ = getChampC(driver, params)
+    # ret["champC"] = champ
 
     r = requests.post(urlApi+"/team/create", json=champ[1])
     print(r.json())
@@ -89,6 +93,7 @@ def getDrivers(driver, params):
         data = []
         pilots = []
         teams = []
+        team = {}
         print("::: DRIVERS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
@@ -96,7 +101,6 @@ def getDrivers(driver, params):
         )
         print(str(len(items)))
         for it in range(0, len(items)):
-            team = {}
             brand = items[it].find_elements_by_xpath(
                 ".//div/h3[@class='imagen_marca']/img")
             if(len(brand) > 0):
@@ -110,10 +114,12 @@ def getDrivers(driver, params):
                     "idCategory": params["catRCtrl"],
                     "idRCtrl": idTeam,
                     "numSeason": parseInt(params["year"]),
+                    "strGender": "T",
                     "strTeamLogo": brand[0].get_attribute("src"),
                     "strTeamBadge":  linkTeam,
                     "strTeamFanart4":  brand[0].get_attribute("src")
                 }
+                print(team)
                 teams.append(team)
             else:
                 linkDriver = items[it].find_element_by_xpath(
@@ -162,6 +168,7 @@ def getTeams(data, params):
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": data[i]["idTeam"],
                 "numSeason": parseInt(params["year"]),
+                "strGender": "T",
                 "strRSS": data[i]["strRSS"],
             }
             if(data[i]["idTeam"] not in teamList):
@@ -233,6 +240,7 @@ def getEvents(driver, params):
 
 def getChampD(driver, pilots, params):
     try:
+        ret = []
         champ = {}
         data = []
         print("::: CHAMPIONSHIP DRIVERS")
@@ -249,6 +257,20 @@ def getChampD(driver, pilots, params):
                 if(pilots[p]["strPlayer"].upper() == nameDriver.upper()):
                     idDriver = pilots[p]["idRCtrl"]
                     break
+            if(idDriver == ""):
+                idDriver = params["catRCtrl"].upper(
+                ) + "-" + nameDriver.lower().strip().replace(" ", "_", 9)
+                linkTeam = tds[1].find_element_by_xpath(
+                    "./img").get_attribute("src")
+                pilot = {
+                    "idPlayer": idDriver,
+                    "idCategory": params["catRCtrl"],
+                    "idRCtrl": idDriver,
+                    "strPlayer": nameDriver.title(),
+                    "numSeason": parseInt(params["year"]),
+                    "strFanart4": linkTeam
+                }
+                pilots.append(pilot)
             line = {
                 "idPlayer": idDriver,
                 "position": parseInt(tds[0].text.replace("°", "")),
@@ -267,7 +289,9 @@ def getChampD(driver, pilots, params):
             "typeChamp": "D"
         }
         print("::: PROCESS FINISHED :::")
-        return champ
+        ret.append(champ)
+        ret.append(pilots)
+        return ret
     except Exception as e:
         print(e)
         return "::: ERROR CHAMP DRIVERS :::"
@@ -292,7 +316,7 @@ def getChampT(driver, pilots, params):
                     idTeam = pilots[p]["idRCtrl"]
                     break
             line = {
-                "idTeam": idTeam,
+                "idPlayer": idTeam,
                 "position": parseInt(tds[0].text.replace("°", "")),
                 "totalPoints": parseFloat(tds[3].text),
             }
@@ -324,13 +348,15 @@ def getChampC(driver, params):
         print("::: CHAMPIONSHIP CONSTRUCTOR")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
-                "//div[@id='tabs-2']/div/ul[@class='puntajes']")
+                "//div[@id='tabs-3']/div/ul[@class='puntajes']")
         )
         points = 0
         for it in range(0, len(items)):
             tds = items[it].find_elements_by_xpath("./li")
-            strTeam = tds[2].find_element_by_xpath("./span").text
-            idTeam = params["catRCtrl"].upper() + "-C-" + strTeam.lower()
+            strTeam = tds[2].find_element_by_xpath(
+                "./span").get_attribute("innerHTML")
+            idTeam = params["catRCtrl"].upper() + "-C-" + \
+                strTeam.lower().strip().replace(" ", "_", 9)
             linkTeam = tds[1].find_element_by_xpath(
                 "./img").get_attribute("src")
             team = {
@@ -339,20 +365,21 @@ def getChampC(driver, params):
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idTeam,
                 "numSeason": parseInt(params["year"]),
+                "strGender": "C",
                 "strTeamLogo": linkTeam,
                 "strTeamBadge":  linkTeam,
                 "strTeamFanart4":  linkTeam
             }
             teams.append(team)
             line = {
-                "idTeam": idTeam,
-                "position": parseInt(tds[0].text.replace("°", "")),
-                "totalPoints": parseFloat(tds[3].text),
+                "idPlayer": idTeam,
+                "position": parseInt(tds[0].get_attribute("innerHTML").replace("°", "")),
+                "totalPoints": parseFloat(tds[3].get_attribute("innerHTML")),
             }
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-T",
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-C",
             "numSeason": parseInt(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],

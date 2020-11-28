@@ -152,6 +152,7 @@ def getTeams(driver, params):
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idTeam,
                 "numSeason": parseInt(params["year"]),
+                "strGender": "T",
                 "strTeamLogo": params["urlBase"] + linkTeam,
                 "strTeamBadge":  params["urlBase"] + linkTeam,
                 "strStadiumLocation": city,
