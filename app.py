@@ -1,21 +1,23 @@
-from mss_upd import updMSS
 from settings import API_URL
 from flask import Flask, request
-import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+import sentry_sdk
 import json
-import settings as sets
-from mss_base import loadMSS
-from actc import loadACTC
-from tc import loadTC
-from tr import loadTR
-from carx import loadCARX
-from cur import loadCUR
-from aptp import loadAPTP
-from apat import loadAPAT
-from auvo import loadAUVO
-import mss_driver_detail as mss_d
-import actc_driver_detail as actc_d
+from rq import Queue
+from rq.job import Job
+from worker import conn
+from workers.int.mss_base import loadMSS
+from workers.arg.actc import loadACTC
+from workers.arg.tc import loadTC
+from workers.arg.tr import loadTR
+from workers.arg.carx import loadCARX
+from workers.uru.cur import loadCUR
+from workers.arg.aptp import loadAPTP
+from workers.arg.apat import loadAPAT
+from workers.uru.auvo import loadAUVO
+from workers.int.mss_upd import updMSS
+import workers.int.mss_driver_detail as mss_d
+import workers.arg.actc_driver_detail as actc_d
 
 
 sentry_sdk.init(
@@ -24,8 +26,9 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-
 app = Flask(__name__)
+
+q = Queue(connection=conn)
 
 
 @app.route('/')
@@ -60,7 +63,6 @@ def run_all():
 @app.route('/mss_base', methods=['GET'])
 def mss_base():
     params = {}
-    params["urlApi"] = API_URL
     params["year"] = request.args.get('year', default="2020")
 
     ans = loadMSS(params)
@@ -110,10 +112,27 @@ def actc_base():
     params["urlApi"] = API_URL
     params["year"] = request.args.get('year', default="2020")
 
+    job = q.enqueue_call(
+        func=loadACTC, args=(params,), result_ttl=5000
+    )
+    print(job.get_id())
+
     ans = loadACTC(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
+
+
+@app.route("/results/<job_key>", methods=['GET'])
+def get_results(job_key):
+
+    job = Job.fetch(job_key, connection=conn)
+
+    if job.is_finished:
+        json_data = json.dumps(job.result, indent=3)
+        return str(json_data), 200
+    else:
+        return "Nay!", 202
 
 
 @app.route('/actc_driver_details', methods=['GET'])

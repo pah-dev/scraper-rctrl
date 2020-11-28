@@ -1,12 +1,14 @@
+from settings import API_URL
 from selenium.webdriver.support.ui import WebDriverWait
 from tools import getBrandLogo, getIdLinkMSS, getLinkCMSS, getLinkMSS, parseFloat, parseInt, runChrome
-from mss_circuit import runScriptCircuits
+from workers.int.mss_circuit import runScriptCircuits
 import requests
 import time
 
 
 def loadMSS(params):
     ret = {}
+    params["urlApi"] = API_URL
     params["urlBase"] = "https://results.motorsportstats.com"
 
     r = requests.get(params["urlApi"]+"/org/find/sec/int")
