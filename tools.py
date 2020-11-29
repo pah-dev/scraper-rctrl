@@ -1,13 +1,23 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import sentry_sdk
 import settings as sets
 
 
-def getApiURL():
+def logger(txt, err=False, module="", obj=None):
+    if(err):
+        sentry_sdk.set_tag('Module', module)
+        sentry_sdk.set_extra(module, obj)
+        sentry_sdk.capture_exception(txt)
+    elif(sets.DEBUG):
+        print(txt)
+
+
+def get_api_URL():
     return sets.API_URL
 
 
-def runChrome():
+def run_chrome():
     # Before Deploy
     # CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
     # GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
@@ -34,7 +44,7 @@ def runChrome():
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 
 
-def getLinkMSS(td):
+def get_link_MSS(td):
     ret = ""
     try:
         ret = td.find_element_by_xpath("./a").get_attribute("href")
@@ -43,7 +53,7 @@ def getLinkMSS(td):
     return ret
 
 
-def getLinkCMSS(td):
+def get_link_CMSS(td):
     ret = ""
     try:
         ret = td.find_element_by_xpath("./a").get_attribute("href")
@@ -52,7 +62,7 @@ def getLinkCMSS(td):
     return ret
 
 
-def getIdLinkMSS(urlBase, link, type):
+def get_id_link_MSS(urlBase, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace("/career", "").replace(urlBase+"/drivers/", "")
@@ -68,7 +78,7 @@ def getIdLinkMSS(urlBase, link, type):
     return ret
 
 
-def getIdLinkACTC(params, link, type):
+def get_id_link_ACTC(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(".html", "").replace(
@@ -89,7 +99,7 @@ def getIdLinkACTC(params, link, type):
     return ret
 
 
-def getIdLinkTC(params, link, type):
+def get_id_link_TC(params, link, type):
     ret = ""
     link = link.replace("https", "http").replace("www.", "").replace("supertc2000", "XXXX").replace(
         "tc2000", "XXXX").replace("formulas-argentinas", "XXXX")
@@ -110,7 +120,7 @@ def getIdLinkTC(params, link, type):
     return ret
 
 
-def getIdLinkTR(params, link, type):
+def get_id_link_TR(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] +
@@ -130,7 +140,7 @@ def getIdLinkTR(params, link, type):
     return ret
 
 
-def getIdLinkCARX(params, link, type):
+def get_id_link_CARX(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(params["urlBase"] + "/player/", "").replace(
@@ -146,7 +156,7 @@ def getIdLinkCARX(params, link, type):
     return ret
 
 
-def getIdLinkAPTP(params, link, type):
+def get_id_link_APTP(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER 02/riestra
         ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(
@@ -157,7 +167,7 @@ def getIdLinkAPTP(params, link, type):
     return ret
 
 
-def getIdLinkAUVO(params, link, type):
+def get_id_link_AUVO(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(params["urlBase"], "").replace(
@@ -171,7 +181,7 @@ def getIdLinkAUVO(params, link, type):
     return ret
 
 
-def getIdLinkAPAT(params, link, type):
+def get_id_link_APAT(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(params["urlBase"] + "/img/usuario/thumb/",
@@ -185,7 +195,7 @@ def getIdLinkAPAT(params, link, type):
     return ret
 
 
-def getLinkACTC(td):
+def get_link_ACTC(td):
     ret = ""
     try:
         ret = td.find_element_by_xpath("./a").get_attribute("href")
@@ -199,7 +209,7 @@ def parseChars(txt):
         "ó", "o").replace("ú", "u").replace("ñ", "ni").replace("ss", "s")
 
 
-def parseInt(txt):
+def parse_int(txt):
     num = 0
     try:
         num = int(txt)
@@ -208,7 +218,7 @@ def parseInt(txt):
     return num
 
 
-def parseFloat(txt):
+def parse_float(txt):
     num = 0
     try:
         num = float(txt)
@@ -217,7 +227,7 @@ def parseFloat(txt):
     return num
 
 
-def getBrandLogo(txt: str):
+def get_brand_logo(txt: str):
     ret = ""
     urlBase = "https://www.toprace.com.ar/vistas/tr/images/logos/"
     urlBase2 = "https://tc2000.com.ar/assets/images/"

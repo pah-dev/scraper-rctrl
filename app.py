@@ -4,20 +4,20 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
 import json
 from rq import Queue
-from rq.job import Job, JobStatus
+from rq.job import Job
 from worker import conn
-from workers.int.mss_base import loadMSS
-from workers.arg.actc import loadACTC
-from workers.arg.tc import loadTC
-from workers.arg.tr import loadTR
-from workers.arg.carx import loadCARX
-from workers.uru.cur import loadCUR
-from workers.arg.aptp import loadAPTP
-from workers.arg.apat import loadAPAT
-from workers.uru.auvo import loadAUVO
-from workers.int.mss_upd import updMSS
-import workers.int.mss_driver_detail as mss_d
-import workers.arg.actc_driver_detail as actc_d
+from jobs.int.mss_base import load_MSS
+from jobs.arg.actc import load_ACTC
+from jobs.arg.tc import load_TC
+from jobs.arg.tr import load_TR
+from jobs.arg.carx import load_CARX
+from jobs.uru.cur import load_CUR
+from jobs.arg.aptp import load_APTP
+from jobs.arg.apat import load_APAT
+from jobs.uru.auvo import load_AUVO
+from jobs.int.mss_upd import upd_MSS
+import jobs.int.mss_driver_detail as mss_d
+import jobs.arg.actc_driver_detail as actc_d
 
 
 sentry_sdk.init(
@@ -41,43 +41,13 @@ def trigger_error():
     division_by_zero = 1 / 0
 
 
-@app.route('/all')
-def run_all():
-    ret = []
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-    ret.append(loadACTC(params))
-    ret.append(loadAPAT(params))
-    ret.append(loadAPTP(params))
-    ret.append(loadCARX(params))
-    ret.append(loadCUR(params))
-    ret.append(loadTC(params))
-    ret.append(loadTR(params))
-    ret.append(loadMSS(params))
-
-    json_data = json.dumps(ret, indent=3)
-    return str(json_data)
-
-
-@app.route('/mss_base', methods=['GET'])
-def mss_base():
-    params = {}
-    params["year"] = request.args.get('year', default="2020")
-
-    ans = loadMSS(params)
-
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
-
-
 @app.route('/mss_upd', methods=['GET'])
 def mss_upd():
     params = {}
     params["urlApi"] = API_URL
     params["year"] = request.args.get('year', default="2020")
 
-    ans = updMSS(params)
+    ans = upd_MSS(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
@@ -89,48 +59,67 @@ def mss_driver_details():
     params["catRCtrl"] = "motoe"
     params["catOrigen"] = "fim-enel-motoe-world-cup"
     params["year"] = "2020"
-    ans = mss_d.runScriptDetails(params)
+    ans = mss_d.run_script_Details(params)
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
 
 
-# @app.route('/mss_circuit', methods=['GET'])
-# def mss_circuit():
-#     params = {}
-#     params["catRCtrl"] = "motoe"
-#     params["catOrigen"] = "fim-enel-motoe-world-cup"
-#     params["year"] = "2020"
-#     ans = runScriptCircuits(params)
+@app.route('/actc_driver_details', methods=['GET'])
+def actc_driver_detail():
+    params = {}
+    params["catRCtrl"] = "tcpk"
+    params["catOrigen"] = "tcpk"
+    params["year"] = "2020"
+    ans = actc_d.run_script_Details(params)
 
-#     json_data = json.dumps(ans, indent=3)
-#     return str(json_data)
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
 
-@app.route('/work/actc', methods=['GET'])
-def actc_base():
+
+@app.route('/load/<org>/<year>', methods=['GET'])
+def load(org, year):
     params = {}
     params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-    print("ENTRA")
+    params["org"] = org
+    params["year"] = year
 
-    # from workers.arg.actc import loadACTC
+    return load_manual(params)
 
-    job = q.enqueue_call(
-        func=loadACTC, args=(params,), result_ttl=5000
-    )
-    job_id = job.get_id()
-    print(job_id)
-    sentry_sdk.capture_message(job_id)
 
-    # ans = loadACTC(params)
+@app.route('/load/<org>/<year>', methods=['GET'])
+def upd(org, year):
+    params = {}
+    params["urlApi"] = API_URL
+    params["org"] = org
+    params["year"] = year
 
-    json_data = json.dumps(job_id, indent=3)
-    return str(json_data)
+    return upd_manual(params)
+
+
+@app.route('/job/<org>/<year>', methods=['GET'])
+def job(org, year):
+    params = {}
+    params["urlApi"] = API_URL
+    params["org"] = org
+    params["year"] = year
+
+    return run_job(params)
+
+
+@app.route('/job/upd/<org>/<year>/<type>', methods=['GET'])
+def upd_job(org, year, type):
+    params = {}
+    params["urlApi"] = API_URL
+    params["org"] = org
+    params["year"] = year
+    params["updType"] = type
+
+    return run_job_upd(params)
 
 
 @app.route("/results/<job_key>", methods=['GET'])
 def get_results(job_key):
-
     job = Job.fetch(job_key, connection=conn)
 
     if job.is_finished:
@@ -140,100 +129,173 @@ def get_results(job_key):
         return "Nay!", 202
 
 
-@app.route('/actc_driver_details', methods=['GET'])
-def actc_driver_detail():
-    params = {}
-    params["catRCtrl"] = "tcpk"
-    params["catOrigen"] = "tcpk"
-    params["year"] = "2020"
-    ans = actc_d.runScriptDetails(params)
-
-    json_data = json.dumps(ans, indent=3)
+def load_manual(params):
+    ret = {}
+    if(params["org"] == 'all'):
+        ret = load_ALL(params)
+    elif(params["org"] == 'actc'):
+        ret = load_ACTC(params)
+    elif (params["org"] == 'apat'):
+        ret = load_APAT(params)
+    elif (params["org"] == 'aptp'):
+        ret = load_APTP(params)
+    elif (params["org"] == 'auvo'):
+        ret = load_AUVO(params)
+    elif (params["org"] == 'carx'):
+        ret = load_CARX(params)
+    elif (params["org"] == 'cur'):
+        ret = load_CUR(params)
+    elif (params["org"] == 'mss'):
+        ret = load_MSS(params)
+    elif (params["org"] == 'tc'):
+        ret = load_TC(params)
+    elif (params["org"] == 'tr'):
+        ret = load_TR(params)
+    json_data = json.dumps(ret, indent=3)
     return str(json_data)
 
 
-@app.route('/tc', methods=['GET'])
-def tc_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-
-    ans = loadTC(params)
-
-    json_data = json.dumps(ans, indent=3)
+def upd_manual(params):
+    ret = {}
+    if(params["org"] == 'all'):
+        ret = load_ALL(params)
+    elif(params["org"] == 'actc'):
+        ret = load_ACTC(params)
+    elif (params["org"] == 'apat'):
+        ret = load_APAT(params)
+    elif (params["org"] == 'aptp'):
+        ret = load_APTP(params)
+    elif (params["org"] == 'auvo'):
+        ret = load_AUVO(params)
+    elif (params["org"] == 'carx'):
+        ret = load_CARX(params)
+    elif (params["org"] == 'cur'):
+        ret = load_CUR(params)
+    elif (params["org"] == 'mss'):
+        ret = upd_MSS(params)
+    elif (params["org"] == 'tc'):
+        ret = load_TC(params)
+    elif (params["org"] == 'tr'):
+        ret = load_TR(params)
+    json_data = json.dumps(ret, indent=3)
     return str(json_data)
 
 
-@app.route('/tr', methods=['GET'])
-def tr_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
+def run_job(params):
+    job = None
 
-    ans = loadTR(params)
+    if(params["org"] == 'all'):
+        job = q.enqueue_call(
+            func=load_ALL, args=(params,), result_ttl=5000
+        )
+    elif(params["org"] == 'actc'):
+        job = q.enqueue_call(
+            func=load_ACTC, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'apat'):
+        job = q.enqueue_call(
+            func=load_APAT, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'aptp'):
+        job = q.enqueue_call(
+            func=load_APTP, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'auvo'):
+        job = q.enqueue_call(
+            func=load_AUVO, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'carx'):
+        job = q.enqueue_call(
+            func=load_CARX, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'cur'):
+        job = q.enqueue_call(
+            func=load_CUR, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'mss'):
+        job = q.enqueue_call(
+            func=load_MSS, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'tc'):
+        job = q.enqueue_call(
+            func=load_TC, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'tr'):
+        job = q.enqueue_call(
+            func=load_TR, args=(params,), result_ttl=5000
+        )
 
-    json_data = json.dumps(ans, indent=3)
+    job_id = job.get_id()
+    print(job_id)
+    sentry_sdk.capture_message(job_id)
+
+    json_data = json.dumps({'job': job_id}, indent=3)
     return str(json_data)
 
 
-@app.route('/carx', methods=['GET'])
-def carx_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
+def run_job_upd(params):
+    job = None
 
-    ans = loadCARX(params)
+    if(params["org"] == 'all'):
+        job = q.enqueue_call(
+            func=load_ALL, args=(params,), result_ttl=5000
+        )
+    elif(params["org"] == 'actc'):
+        job = q.enqueue_call(
+            func=load_ACTC, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'apat'):
+        job = q.enqueue_call(
+            func=load_APAT, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'aptp'):
+        job = q.enqueue_call(
+            func=load_APTP, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'auvo'):
+        job = q.enqueue_call(
+            func=load_AUVO, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'carx'):
+        job = q.enqueue_call(
+            func=load_CARX, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'cur'):
+        job = q.enqueue_call(
+            func=load_CUR, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'mss'):
+        job = q.enqueue_call(
+            func=upd_MSS, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'tc'):
+        job = q.enqueue_call(
+            func=load_TC, args=(params,), result_ttl=5000
+        )
+    elif (params["org"] == 'tr'):
+        job = q.enqueue_call(
+            func=load_TR, args=(params,), result_ttl=5000
+        )
 
-    json_data = json.dumps(ans, indent=3)
+    job_id = job.get_id()
+    print(job_id)
+    sentry_sdk.capture_message(job_id)
+
+    json_data = json.dumps({'job': job_id}, indent=3)
     return str(json_data)
 
 
-@app.route('/cur', methods=['GET'])
-def cur_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-
-    ans = loadCUR(params)
-
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
-
-
-@app.route('/aptp', methods=['GET'])
-def aptp_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-
-    ans = loadAPTP(params)
-
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
-
-
-@app.route('/apat', methods=['GET'])
-def apat_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-
-    ans = loadAPAT(params)
-
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
-
-
-@app.route('/auvo', methods=['GET'])
-def auvo_base():
-    params = {}
-    params["urlApi"] = API_URL
-    params["year"] = request.args.get('year', default="2020")
-
-    ans = loadAUVO(params)
-
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
+def load_ALL(params):
+    ret = []
+    ret.append(load_ACTC(params))
+    ret.append(load_APAT(params))
+    ret.append(load_APTP(params))
+    ret.append(load_CARX(params))
+    ret.append(load_CUR(params))
+    ret.append(load_TC(params))
+    ret.append(load_TR(params))
+    ret.append(load_MSS(params))
+    return ret
 
 
 if __name__ == '__main__':
