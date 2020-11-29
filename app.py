@@ -183,6 +183,7 @@ def upd_manual(params):
 
 def run_job(params):
     job = None
+    from app import load_ALL
 
     if(params["org"] == 'all'):
         job = q.enqueue_call(
