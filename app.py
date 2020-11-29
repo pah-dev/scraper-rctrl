@@ -115,7 +115,7 @@ def actc_base():
 
     from workers.arg.aptp import loadACTC
 
-    job = q.enqueue_call(
+    job = q..enqueue_call(
         func=loadACTC, args=(params,), result_ttl=5000
     )
     job_id = job.get_id()
