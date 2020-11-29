@@ -4,7 +4,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
 import json
 from rq import Queue
-from rq.job import Job
+from rq.job import Job, JobStatus
 from worker import conn
 from workers.int.mss_base import loadMSS
 from workers.arg.actc import loadACTC
@@ -106,22 +106,26 @@ def mss_driver_details():
 #     json_data = json.dumps(ans, indent=3)
 #     return str(json_data)
 
-@app.route('/actc', methods=['GET'])
+@app.route('/work/actc', methods=['GET'])
 def actc_base():
     params = {}
     params["urlApi"] = API_URL
     params["year"] = request.args.get('year', default="2020")
+    print("ENTRA")
+
+    from workers.arg.aptp import loadACTC
 
     job = q.enqueue_call(
         func=loadACTC, args=(params,), result_ttl=5000
     )
-    print(job.get_id())
-    sentry_sdk.capture_message(job.get_id())
+    job_id = job.get_id()
+    print(job_id)
+    sentry_sdk.capture_message(job_id)
 
     # ans = loadACTC(params)
 
-    # json_data = json.dumps(ans, indent=3)
-    # return str(json_data)
+    json_data = json.dumps(job_id, indent=3)
+    return str(json_data)
 
 
 @app.route("/results/<job_key>", methods=['GET'])
