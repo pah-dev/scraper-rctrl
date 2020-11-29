@@ -1,6 +1,6 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from tools import getIdLinkMSS, getLinkCMSS, getLinkMSS, parseFloat, parseInt, runChrome
-from mss_circuit import runScriptCircuits
+from workers.int.mss_circuit import runScriptCircuits
 import requests
 import time
 
