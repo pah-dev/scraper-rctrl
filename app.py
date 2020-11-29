@@ -1,4 +1,4 @@
-from settings import API_URL
+from settings import API_URL, DEBUG, PORT
 from flask import Flask, request
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
@@ -237,4 +237,5 @@ def auvo_base():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(PORT)
+    app.run(host='0.0.0.0', port=port, debug=DEBUG)
