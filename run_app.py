@@ -3,15 +3,15 @@
 # from apscheduler.triggers.cron import CronTrigger
 # from run_housekeeping import run_housekeeping
 # from apscheduler.schedulers.background import BackgroundScheduler
-# import os
-import app
+import os
+# import app
 
 
 def run_web_script():
     # start the gunicorn server with custom configuration
     # You can also using app.run() if you want to use the flask built-in server -- be careful about the port
-    #    os.system('gunicorn -c gunicorn.conf.py web.jobboard:app --debug')
-    app.run()
+    os.system('gunicorn -c gunicorn.conf.py app:app --debug')
+#     app.run()
 
 
 # def start_scheduler():
