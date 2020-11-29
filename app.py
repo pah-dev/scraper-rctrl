@@ -116,11 +116,12 @@ def actc_base():
         func=loadACTC, args=(params,), result_ttl=5000
     )
     print(job.get_id())
+    sentry_sdk.capture_message(job.get_id())
 
-    ans = loadACTC(params)
+    # ans = loadACTC(params)
 
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
+    # json_data = json.dumps(ans, indent=3)
+    # return str(json_data)
 
 
 @app.route("/results/<job_key>", methods=['GET'])
