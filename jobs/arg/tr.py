@@ -1,3 +1,4 @@
+from os import curdir
 from selenium.webdriver.support.ui import WebDriverWait
 from tools import get_id_link_TR, logger, parse_float, parse_int, run_chrome
 import requests
@@ -25,47 +26,42 @@ def run_script_TR(params):
 
     driver = run_chrome()
 
-    # Params
-    catOrigen = params["catOrigen"]
-    urlBase = params["urlBase"]
-    urlApi = params["urlApi"]
-
     url = "/equipos.html"
-    driver.get(urlBase + "/" + catOrigen + url)
+    driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
     data = get_teams(driver, params)
 
-    r = requests.post(urlApi+"/team/create", json=data)
+    r = requests.post(params["urlApi"]+"/team/create", json=data)
     logger(r.json())
     ret["teams"] = r.json()
 
     url = "/pilotos.html"
-    driver.get(urlBase + "/" + catOrigen + url)
+    driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
     data = get_drivers(driver, params, data)
 
-    r = requests.post(urlApi+"/driver/create", json=data)
+    r = requests.post(params["urlApi"]+"/driver/create", json=data)
     logger(r.json())
     ret["drivers"] = r.json()
 
     url = "/calendario/" + params["year"] + ".html"
-    driver.get(urlBase + "/" + catOrigen + url)
+    driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
     events = get_events(driver, params)
 
-    r = requests.post(urlApi+"/circuit/create", json=events[1])
+    r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
     logger(r.json())
     ret["circuits"] = r.json()
 
-    r = requests.post(urlApi+"/event/create", json=events[0])
+    r = requests.post(params["urlApi"]+"/event/create", json=events[0])
     logger(r.json())
     ret["events"] = r.json()
 
     url = "/campeonato-general/" + params["year"] + ".html"
-    driver.get(urlBase + "/" + catOrigen + url)
+    driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
     champ = get_champD(driver, params)
-    r = requests.post(urlApi+"/champ/create", json=champ)
+    r = requests.post(params["urlApi"]+"/champ/create", json=champ)
     logger(r.json())
     ret["champD"] = r.json()
 
@@ -251,7 +247,7 @@ def get_events(driver, params):
         print("::: PROCESS FINISHED :::")
         return data
     except Exception as e:
-        logger(e, True, "Events", data)
+        logger(e, True, "Events", [events, circuits])
         return "::: ERROR EVENTS :::"
 
 

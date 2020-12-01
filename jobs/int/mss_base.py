@@ -377,6 +377,7 @@ def get_champC(driver, params):
     ret = []
     teams = []
     data = []
+    champ = {}
     try:
         print("::: CHAMPIONSHIP CONSTRUCTORS")
         try:
@@ -450,5 +451,5 @@ def get_champC(driver, params):
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:
-        logger(e, True, "Championship", ret)
+        logger(e, True, "Championship", [teams, champ])
         return "::: ERROR CHAMP CONSTRUCTORS :::"

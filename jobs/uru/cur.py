@@ -150,7 +150,7 @@ def get_events(driver, params):
         print("::: PROCESS FINISHED :::")
         return data
     except Exception as e:
-        logger(e, True, "Events", data)
+        logger(e, True, "Events", [events, circuits])
         return "::: ERROR EVENTS :::"
 
 
@@ -203,5 +203,5 @@ def get_champD(driver, params):
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:
-        logger(e, True, "Championship", data)
+        logger(e, True, "Championship", [pilots, champ])
         return "::: ERROR CHAMP DRIVERS :::"

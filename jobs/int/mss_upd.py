@@ -278,7 +278,7 @@ def compareEvents(olds, news):
         ret["news"] = news
         logger(ret)
     except Exception as e:
-        logger(e, True, "Compare Events", ret)
+        logger(e, True, "Compare Events", [upd, cld, news])
         return "::: ERROR COMPARE EVENTS :::"
     return ret
 

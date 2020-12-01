@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_brand_logo, get_id_link_APAT, parse_float, parse_int, run_chrome
+from tools import get_brand_logo, get_id_link_APAT, logger, parse_float, parse_int, run_chrome
 import requests
 
 
@@ -25,45 +25,39 @@ def run_script_APAT(params):
 
     driver = run_chrome()
 
-    # Params
-    urlBase = params["urlBase"]
-    catOrigen = params["catOrigen"]
-    year = params["year"]
-
-    url = "/pilotoslistado" + "/" + catOrigen
+    url = "/pilotoslistado" + "/" + params["catOrigen"]
     urlApi = params["urlApi"]
-    driver.get(urlBase + url)
-    print(urlBase + url)
+    driver.get(params["urlBase"] + url)
 
     data = get_drivers(driver, params)
     # # ret["drivers"] = pilots
 
     r = requests.post(urlApi+"/driver/create", json=data[0])
-    print(r.json())
+    logger(r.json())
     ret["drivers"] = r.json()
 
     r = requests.post(urlApi+"/champ/create", json=data[1])
-    print(r.json())
+    logger(r.json())
     ret["champD"] = r.json()
 
     url = "/circuitos/todos"
-    driver.get(urlBase + url)
+    driver.get(params["urlBase"] + url)
 
     circuits = get_circuits(driver, params)
     # ret["circuits"] = circuits
 
-    url = "/calendario/" + year
-    driver.get(urlBase + url)
+    url = "/calendario/" + params["year"]
+    driver.get(params["urlBase"] + url)
 
     events = get_events(driver, params)
     # ret["events"] = events
 
     r = requests.post(urlApi+"/circuit/create", json=circuits)
-    print(r.json())
+    logger(r.json())
     ret["circuits"] = r.json()
 
     r = requests.post(urlApi+"/event/create", json=events)
-    print(r.json())
+    logger(r.json())
     ret["events"] = r.json()
 
     driver.close()
@@ -72,11 +66,11 @@ def run_script_APAT(params):
 
 
 def get_drivers(driver, params):
+    pilots = []
+    champ = {}
+    data = []
+    ret = []
     try:
-        pilots = []
-        champ = {}
-        data = []
-        ret = []
         print("::: DRIVERS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
@@ -125,7 +119,7 @@ def get_drivers(driver, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],
@@ -136,19 +130,17 @@ def get_drivers(driver, params):
         }
         ret.append(pilots)
         ret.append(champ)
+        logger(ret)
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:
-        print(e)
+        logger(e, True, "Drivers", [pilots, champ])
         return "::: ERROR DRIVERS :::"
 
 
 def get_events(driver, params):
+    events = []
     try:
-        # data = []
-        events = []
-        # circuits = []
-        # circList = []
         print("::: EVENTS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
@@ -187,23 +179,22 @@ def get_events(driver, params):
                 "strRSS": linkEvent,
             }
             events.append(event)
-        print(events)
+        logger(events)
         print("::: PROCESS FINISHED :::")
         return events
     except Exception as e:
-        print(e)
+        logger(e, True, "Events", events)
         return "::: ERROR EVENTS :::"
 
 
 def get_circuits(driver, params):
+    circuits = []
     try:
-        circuits = []
         print("::: CIRCUITS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
                 "//div[@class='row']/div[contains(@class, 'col-md-4 nopadding')]")
         )
-        print(str(len(items)))
         for it in range(0, len(items)):
             linkCircuit = items[it].find_element_by_xpath(
                 ".//a").get_attribute("href")
@@ -224,9 +215,9 @@ def get_circuits(driver, params):
                 "strLogo": logo
             }
             circuits.append(circuit)
-        print(circuits)
+        logger(circuits)
         print("::: PROCESS FINISHED :::")
         return circuits
     except Exception as e:
-        print(e)
+        logger(e, True, "Circuits", circuits)
         return "::: ERROR EVENTS :::"

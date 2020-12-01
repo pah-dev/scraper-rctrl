@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_id_link_CARX, parse_float, parse_int, run_chrome
+from tools import get_id_link_CARX, logger, parse_float, parse_int, run_chrome
 import requests
 
 
@@ -25,47 +25,39 @@ def run_script_CARX(params):
 
     driver = run_chrome()
 
-    # Params
-    catOrigen = params["catOrigen"]
-
-    urlBase = params["urlBase"]
-    urlApi = params["urlApi"]
-
     url = "/pilotos/"
-    driver.get(urlBase + url)
+    driver.get(params["urlBase"] + url)
 
     data = get_drivers(driver, params)
     # ret["drivers"] = data
-
-    r = requests.post(urlApi+"/driver/create", json=data)
+    r = requests.post(params["urlApi"]+"/driver/create", json=data)
     print(r.json())
     ret["drivers"] = r.json()
 
     url = "/calendario/"
-    driver.get(urlBase + url)
+    driver.get(params["urlBase"] + url)
 
     events = get_events(driver, params)
     # ret["events"] = events
-
-    r = requests.post(urlApi+"/circuit/create", json=events[1])
+    r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
     print(r.json())
     ret["circuits"] = r.json()
 
-    r = requests.post(urlApi+"/event/create", json=events[0])
+    r = requests.post(params["urlApi"]+"/event/create", json=events[0])
     print(r.json())
     ret["events"] = r.json()
 
-    url = "/campeonato-" + catOrigen + "/"
-    driver.get(urlBase + url)
+    url = "/campeonato-" + params["catOrigen"] + "/"
+    driver.get(params["urlBase"] + url)
 
     champ = get_champD(driver, params)
     # ret["champD"] = champ
 
-    r = requests.post(urlApi+"/driver/create", json=champ[0])
+    r = requests.post(params["urlApi"]+"/driver/create", json=champ[0])
     print(r.json())
     ret["drivers_extra"] = r.json()
 
-    r = requests.post(urlApi+"/champ/create", json=champ[1])
+    r = requests.post(params["urlApi"]+"/champ/create", json=champ[1])
     print(r.json())
     ret["champD"] = r.json()
 
@@ -75,14 +67,13 @@ def run_script_CARX(params):
 
 
 def get_drivers(driver, params):
+    pilots = []
     try:
-        pilots = []
         print("::: DRIVERS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
                 "//div[contains(@class, 'kf_roster_dec6')]")
         )
-        print(str(len(items)))
         for it in range(0, len(items)):
             linkDriver = items[it].find_element_by_xpath(
                 ".//h3/a").get_attribute("href")
@@ -106,24 +97,20 @@ def get_drivers(driver, params):
                 "strRSS": linkDriver,
             }
             pilots.append(pilot)
-        # for t in range(0, len(teams)):
-        #     if(teams[t]["strTeam"].upper() == strTeam.upper()):
-        #         pilot["idTeam"] = teams[t]["idTeam"]
-        #         break
-        print(pilots)
+        logger(pilots)
         print("::: PROCESS FINISHED :::")
         return pilots
     except Exception as e:
-        print(e)
+        logger(e, True, "Drivers", pilots)
         return "::: ERROR DRIVERS :::"
 
 
 def get_events(driver, params):
+    data = []
+    events = []
+    circuits = []
+    circList = []
     try:
-        data = []
-        events = []
-        circuits = []
-        circList = []
         print("::: EVENTS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
@@ -159,20 +146,20 @@ def get_events(driver, params):
                 circList.append(circuit["idCircuit"])
         data.append(events)
         data.append(circuits)
-        print(data)
+        logger(data)
         print("::: PROCESS FINISHED :::")
         return data
     except Exception as e:
-        print(e)
+        logger(e, True, "Events", [events, circuits])
         return "::: ERROR EVENTS :::"
 
 
 def get_champD(driver, params):
+    champ = {}
+    pilots = []
+    data = []
+    ret = []
     try:
-        champ = {}
-        pilots = []
-        data = []
-        ret = []
         print("::: CHAMPIONSHIP DRIVERS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath("//tbody/tr")
@@ -213,8 +200,9 @@ def get_champD(driver, params):
         }
         ret.append(pilots)
         ret.append(champ)
+        logger(ret)
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:
-        print(e)
+        logger(e, True, "Championship", [pilots, champ])
         return "::: ERROR CHAMP DRIVERS :::"

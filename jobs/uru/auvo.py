@@ -254,7 +254,7 @@ def get_events(driver, params):
         print("::: PROCESS FINISHED :::")
         return data
     except Exception as e:
-        logger(e, True, "Events", data)
+        logger(e, True, "Events", [events, circuits])
         return "::: ERROR EVENTS :::"
 
 

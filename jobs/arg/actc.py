@@ -27,45 +27,40 @@ def run_script_ACTC(params):
 
     driver = run_chrome()
 
-    # Params
-    urlBase = params["urlBase"]
-    catOrigen = params["catOrigen"]
-    year = params["year"]
-
-    url = "/" + catOrigen + "/pilotos.html"
+    url = "/" + params["catOrigen"] + "/pilotos.html"
     urlApi = params["urlApi"]
-    driver.get(urlBase + url)
+    driver.get(params["urlBase"] + url)
 
     data = get_drivers(driver, params)
     t_data = get_teams(data, params)
 
     r = requests.post(urlApi+"/team/create", json=t_data)
-    print(r.json())
+    logger(r.json())
     ret["teams"] = r.json()
 
     r = requests.post(urlApi+"/driver/create", json=data)
-    print(r.json())
+    logger(r.json())
     ret["drivers"] = r.json()
 
-    url = "/" + catOrigen + "/calendario/" + year + ".html"
-    driver.get(urlBase + url)
+    url = "/" + params["catOrigen"] + "/calendario/" + params["year"] + ".html"
+    driver.get(params["urlBase"] + url)
 
     events = get_events(driver, params)
 
     r = requests.post(urlApi+"/circuit/create", json=events[1])
-    print(r.json())
+    logger(r.json())
     ret["circuits"] = r.json()
 
     r = requests.post(urlApi+"/event/create", json=events[0])
-    print(r.json())
+    logger(r.json())
     ret["events"] = r.json()
 
-    url = "/" + catOrigen + "/campeonato/" + year + ".html"
-    driver.get(urlBase + url)
+    url = "/" + params["catOrigen"] + "/campeonato/" + params["year"] + ".html"
+    driver.get(params["urlBase"] + url)
 
     data = get_champD(driver, params)
     r = requests.post(urlApi+"/champ/create", json=data)
-    print(r.json())
+    logger(r.json())
     ret["champD"] = r.json()
 
     driver.close()
@@ -219,7 +214,7 @@ def get_events(driver, params):
         print("::: PROCESS FINISHED :::")
         return data
     except Exception as e:
-        logger(e, True, "Events", data)
+        logger(e, True, "Events", [events, circuits])
         return "::: ERROR EVENTS :::"
 
 
