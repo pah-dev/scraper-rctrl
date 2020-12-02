@@ -131,9 +131,11 @@ def upd_job(org, year, type):
 def get_results(job_key):
     job = Job.fetch(job_key, connection=conn)
 
-    if job.is_finished:
+    if (job.is_finished):
         json_data = json.dumps(job.result, indent=3)
         return str(json_data), 200
+    elif(job.is_failed):
+        return str("Error"), 400
     else:
         return "Nay!", 202
 

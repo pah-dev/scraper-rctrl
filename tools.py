@@ -45,7 +45,7 @@ def run_chrome():
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 
 
-def api_request(method, url, data):
+def api_request(method, url, data=None):
     r = None
     try:
         if(method == "post"):
