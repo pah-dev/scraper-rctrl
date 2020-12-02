@@ -29,7 +29,7 @@ sentry_sdk.init(
 
 app = Flask(__name__)
 
-q = Queue(connection=conn)
+q = Queue(connection=conn, default_timeout=3600)
 
 
 @app.route('/')
@@ -82,8 +82,15 @@ def actc_driver_detail():
 def init():
     params = {}
     params["urlApi"] = API_URL
+    job = q.enqueue_call(
+        func=load_init, args=(params,), result_ttl=500, timeout=1200
+    )
+    job_id = job.get_id()
+    print(job_id)
+    sentry_sdk.capture_message(job_id)
 
-    return load_init(params)
+    json_data = json.dumps({'job': job_id}, indent=3)
+    return str(json_data)
 
 
 @app.route('/load/<org>/<year>', methods=['GET'])
@@ -198,43 +205,43 @@ def run_job(params):
 
     if(params["org"] == 'all'):
         job = q.enqueue_call(
-            func=load_ALL, args=(params,), result_ttl=5000
+            func=load_ALL, args=(params,), result_ttl=86400, timeout=7200
         )
     elif(params["org"] == 'actc'):
         job = q.enqueue_call(
-            func=load_ACTC, args=(params,), result_ttl=5000
+            func=load_ACTC, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'apat'):
         job = q.enqueue_call(
-            func=load_APAT, args=(params,), result_ttl=5000
+            func=load_APAT, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'aptp'):
         job = q.enqueue_call(
-            func=load_APTP, args=(params,), result_ttl=5000
+            func=load_APTP, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'auvo'):
         job = q.enqueue_call(
-            func=load_AUVO, args=(params,), result_ttl=5000
+            func=load_AUVO, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'carx'):
         job = q.enqueue_call(
-            func=load_CARX, args=(params,), result_ttl=5000
+            func=load_CARX, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'cur'):
         job = q.enqueue_call(
-            func=load_CUR, args=(params,), result_ttl=5000
+            func=load_CUR, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'mss'):
         job = q.enqueue_call(
-            func=load_MSS, args=(params,), result_ttl=5000
+            func=load_MSS, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tc'):
         job = q.enqueue_call(
-            func=load_TC, args=(params,), result_ttl=5000
+            func=load_TC, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tr'):
         job = q.enqueue_call(
-            func=load_TR, args=(params,), result_ttl=5000
+            func=load_TR, args=(params,), result_ttl=5000, timeout=3600
         )
 
     job_id = job.get_id()
@@ -250,43 +257,43 @@ def run_job_upd(params):
 
     if(params["org"] == 'all'):
         job = q.enqueue_call(
-            func=load_ALL, args=(params,), result_ttl=5000
+            func=load_ALL, args=(params,), result_ttl=5000, timeout=3600
         )
     elif(params["org"] == 'actc'):
         job = q.enqueue_call(
-            func=load_ACTC, args=(params,), result_ttl=5000
+            func=load_ACTC, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'apat'):
         job = q.enqueue_call(
-            func=load_APAT, args=(params,), result_ttl=5000
+            func=load_APAT, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'aptp'):
         job = q.enqueue_call(
-            func=load_APTP, args=(params,), result_ttl=5000
+            func=load_APTP, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'auvo'):
         job = q.enqueue_call(
-            func=load_AUVO, args=(params,), result_ttl=5000
+            func=load_AUVO, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'carx'):
         job = q.enqueue_call(
-            func=load_CARX, args=(params,), result_ttl=5000
+            func=load_CARX, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'cur'):
         job = q.enqueue_call(
-            func=load_CUR, args=(params,), result_ttl=5000
+            func=load_CUR, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'mss'):
         job = q.enqueue_call(
-            func=upd_MSS, args=(params,), result_ttl=5000
+            func=upd_MSS, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tc'):
         job = q.enqueue_call(
-            func=load_TC, args=(params,), result_ttl=5000
+            func=load_TC, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tr'):
         job = q.enqueue_call(
-            func=load_TR, args=(params,), result_ttl=5000
+            func=load_TR, args=(params,), result_ttl=5000, timeout=3600
         )
 
     job_id = job.get_id()

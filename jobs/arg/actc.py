@@ -11,7 +11,7 @@ def load_ACTC(params):
     data = api_request("get", params["urlApi"]+"/org/find/actc")
     if(len(data["categories"]) > 0):
         cats = data["categories"]
-        for it in range(3, len(cats)):
+        for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
