@@ -25,7 +25,6 @@ def run_chrome():
     # CHROMEDRIVER_PATH = '/app/.apt/usr/bin/google_chrome'
     # GOOGLE_CHROME_BIN = '/app/.chromedriver/bin/chromedriver'
     chrome_options = Options()
-    print(USE_BIN)
     if(USE_BIN):
         chrome_options.binary_location = GOOGLE_CHROME_BIN
     chrome_options.add_argument("disable-infobars")  # disabling infobars
@@ -41,7 +40,6 @@ def run_chrome():
 
     # chrome_options.page_load_strategy = 'eager'
     chrome_options.headless = True
-    print(CHROMEDRIVER_PATH)
     return webdriver.Chrome(
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 
