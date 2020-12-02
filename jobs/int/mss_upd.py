@@ -1,7 +1,7 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_id_link_MSS, get_link_CMSS, get_link_MSS, logger, parse_float, parse_int, run_chrome
+from tools import api_request, get_id_link_MSS, get_link_CMSS, get_link_MSS
+from tools import logger, parse_float, parse_int, run_chrome
 from jobs.int.mss_circuit import run_script_circuits
-import requests
 import time
 
 
@@ -10,8 +10,7 @@ def upd_MSS(params):
     params["urlBase"] = "https://results.motorsportstats.com"
     params["updType"] = "eveeeents"
 
-    r = requests.get(params["urlApi"]+"/org/find/sec/int")
-    data = r.json()
+    data = api_request("get", params["urlApi"]+"/org/find/sec/int")
     try:
         for i in range(0, len(data)):
             if(len(data[i]["categories"]) > 0):
@@ -38,9 +37,9 @@ def run_script_MSS(params):
     driver = run_chrome()
 
     if("D" in params["chTypes"]):
-        r = requests.get(params["urlApi"]+"/champ/cat/" +
-                         params["catId"]+"/"+params["year"]+"/D")
-        res = r.json()
+        res = api_request(
+            "get", params["urlApi"] + "/champ/cat /" + params["catId"] + "/" +
+            params["year"]+"/D")
 
         url = "/series/" + params["catOrigen"] + \
             "/season/" + params["year"] + ""
@@ -51,97 +50,86 @@ def run_script_MSS(params):
             sumPoints = res["sumPoints"]
             data = get_champD(driver, params)
             if(len(data) > 0 and data["sumPoints"] > sumPoints):
-                r = requests.put(params["urlApi"] +
-                                 "/champ/update/"+champId, json=data)
-                logger(r.json())
-                ret["champD"] = r.json()
+                ret["champD"] = api_request(
+                    "put", params["urlApi"]+"/champ/update/"+champId, data)
 
     if("C" in params["chTypes"]):
-        r = requests.get(params["urlApi"]+"/champ/cat/" +
-                         params["catId"]+"/"+params["year"]+"/C")
-        res = r.json()
+        time.sleep(5)
+        res = api_request(
+            "get", params["urlApi"] + "/champ/cat /" + params["catId"] + "/" +
+            params["year"]+"/C")
 
         if(res):
             champId = res["_id"]
             sumPoints = res["sumPoints"]
-
             data = get_champC(driver, params)
             if(len(data) > 0 and data["sumPoints"] > sumPoints):
-                r = requests.put(params["urlApi"] +
-                                 "/champ/update/"+champId, json=data)
-                logger(r.json())
-                ret["champT"] = r.json()
+                ret["champT"] = api_request(
+                    "put", params["urlApi"] + "/champ/update/"+champId, data)
 
     if("D" in params["chTypes"]):
-        r = requests.get(params["urlApi"]+"/champ/cat/" +
-                         params["catId"]+"/"+params["year"]+"/T")
-        res = r.json()
+        time.sleep(5)
+        res = api_request(
+            "get", params["urlApi"] + "/champ/cat /" + params["catId"] + "/" +
+            params["year"]+"/T")
 
         if(res):
             champId = res["_id"]
             sumPoints = res["sumPoints"]
-
             data = get_champT(driver, params)
             if(len(data) > 0 and data["sumPoints"] > sumPoints):
-                r = requests.put(params["urlApi"] +
-                                 "/champ/update/"+champId, json=data)
-                logger(r.json())
-                ret["champT"] = r.json()
+                ret["champT"] = api_request(
+                    "put", params["urlApi"] + "/champ/update/" + champId, data)
 
     # EVENTS AND CIRCUITS
     if(params["updType"] == "events" or params["updType"] == "full"):
-        r = requests.get(params["urlApi"]+"/event/cat/" +
-                         params["catId"]+"/"+params["year"])
-        res = r.json()
+        time.sleep(5)
+        res = api_request(
+            "get", params["urlApi"]+"/event/cat /" + params["catId"] + "/" +
+            params["year"])
 
         events = get_events(driver, params)
         ret["events"] = res
 
-        circuits = run_script_circuits(
-            params, events)
+        circuits = run_script_circuits(params, events)
 
         compared = compareEvents(res, events)
         ret["compared"] = compared
 
-        r = requests.post(params["urlApi"]+"/circuit/create", json=circuits)
-        logger(r.json())
-        ret["circuits"] = r.json()
+        ret["circuits"] = api_request(
+            "post", params["urlApi"]+"/circuit/create", circuits)
 
         if(len(compared["news"]) > 0):
-            r = requests.post(params["urlApi"] +
-                              "/event/create", json=compared["news"])
-            logger(r.json())
-            ret["newEvents"] = r.json()
+            time.sleep(5)
+            ret["newEvents"] = api_request(
+                "post", params["urlApi"] + "/event/create", compared["news"])
 
         upds = compared["updated"]
         clds = compared["cancelled"]
         items = []
         for it in range(0, len(upds)):
-            r = requests.put(
-                params["urlApi"] + "/event/update/" + upds[it]["id"],
-                json=upds[it]["new"])
-            logger(r.json())
-            items.append(r.json())
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + upds[it]["id"],
+                upds[it]["new"]))
         for it in range(0, len(clds)):
-            r = requests.put(
-                params["urlApi"] + "/event/update/" + clds[it]["id"],
-                json=clds[it]["new"])
-            logger(r.json())
-            items.append(r.json())
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + clds[it]["id"],
+                clds[it]["new"]))
         ret["updEvents"] = items
 
     # DRIVERS AND TEAMS
     if(params["updType"] == "full"):
+        time.sleep(5)
         data = get_drivers(driver, params)
-        r = requests.post(params["urlApi"]+"/driver/update", json=data)
-        logger(r.json())
-        ret["drivers"] = r.json()
+        ret["drivers"] = api_request(
+            "put", params["urlApi"]+"/driver/update", data)
 
         data = get_teams(driver, params)
         if(len(data) > 0):
-            r = requests.post(params["urlApi"]+"/team/update", json=data)
-            logger(r.json())
-            ret["teams"] = r.json()
+            ret["teams"] = api_request(
+                "put", params["urlApi"]+"/team/update", data)
 
     driver.close()
 

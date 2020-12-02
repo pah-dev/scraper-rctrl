@@ -1,20 +1,21 @@
+import time
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_id_link_TC, logger, parse_float, parse_int, run_chrome
-import requests
+from tools import api_request, get_id_link_TC, logger, parse_float
+from tools import parse_int, run_chrome
 
 
 def load_TC(params):
     ret = {}
     urlBase = "https://#CAT#.com.ar"
 
-    r = requests.get(params["urlApi"]+"/org/find/tc")
-    data = r.json()
+    data = api_request("get", params["urlApi"]+"/org/find/tc")
     if(len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
+            params["chTypes"] = cats[it]["chTypes"]
             params["urlBaseO"] = urlBase
             params["urlBase"] = urlBase.replace(
                 "#CAT#", params["catOrigen"])
@@ -32,53 +33,50 @@ def run_script_TC(params):
     driver.get(params["urlBase"] + url)
 
     pilots = get_drivers(driver, params)
-
-    r = requests.post(params["urlApi"]+"/team/create", json=pilots[1])
-    logger(r.json())
-    ret["teams"] = r.json()
+    ret["teams"] = api_request(
+        "post", params["urlApi"]+"/team/create", pilots[1])
 
     url = "/carreras.php?evento=calendario"
     driver.get(params["urlBase"] + url)
 
+    time.sleep(5)
     events = get_events(driver, params)
+    ret["circuits"] = api_request(
+        "post", params["urlApi"]+"/circuit/create", events[0])
 
-    r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
-    logger(r.json())
-    ret["circuits"] = r.json()
-
-    r = requests.post(params["urlApi"]+"/event/create", json=events[0])
-    logger(r.json())
-    ret["events"] = r.json()
+    time.sleep(5)
+    ret["events"] = api_request(
+        "post", params["urlApi"]+"/event/create", events[1])
 
     url = "/estadisticas.php?accion=posiciones"
     driver.get(params["urlBase"] + url)
 
+    time.sleep(5)
     champ = get_champD(driver, pilots[0], params)
     # ret["champD"] = champ
+    ret["drivers"] = api_request(
+        "post", params["urlApi"]+"/driver/create", champ[1])
 
-    r = requests.post(params["urlApi"]+"/driver/create", json=champ[1])
-    logger(r.json())
-    ret["drivers"] = r.json()
+    time.sleep(5)
+    ret["champD"] = api_request(
+        "post", params["urlApi"]+"/champ/create", champ[0])
 
-    r = requests.post(params["urlApi"]+"/champ/create", json=champ[0])
-    logger(r.json())
-    ret["champD"] = r.json()
+    if("T" in params["chTypes"]):
+        time.sleep(5)
+        champ = get_champT(driver, pilots[1], params)
+        ret["champT"] = api_request(
+            "post", params["urlApi"]+"/champ/create", champ)
 
-    champ = get_champT(driver, pilots[1], params)
-    r = requests.post(params["urlApi"]+"/champ/create", json=champ)
-    logger(r.json())
-    ret["champT"] = r.json()
+    if("C" in params["chTypes"]):
+        time.sleep(5)
+        champ = get_champC(driver, params)
+        # ret["champC"] = champ
+        ret["teamsC"] = api_request(
+            "post", params["urlApi"]+"/team/create", champ[1])
 
-    champ = get_champC(driver, params)
-    # ret["champC"] = champ
-
-    r = requests.post(params["urlApi"]+"/team/create", json=champ[1])
-    logger(r.json())
-    ret["teamsC"] = r.json()
-
-    r = requests.post(params["urlApi"]+"/champ/create", json=champ[0])
-    logger(r.json())
-    ret["champC"] = r.json()
+        time.sleep(5)
+        ret["champC"] = api_request(
+            "post", params["urlApi"]+"/champ/create", champ[0])
 
     driver.close()
 
@@ -94,7 +92,8 @@ def get_drivers(driver, params):
         print("::: DRIVERS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
-                "//div[contains(@class, 'pilotos_listado')]/div[contains(@class, 'col-md-4 col-sm-6 col-xs-12 m_t_15')]")
+                "//div[contains(@class, 'pilotos_listado')]/div" +
+                "[contains(@class, 'col-md-4 col-sm-6 col-xs-12 m_t_15')]")
         )
         for it in range(0, len(items)):
             brand = items[it].find_elements_by_xpath(
@@ -223,8 +222,8 @@ def get_events(driver, params):
             if(circuit["idCircuit"] not in circList):
                 circuits.append(circuit)
                 circList.append(circuit["idCircuit"])
-        data.append(events)
         data.append(circuits)
+        data.append(events)
         logger(data)
         print("::: PROCESS FINISHED :::")
         return data

@@ -1,14 +1,14 @@
+import time
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_brand_logo, get_id_link_APAT, logger, parse_float, parse_int, run_chrome
-import requests
+from tools import api_request, get_brand_logo, get_id_link_APAT, logger
+from tools import parse_float, parse_int, run_chrome
 
 
 def load_APAT(params):
     ret = {}
     params["urlBase"] = "http://www.apat.org.ar"
 
-    r = requests.get(params["urlApi"]+"/org/find/apat")
-    data = r.json()
+    data = api_request("get", params["urlApi"]+"/org/find/apat")
     if(len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -26,39 +26,34 @@ def run_script_APAT(params):
     driver = run_chrome()
 
     url = "/pilotoslistado" + "/" + params["catOrigen"]
-    urlApi = params["urlApi"]
     driver.get(params["urlBase"] + url)
 
     data = get_drivers(driver, params)
-    # # ret["drivers"] = pilots
+    # ret["drivers"] = pilots
+    ret["drivers"] = api_request(
+        "post", params["urlApi"]+"/driver/create", data[0])
 
-    r = requests.post(urlApi+"/driver/create", json=data[0])
-    logger(r.json())
-    ret["drivers"] = r.json()
-
-    r = requests.post(urlApi+"/champ/create", json=data[1])
-    logger(r.json())
-    ret["champD"] = r.json()
-
-    url = "/circuitos/todos"
-    driver.get(params["urlBase"] + url)
-
-    circuits = get_circuits(driver, params)
-    # ret["circuits"] = circuits
+    time.sleep(5)
+    ret["champD"] = api_request(
+        "post", params["urlApi"]+"/champ/create", data[1])
 
     url = "/calendario/" + params["year"]
     driver.get(params["urlBase"] + url)
 
+    time.sleep(5)
     events = get_events(driver, params)
     # ret["events"] = events
+    ret["events"] = api_request(
+        "post", params["urlApi"]+"/event/create", events)
 
-    r = requests.post(urlApi+"/circuit/create", json=circuits)
-    logger(r.json())
-    ret["circuits"] = r.json()
+    url = "/circuitos/todos"
+    driver.get(params["urlBase"] + url)
 
-    r = requests.post(urlApi+"/event/create", json=events)
-    logger(r.json())
-    ret["events"] = r.json()
+    time.sleep(5)
+    circuits = get_circuits(driver, params)
+    # ret["circuits"] = circuits
+    ret["circuits"] = api_request(
+        "post", params["urlApi"]+"/circuit/create", circuits)
 
     driver.close()
 
@@ -193,7 +188,7 @@ def get_circuits(driver, params):
         print("::: CIRCUITS")
         items = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath(
-                "//div[@class='row']/div[contains(@class, 'col-md-4 nopadding')]")
+                "//div[@class='row']/div[contains(@class,'col-md-4 nopadding')]")
         )
         for it in range(0, len(items)):
             linkCircuit = items[it].find_element_by_xpath(

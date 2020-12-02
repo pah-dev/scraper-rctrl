@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import sentry_sdk
+import requests
 import settings as sets
 
 
@@ -44,6 +45,21 @@ def run_chrome():
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 
 
+def api_request(method, url, data):
+    r = None
+    try:
+        if(method == "post"):
+            r = requests.post(url, json=data)
+        elif(method == "get"):
+            r = requests.get(url)
+        elif(method == "put"):
+            r = requests.put(url, json=data)
+        logger(r.json())
+        return r.json()
+    except Exception as e:
+        logger(e, True, method.upper(), data)
+
+
 def get_link_MSS(td):
     ret = ""
     try:
@@ -82,7 +98,8 @@ def get_id_link_ACTC(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(".html", "").replace(
-            params["urlBase"]+"/"+params["catOrigen"]+"/pilotos/"+params["year"]+"/", "")
+            params["urlBase"]+"/"+params["catOrigen"]+"/pilotos/" +
+            params["year"]+"/", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(
             "/history", "").replace(params["urlBase"]+"/teams/", "")
@@ -101,17 +118,20 @@ def get_id_link_ACTC(params, link, type):
 
 def get_id_link_TC(params, link, type):
     ret = ""
-    link = link.replace("https", "http").replace("www.", "").replace("supertc2000", "XXXX").replace(
+    link = link.replace("https", "http").replace("www.", "").replace(
+        "supertc2000", "XXXX").replace(
         "tc2000", "XXXX").replace("formulas-argentinas", "XXXX")
     if(type == 'D'):        # DRIVER
-        ret = link.replace("/equipos.php?accion=detalle", "").replace("&id", "", 4).replace(
+        ret = link.replace("/equipos.php?accion=detalle", "").replace(
+            "&id", "", 4).replace(
             "=", "-", 4).replace("http://XXXX.com.ar", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(".jpg", "").replace(
             "/images/equipos/equipo-", "").replace("http://XXXX.com.ar", "")
     elif(type == 'E'):       # EVENT
         ret = link.replace("&temp=", "").replace(
-            "/carreras.php?accion=historial&id=", "").replace("http://XXXX.com.ar", "")
+            "/carreras.php?accion=historial&id=", "").replace(
+                "http://XXXX.com.ar", "")
     elif (type == 'C'):     # CIRCUIT
         ret = link.replace(".jpg", "").replace(
             "/images/autodromos/aut-", "").replace("http://XXXX.com.ar", "")
@@ -128,15 +148,19 @@ def get_id_link_TR(params, link, type):
             ".html", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(".jpg", "").replace(".png", "").replace(
-            "/upload/equipos/", "").replace("/vistas/", "").replace("/images/", "_")
+            "/upload/equipos/", "").replace("/vistas/", "").replace(
+                "/images/", "_")
     elif(type == 'E'):       # EVENT
-        ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] + "/carrera-online/" +
-                           params["year"] + "/tanda-finalizada/", "").replace(".html", "")
+        ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] +
+                           "/carrera-online/" + params["year"] +
+                           "/tanda-finalizada/", "").replace(
+            ".html", "")
         ret = ret.replace(".html", "").replace(
             params["urlBase"] + "/" + params["catOrigen"] + "/circuitos/", "")
     elif (type == 'C'):     # CIRCUIT
         ret = link.replace(".jpg", "").replace(".png", "").replace(
-            params["urlBase"] + "/upload/circuitos/", "").replace("/imgs_v3/calendario/", "-")
+            params["urlBase"] + "/upload/circuitos/", "").replace(
+                "/imgs_v3/calendario/", "-")
     return ret
 
 
@@ -149,8 +173,10 @@ def get_id_link_CARX(params, link, type):
         ret = link.replace(".jpg", "").replace(".png", "").replace(
             "/upload/equipos/", "")
     elif(type == 'E'):       # EVENT
-        ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] + "/carrera-online/" +
-                           params["year"] + "/tanda-finalizada/", "").replace(".html", "")
+        ret = link.replace(params["urlBase"] + "/" + params["catOrigen"] +
+                           "/carrera-online/" + params["year"] +
+                           "/tanda-finalizada/", "").replace(
+            ".html", "")
         ret = ret.replace(".html", "").replace(
             params["urlBase"] + "/" + params["catOrigen"] + "/circuitos/", "")
     return ret
@@ -159,11 +185,13 @@ def get_id_link_CARX(params, link, type):
 def get_id_link_APTP(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER 02/riestra
-        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(
-            ".jpg", "").replace("2020/", "").replace("/", "_", 9).replace("-", "_", 9).replace("ok", "")
+        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+            ".jpg", "").replace("2020/", "").replace(
+            "/", "_", 9).replace("-", "_", 9).replace("ok", "")
     elif(type == 'E'):       # EVENT
-        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
-            ".png", "").replace("2020/", "").replace("/", "_", 9).replace("-", "_", 9).replace("ok", "")
+        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+            ".jpg", "").replace(".png", "").replace("2020/", "").replace(
+                "/", "_", 9).replace("-", "_", 9).replace("ok", "")
     return ret
 
 
@@ -173,11 +201,13 @@ def get_id_link_AUVO(params, link, type):
         ret = link.replace(params["urlBase"], "").replace(
             "/", "", 4).replace("-", "_", 9).replace("ok", "")
     elif(type == 'T'):      # TEAM
-        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
-            ".png", "").replace("-min", "").replace("/", "_", 9).replace("-", "_", 9)
-    elif(type == 'E'):       # EVENT 2020/09/1-Horarios-blanco-s%C3%A1bado-1.jpg
-        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(".jpg", "").replace(
-            ".png", "").replace("Horarios-blanco-", "").replace("/", "_", 9).replace("-", "_", 9)
+        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+            ".jpg", "").replace(".png", "").replace("-min", "").replace(
+                "/", "_", 9).replace("-", "_", 9)
+    elif(type == 'E'):       # EVENT
+        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+            ".jpg", "").replace(".png", "").replace("Horarios-blanco-", "").replace(
+                "/", "_", 9).replace("-", "_", 9)
     return ret
 
 

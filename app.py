@@ -1,3 +1,4 @@
+from jobs.mock import load_init
 from settings import API_URL, DEBUG, PORT
 from flask import Flask, request
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -75,6 +76,14 @@ def actc_driver_detail():
 
     json_data = json.dumps(ans, indent=3)
     return str(json_data)
+
+
+@app.route('/init', methods=['GET'])
+def init():
+    params = {}
+    params["urlApi"] = API_URL
+
+    return load_init(params)
 
 
 @app.route('/load/<org>/<year>', methods=['GET'])

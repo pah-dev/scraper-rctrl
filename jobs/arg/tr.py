@@ -1,15 +1,14 @@
-from os import curdir
+import time
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_id_link_TR, logger, parse_float, parse_int, run_chrome
-import requests
+from tools import api_request, get_id_link_TR, logger, parse_float
+from tools import parse_int, run_chrome
 
 
 def load_TR(params):
     ret = {}
     params["urlBase"] = "https://www.toprace.com.ar"
 
-    r = requests.get(params["urlApi"]+"/org/find/toprace")
-    data = r.json()
+    data = api_request("get", params["urlApi"]+"/org/find/toprace")
     if(len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -30,45 +29,39 @@ def run_script_TR(params):
     driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
     data = get_teams(driver, params)
-
-    r = requests.post(params["urlApi"]+"/team/create", json=data)
-    logger(r.json())
-    ret["teams"] = r.json()
+    ret["teams"] = api_request("post", params["urlApi"]+"/team/create", data)
 
     url = "/pilotos.html"
     driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
+    time.sleep(5)
     data = get_drivers(driver, params, data)
-
-    r = requests.post(params["urlApi"]+"/driver/create", json=data)
-    logger(r.json())
-    ret["drivers"] = r.json()
+    ret["drivers"] = api_request(
+        "post", params["urlApi"]+"/driver/create", data)
 
     url = "/calendario/" + params["year"] + ".html"
     driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
+    time.sleep(5)
     events = get_events(driver, params)
+    ret["circuits"] = api_request(
+        "post", params["urlApi"]+"/circuit/create", events[0])
 
-    r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
-    logger(r.json())
-    ret["circuits"] = r.json()
-
-    r = requests.post(params["urlApi"]+"/event/create", json=events[0])
-    logger(r.json())
-    ret["events"] = r.json()
+    time.sleep(5)
+    ret["events"] = api_request(
+        "post", params["urlApi"]+"/event/create", events[1])
 
     url = "/campeonato-general/" + params["year"] + ".html"
     driver.get(params["urlBase"] + "/" + params["catOrigen"] + url)
 
+    time.sleep(5)
     champ = get_champD(driver, params)
-    r = requests.post(params["urlApi"]+"/champ/create", json=champ)
-    logger(r.json())
-    ret["champD"] = r.json()
+    ret["champD"] = api_request(
+        "post", params["urlApi"]+"/champ/create", champ)
 
+    # time.sleep(5)
     # champ = get_champT(driver, data[1], params)
-    # r = requests.post(urlApi+"/champ/create", json=champ)
-    # logger(r.json())
-    # ret["champT"] = r.json()
+    # ret["champT"] = api_request("post",urlApi+"/champ/create", champ)
 
     driver.close()
 
@@ -241,8 +234,8 @@ def get_events(driver, params):
             if(circuit["idCircuit"] not in circList):
                 circuits.append(circuit)
                 circList.append(circuit["idCircuit"])
-        data.append(events)
         data.append(circuits)
+        data.append(events)
         logger(data)
         print("::: PROCESS FINISHED :::")
         return data

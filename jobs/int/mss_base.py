@@ -1,8 +1,8 @@
 from settings import API_URL
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_brand_logo, get_id_link_MSS, get_link_CMSS, get_link_MSS, logger, parse_float, parse_int, run_chrome
+from tools import api_request, get_brand_logo, get_id_link_MSS, get_link_CMSS
+from tools import get_link_MSS, logger, parse_float, parse_int, run_chrome
 from jobs.int.mss_circuit import run_script_circuits
-import requests
 import time
 
 
@@ -11,8 +11,7 @@ def load_MSS(params):
     params["urlApi"] = API_URL
     params["urlBase"] = "https://results.motorsportstats.com"
 
-    r = requests.get(params["urlApi"]+"/org/find/sec/int")
-    data = r.json()
+    data = api_request("get", params["urlApi"]+"/org/find/sec/int")
     try:
         for i in range(0, len(data)):
             if(len(data[i]["categories"]) > 0):
@@ -35,58 +34,50 @@ def run_script_MSS(params):
 
     driver = run_chrome()
 
-    # Params
-    catOrigen = params["catOrigen"]
-    url = "/series/" + catOrigen + "/season/" + params["year"] + ""
-
+    url = "/series/" + params["catOrigen"] + "/season/" + params["year"] + ""
     driver.get(params["urlBase"] + url)
 
     data = get_drivers(driver, params)
-    r = requests.post(params["urlApi"]+"/driver/create", json=data)
-    logger(r.json())
-    ret["drivers"] = r.json()
+    ret["drivers"] = api_request(
+        "post", params["urlApi"]+"/driver/create", data)
 
+    time.sleep(5)
     data = get_teams(driver, params)
-    if(len(data) > 0):
-        r = requests.post(params["urlApi"]+"/team/create", json=data)
-        logger(r.json())
-        ret["teams"] = r.json()
+    ret["teams"] = api_request("post", params["urlApi"]+"/team/create", data)
 
+    time.sleep(5)
     events = get_events(driver, params)
+    ret["events"] = api_request(
+        "post", params["urlApi"]+"/event/create", events)
+
+    time.sleep(5)
     circuits = run_script_circuits(params, events)
-
-    r = requests.post(params["urlApi"]+"/circuit/create", json=circuits)
-    logger(r.json())
-    ret["circuits"] = r.json()
-
-    r = requests.post(params["urlApi"]+"/event/create", json=events)
-    logger(r.json())
-    ret["events"] = r.json()
+    ret["circuits"] = api_request(
+        "post", params["urlApi"]+"/circuit/create", circuits)
 
     if("D" in params["chTypes"]):
+        time.sleep(5)
         data = get_champD(driver, params)
-        r = requests.post(params["urlApi"]+"/champ/create", json=data)
-        logger(r.json())
-        ret["champD"] = r.json()
+        ret["champD"] = api_request(
+            "post", params["urlApi"]+"/champ/create", data)
 
     if("C" in params["chTypes"]):
+        time.sleep(5)
         data = get_champC(driver, params)
         # ret["champC"] = data
+        ret["teamsC"] = api_request(
+            "post", params["urlApi"]+"/team/create", data[1])
 
-        r = requests.post(params["urlApi"]+"/team/create", json=data[1])
-        logger(r.json())
-        ret["teamsC"] = r.json()
-
-        r = requests.post(params["urlApi"]+"/champ/create", json=data[0])
-        logger(r.json())
-        ret["champC"] = r.json()
+        time.sleep(5)
+        ret["champC"] = api_request(
+            "post", params["urlApi"]+"/champ/create", data[0])
 
     if("T" in params["chTypes"]):
+        time.sleep(5)
         data = get_champT(driver, params)
         # ret["champT"] = data
-        r = requests.post(params["urlApi"]+"/champ/create", json=data)
-        logger(r.json())
-        ret["champT"] = r.json()
+        ret["champT"] = api_request(
+            "post", params["urlApi"]+"/champ/create", data)
 
     driver.close()
 

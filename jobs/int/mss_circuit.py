@@ -11,7 +11,6 @@ def run_script_circuits(params, events):
     print("::: CIRCUIT DETAIL")
     for i in range(0, len(events)):
         uri = events[i]["idCircuit"]
-        # print(uri)
         driver.get(params["urlBase"] + url + uri)
         circuit = get_circuit_detail(driver, params, events[i])
         circuits.append(circuit)

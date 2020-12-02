@@ -1,17 +1,15 @@
+import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from tools import get_id_link_AUVO, logger, parse_float, parse_int, run_chrome
-import requests
-
-# Scraping
+from tools import api_request, get_id_link_AUVO, logger, parse_float
+from tools import parse_int, run_chrome
 
 
 def load_AUVO(params):
     ret = {}
     params["urlBase"] = "http://www.auvo.com.uy"
 
-    r = requests.get(params["urlApi"]+"/org/find/auvo")
-    data = r.json()
+    data = api_request("get", params["urlApi"]+"/org/find/auvo")
     if(len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -48,17 +46,14 @@ def run_script_AUVOCat(params):
         return ret
 
     data = get_drivers(driver, params)
-    ret["drivers"] = data
+    # ret["drivers"] = data
+    ret["drivers"] = api_request(
+        "post", params["urlApi"]+"/driver/create", data)
+
+    # time.sleep(5)
     # t_data = get_teams(driver, params)
-
-    # r = requests.post(params["urlApi"]+"/team/create", json=t_data)
-    # print(r.json())
-    # ret["teams"] = r.json()
-
-    # r = requests.post(params["urlApi"]+"/driver/create", json=data)
-    # print(r.json())
-    # ret["drivers"] = r.json()
-
+    # ret["teams"] = api_request(
+    # "post", params["urlApi"]+"/team/create", t_data)
     driver.close()
 
     return ret
@@ -73,16 +68,14 @@ def run_script_AUVO(params):
     driver.get(params["urlBase"] + url)
 
     events = get_events(driver, params)
+    # ret["circuits"] = events[0]
+    # ret["events"] = events[1]
+    ret["circuits"] = api_request(
+        "post", params["urlApi"]+"/circuit/create", events[0])
 
-    ret["circuits"] = events[1]
-    ret["events"] = events[0]
-    # r = requests.post(urlApi+"/circuit/create", json=events[1])
-    # print(r.json())
-    # ret["circuits"] = r.json()
-
-    # r = requests.post(urlApi+"/event/create", json=events[0])
-    # print(r.json())
-    # ret["events"] = r.json()
+    time.sleep(5)
+    ret["events"] = api_request(
+        "post", params["urlApi"]+"/event/create", events[1])
 
     driver.close()
 
@@ -248,8 +241,8 @@ def get_events(driver, params):
             if(circuit["idCircuit"] not in circList):
                 circuits.append(circuit)
                 circList.append(circuit["idCircuit"])
-        data.append(events)
         data.append(circuits)
+        data.append(events)
         logger(data)
         print("::: PROCESS FINISHED :::")
         return data
