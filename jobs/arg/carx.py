@@ -31,7 +31,7 @@ def run_script_CARX(params):
     data = get_drivers(driver, params)
     # ret["drivers"] = data
     r = requests.post(params["urlApi"]+"/driver/create", json=data)
-    print(r.json())
+    logger(r.json())
     ret["drivers"] = r.json()
 
     url = "/calendario/"
@@ -40,11 +40,11 @@ def run_script_CARX(params):
     events = get_events(driver, params)
     # ret["events"] = events
     r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
-    print(r.json())
+    logger(r.json())
     ret["circuits"] = r.json()
 
     r = requests.post(params["urlApi"]+"/event/create", json=events[0])
-    print(r.json())
+    logger(r.json())
     ret["events"] = r.json()
 
     url = "/campeonato-" + params["catOrigen"] + "/"
@@ -54,11 +54,11 @@ def run_script_CARX(params):
     # ret["champD"] = champ
 
     r = requests.post(params["urlApi"]+"/driver/create", json=champ[0])
-    print(r.json())
+    logger(r.json())
     ret["drivers_extra"] = r.json()
 
     r = requests.post(params["urlApi"]+"/champ/create", json=champ[1])
-    print(r.json())
+    logger(r.json())
     ret["champD"] = r.json()
 
     driver.close()

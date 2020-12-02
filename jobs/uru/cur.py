@@ -31,7 +31,7 @@ def run_script_CUR(params):
     # ret["drivers"] = data
 
     r = requests.post(params["urlApi"]+"/driver/create", json=data)
-    print(r.json())
+    logger(r.json())
     ret["drivers"] = r.json()
 
     url = "https://www.cur.com.uy/calendario-2020"
@@ -41,11 +41,11 @@ def run_script_CUR(params):
     # ret["events"] = events
 
     r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
-    print(r.json())
+    logger(r.json())
     ret["circuits"] = r.json()
 
     r = requests.post(params["urlApi"]+"/event/create", json=events[0])
-    print(r.json())
+    logger(r.json())
     ret["events"] = r.json()
 
     # url = "/campeonato-" + catOrigen + "/"

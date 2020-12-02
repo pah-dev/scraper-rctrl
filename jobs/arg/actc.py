@@ -13,7 +13,7 @@ def load_ACTC(params):
     data = r.json()
     if(len(data["categories"]) > 0):
         cats = data["categories"]
-        for it in range(0, len(cats)):
+        for it in range(3, len(cats)):
             print(cats[it]["idRCtrl"])
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
@@ -28,40 +28,56 @@ def run_script_ACTC(params):
     driver = run_chrome()
 
     url = "/" + params["catOrigen"] + "/pilotos.html"
-    urlApi = params["urlApi"]
     driver.get(params["urlBase"] + url)
 
     data = get_drivers(driver, params)
-    t_data = get_teams(data, params)
+    teams = get_teams(data, params)
+    # ret["driv"] = data
+    # ret["teams"] = teams
+    try:
+        r = requests.post(params["urlApi"]+"/team/create", json=teams)
+        logger(r.json())
+        ret["teams"] = r.json()
+    except Exception as e:
+        logger(e, True, "Create Circuit", teams)
 
-    r = requests.post(urlApi+"/team/create", json=t_data)
-    logger(r.json())
-    ret["teams"] = r.json()
-
-    r = requests.post(urlApi+"/driver/create", json=data)
-    logger(r.json())
-    ret["drivers"] = r.json()
+    try:
+        r = requests.post(params["urlApi"]+"/driver/create", json=data)
+        logger(r.json())
+        ret["drivers"] = r.json()
+    except Exception as e:
+        logger(e, True, "Create Circuit", data)
 
     url = "/" + params["catOrigen"] + "/calendario/" + params["year"] + ".html"
     driver.get(params["urlBase"] + url)
 
     events = get_events(driver, params)
+    # ret["events"] = events
 
-    r = requests.post(urlApi+"/circuit/create", json=events[1])
-    logger(r.json())
-    ret["circuits"] = r.json()
+    try:
+        r = requests.post(params["urlApi"]+"/circuit/create", json=events[1])
+        logger(r.json())
+        ret["circuits"] = r.json()
+    except Exception as e:
+        logger(e, True, "Create Circuit", events[1])
 
-    r = requests.post(urlApi+"/event/create", json=events[0])
-    logger(r.json())
-    ret["events"] = r.json()
+    try:
+        r = requests.post(params["urlApi"]+"/event/create", json=events[0])
+        logger(r.json())
+        ret["events"] = r.json()
+    except Exception as e:
+        logger(e, True, "Create Circuit", events[0])
 
     url = "/" + params["catOrigen"] + "/campeonato/" + params["year"] + ".html"
     driver.get(params["urlBase"] + url)
 
-    data = get_champD(driver, params)
-    r = requests.post(urlApi+"/champ/create", json=data)
-    logger(r.json())
-    ret["champD"] = r.json()
+    champ = get_champD(driver, params)
+    try:
+        r = requests.post(params["urlApi"]+"/champ/create", json=champ)
+        logger(r.json())
+        ret["champD"] = r.json()
+    except Exception as e:
+        logger(e, True, "Create Circuit", champ)
 
     driver.close()
 
