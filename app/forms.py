@@ -1,5 +1,4 @@
 from flask_wtf import Form
-from wtforms.fields import *
 from wtforms.fields.core import BooleanField, DateField, DateTimeField
 from wtforms.fields.core import DecimalField, FloatField, IntegerField
 from wtforms.fields.simple import FileField, SubmitField, TextField

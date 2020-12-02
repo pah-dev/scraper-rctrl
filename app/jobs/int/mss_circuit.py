@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_id_link_MSS, get_link_MSS, logger, parse_int, run_chrome
+from ...tools import get_id_link_MSS, get_link_MSS, logger, parse_int, run_chrome
 
 
 def run_script_circuits(params, events):

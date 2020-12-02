@@ -1,8 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import get_id_link_MSS, get_link_MSS
-from jobs.int.mss_base import get_drivers
+from ...tools import get_id_link_MSS, get_link_MSS
+from .mss_base import get_drivers
 
 # Scraping
 urlBase = "https://results.motorsportstats.com"

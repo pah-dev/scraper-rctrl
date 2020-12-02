@@ -1,26 +1,24 @@
-from tools import wake_up
-from jobs.mock import load_init
-from settings import API_URL
 from flask import request, render_template
-from forms import SignupForm
 from flask import Blueprint, flash, redirect, url_for
 import sentry_sdk
-from markupsafe import escape
 import json
+from markupsafe import escape
 from rq import Queue
 from rq.job import Job
-from worker import conn
-from jobs.arg.actc import load_ACTC
-from jobs.arg.tc import load_TC
-from jobs.arg.tr import load_TR
-from jobs.arg.carx import load_CARX
-from jobs.uru.cur import load_CUR
-from jobs.arg.aptp import load_APTP
-from jobs.arg.apat import load_APAT
-from jobs.uru.auvo import load_AUVO
-from jobs.int.mss_upd import upd_MSS
-import jobs.int.mss_driver_detail as mss_d
-import jobs.arg.actc_driver_detail as actc_d
+from settings import API_URL
+from .worker import conn
+from .tools import wake_up
+from .forms import SignupForm
+from .jobs.mock import load_init
+from .jobs.arg.actc import load_ACTC
+from .jobs.arg.apat import load_APAT
+from .jobs.arg.aptp import load_APTP
+from .jobs.arg.carx import load_CARX
+from .jobs.arg.tc import load_TC
+from .jobs.arg.tr import load_TR
+from .jobs.uru.auvo import load_AUVO
+from .jobs.uru.cur import load_CUR
+from .jobs.int.mss_upd import upd_MSS
 
 frontend = Blueprint('frontend', __name__)
 
@@ -30,7 +28,7 @@ frontend = Blueprint('frontend', __name__)
 
 @frontend.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('./index.html')
 
 
 # Shows a long signup form, demonstrating form rendering.

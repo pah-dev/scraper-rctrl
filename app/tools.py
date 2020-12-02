@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import sentry_sdk
 import requests
-import settings as sets
+from settings import API_URL, DEBUG, GOOGLE_CHROME_BIN, USE_BIN, CHROMEDRIVER_PATH
 
 
 def logger(txt, err=False, module="", obj=None):
@@ -10,12 +10,12 @@ def logger(txt, err=False, module="", obj=None):
         sentry_sdk.set_tag('Module', module)
         sentry_sdk.set_extra(module, obj)
         sentry_sdk.capture_exception(txt)
-    elif(sets.DEBUG):
+    elif(DEBUG):
         print(txt)
 
 
 def get_api_URL():
-    return sets.API_URL
+    return API_URL
 
 
 def run_chrome():
@@ -24,10 +24,10 @@ def run_chrome():
     # GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
     # CHROMEDRIVER_PATH = '/app/.apt/usr/bin/google_chrome'
     # GOOGLE_CHROME_BIN = '/app/.chromedriver/bin/chromedriver'
-    CHROMEDRIVER_PATH = sets.CHROMEDRIVER_PATH
     chrome_options = Options()
-    if(sets.USE_BIN):
-        chrome_options.binary_location = sets.GOOGLE_CHROME_BIN
+    print(USE_BIN)
+    if(USE_BIN):
+        chrome_options.binary_location = GOOGLE_CHROME_BIN
     chrome_options.add_argument("disable-infobars")  # disabling infobars
     chrome_options.add_argument("--disable-extensions")  # disabling extensions
     # applicable to windows os only
@@ -41,6 +41,7 @@ def run_chrome():
 
     # chrome_options.page_load_strategy = 'eager'
     chrome_options.headless = True
+    print(CHROMEDRIVER_PATH)
     return webdriver.Chrome(
         executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 

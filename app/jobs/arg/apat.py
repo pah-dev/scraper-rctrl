@@ -1,7 +1,7 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import api_request, get_brand_logo, get_id_link_APAT, logger
-from tools import parse_float, parse_int, run_chrome
+from ...tools import api_request, get_brand_logo, get_id_link_APAT, logger
+from ...tools import parse_float, parse_int, run_chrome
 
 
 def load_APAT(params):

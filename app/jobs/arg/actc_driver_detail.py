@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from jobs.arg.actc import get_drivers
+from .actc import get_drivers
 
 # Scraping
 urlBase = "https://www.actc.org.ar"

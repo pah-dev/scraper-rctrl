@@ -1,8 +1,8 @@
-from settings import API_URL
+from .settings import API_URL
 from selenium.webdriver.support.ui import WebDriverWait
-from tools import api_request, get_brand_logo, get_id_link_MSS, get_link_CMSS
-from tools import get_link_MSS, logger, parse_float, parse_int, run_chrome, wake_up
-from jobs.int.mss_circuit import run_script_circuits
+from ...tools import api_request, get_brand_logo, get_id_link_MSS, get_link_CMSS
+from ...tools import get_link_MSS, logger, parse_float, parse_int, run_chrome, wake_up
+from .mss_circuit import run_script_circuits
 import time
 
 

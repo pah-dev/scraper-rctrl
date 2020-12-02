@@ -1,5 +1,5 @@
 import time
-from tools import api_request
+from ..tools import api_request
 
 sections = [
     {
@@ -6474,18 +6474,20 @@ catsInt = [
 def load_init(params):
     ret = {}
 
-    ret["sections"] = api_request("post",params["urlApi"]+"/section/create", sections)
+    ret["sections"] = api_request(
+        "post", params["urlApi"]+"/section/create", sections)
 
     time.sleep(5)
 
-    ret["orgs"] = api_request("post",params["urlApi"]+"/org/create", orgs)
+    ret["orgs"] = api_request("post", params["urlApi"]+"/org/create", orgs)
 
     time.sleep(5)
 
-    ret["cats"] = api_request("post",params["urlApi"]+"/cat/create", cats)
+    ret["cats"] = api_request("post", params["urlApi"]+"/cat/create", cats)
 
     time.sleep(5)
 
-    ret["catsInt"] = api_request("post",params["urlApi"]+"/cat/create", catsInt)
+    ret["catsInt"] = api_request(
+        "post", params["urlApi"]+"/cat/create", catsInt)
 
     return ret

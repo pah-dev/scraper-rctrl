@@ -1,8 +1,8 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from tools import api_request, get_id_link_AUVO, logger, parse_float
-from tools import parse_int, run_chrome
+from ...tools import api_request, get_id_link_AUVO, logger, parse_float
+from ...tools import parse_int, run_chrome
 
 
 def load_AUVO(params):
