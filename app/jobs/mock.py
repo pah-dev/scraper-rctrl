@@ -6477,15 +6477,15 @@ def load_init(params):
     ret["sections"] = api_request(
         "post", params["urlApi"]+"/section/create", sections)
 
-    time.sleep(5)
+    time.sleep(10)
 
     ret["orgs"] = api_request("post", params["urlApi"]+"/org/create", orgs)
 
-    time.sleep(5)
+    time.sleep(10)
 
     ret["cats"] = api_request("post", params["urlApi"]+"/cat/create", cats)
 
-    time.sleep(5)
+    time.sleep(10)
 
     ret["catsInt"] = api_request(
         "post", params["urlApi"]+"/cat/create", catsInt)

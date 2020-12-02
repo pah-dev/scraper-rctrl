@@ -18,6 +18,7 @@ from .jobs.arg.tc import load_TC
 from .jobs.arg.tr import load_TR
 from .jobs.uru.auvo import load_AUVO
 from .jobs.uru.cur import load_CUR
+from .jobs.int.mss_base import load_MSS
 from .jobs.int.mss_upd import upd_MSS
 
 frontend = Blueprint('frontend', __name__)
@@ -71,28 +72,28 @@ def mss_upd():
     return str(json_data)
 
 
-@frontend.route('/mss_driver_details', methods=['GET'])
-def mss_driver_details():
-    params = {}
-    params["catRCtrl"] = "motoe"
-    params["catOrigen"] = "fim-enel-motoe-world-cup"
-    params["year"] = "2020"
-    ans = mss_d.run_script_Details(params)
+# @frontend.route('/mss_driver_details', methods=['GET'])
+# def mss_driver_details():
+#     params = {}
+#     params["catRCtrl"] = "motoe"
+#     params["catOrigen"] = "fim-enel-motoe-world-cup"
+#     params["year"] = "2020"
+#     ans = mss_d.run_script_Details(params)
 
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
+#     json_data = json.dumps(ans, indent=3)
+#     return str(json_data)
 
 
-@frontend.route('/actc_driver_details', methods=['GET'])
-def actc_driver_detail():
-    params = {}
-    params["catRCtrl"] = "tcpk"
-    params["catOrigen"] = "tcpk"
-    params["year"] = "2020"
-    ans = actc_d.run_script_Details(params)
+# @frontend.route('/actc_driver_details', methods=['GET'])
+# def actc_driver_detail():
+#     params = {}
+#     params["catRCtrl"] = "tcpk"
+#     params["catOrigen"] = "tcpk"
+#     params["year"] = "2020"
+#     ans = actc_d.run_script_Details(params)
 
-    json_data = json.dumps(ans, indent=3)
-    return str(json_data)
+#     json_data = json.dumps(ans, indent=3)
+#     return str(json_data)
 
 
 @frontend.route('/init', methods=['GET'])
@@ -218,7 +219,7 @@ def upd_manual(params):
 
 def run_job(params):
     job = None
-    from frontend import load_ALL
+    from .frontend import load_ALL
 
     if(params["org"] == 'all'):
         job = q.enqueue_call(
