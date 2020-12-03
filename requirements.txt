@@ -1,3 +1,4 @@
+arrow==0.17.0
 blinker==1.4
 certifi==2020.11.8
 chardet==3.0.4
@@ -15,11 +16,13 @@ inflection==0.5.1
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
+python-dateutil==2.8.1
 python-decouple==3.3
 python-dotenv==0.15.0
 redis==3.5.3
 requests==2.25.0
 rq==1.7.0
+rq-dashboard==0.6.1
 selenium==3.141.0
 sentry-sdk==0.19.4
 six==1.15.0
