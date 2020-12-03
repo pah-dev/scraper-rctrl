@@ -1,6 +1,6 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from ...tools import api_request, get_id_link_TC, logger, parse_float
+from ...tools import api_request, clean_duplicate, clean_duplicate_ch, get_id_link_TC, logger, parse_float
 from ...tools import parse_int, run_chrome
 
 
@@ -32,51 +32,69 @@ def run_script_TC(params):
     url = "/equipos.php?accion=pilotos"
     driver.get(params["urlBase"] + url)
 
-    pilots = get_drivers(driver, params)
+    d_scrap = get_drivers(driver, params)
+    t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
+                         + "/" + params["year"])
+    t_clean = clean_duplicate("idTeam", d_scrap[0], t_base)
     ret["teams"] = api_request(
-        "post", params["urlApi"]+"/team/create", pilots[1])
+        "post", params["urlApi"]+"/team/create", t_clean)
 
     url = "/carreras.php?evento=calendario"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    events = get_events(driver, params)
+    e_scrap = get_events(driver, params)
+    c_base = api_request(
+        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+    c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", events[0])
+        "post", params["urlApi"]+"/circuit/create", c_clean)
 
     time.sleep(5)
+    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+                         + "/" + params["year"])
+    e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", events[1])
+        "post", params["urlApi"]+"/event/create", e_clean)
 
     url = "/estadisticas.php?accion=posiciones"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    champ = get_champD(driver, pilots[0], params)
-    # ret["champD"] = champ
+    chd_scrap = get_champD(driver, d_scrap[1], params)
+    # ret["champD"] = chd_scrap
+    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                         + "/" + params["year"])
+    d_clean = clean_duplicate("idPlayer", chd_scrap[0], d_base)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", champ[1])
+        "post", params["urlApi"]+"/driver/create", d_clean)
 
     time.sleep(5)
+    ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
+                          + "/" + params["year"])
+    chd_clean = clean_duplicate_ch("idChamp", chd_scrap[1], ch_base)
     ret["champD"] = api_request(
-        "post", params["urlApi"]+"/champ/create", champ[0])
+        "post", params["urlApi"]+"/champ/create", chd_clean)
 
     if("T" in params["chTypes"]):
         time.sleep(5)
-        champ = get_champT(driver, pilots[1], params)
+        cht_scrap = get_champT(driver, d_scrap[0], params)
+        cht_clean = clean_duplicate_ch("idChamp", cht_scrap, ch_base)
         ret["champT"] = api_request(
-            "post", params["urlApi"]+"/champ/create", champ)
+            "post", params["urlApi"]+"/champ/create", cht_clean)
 
     if("C" in params["chTypes"]):
         time.sleep(5)
-        champ = get_champC(driver, params)
-        # ret["champC"] = champ
+        chc_srcap = get_champC(driver, params)
+        # ret["champC"] = chc_srcap
+        t_clean = clean_duplicate("idTeam", chc_srcap[0], t_base)
         ret["teamsC"] = api_request(
-            "post", params["urlApi"]+"/team/create", champ[1])
+            "post", params["urlApi"]+"/team/create", t_clean)
 
         time.sleep(5)
+        chc_clean = clean_duplicate_ch("idChamp", chc_srcap[1], ch_base)
         ret["champC"] = api_request(
-            "post", params["urlApi"]+"/champ/create", champ[0])
+            "post", params["urlApi"]+"/champ/create", chc_clean)
 
     driver.close()
 
@@ -140,8 +158,8 @@ def get_drivers(driver, params):
                     "strRSS": linkDriver,
                 }
                 pilots.append(pilot)
-        data.append(pilots)
         data.append(teams)
+        data.append(pilots)
         logger(data)
         print("::: PROCESS FINISHED :::")
         return data
@@ -215,6 +233,7 @@ def get_events(driver, params):
                 "strCircuit": event["strEvent"],
                 "idRCtrl": event["idCircuit"],
                 "strCountry": "Argentina",
+                "strLeague": params["catRCtrl"],
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
                 "strLogo": linkCircuit,
@@ -282,8 +301,8 @@ def get_champD(driver, pilots, params):
             "sumPoints": points,
             "typeChamp": "D"
         }
-        ret.append(champ)
         ret.append(pilots)
+        ret.append(champ)
         logger(ret)
         print("::: PROCESS FINISHED :::")
         return ret
@@ -385,8 +404,8 @@ def get_champC(driver, params):
             "sumPoints": points,
             "typeChamp": "T"
         }
-        ret.append(champ)
         ret.append(teams)
+        ret.append(champ)
         logger(ret)
         print("::: PROCESS FINISHED :::")
         return ret

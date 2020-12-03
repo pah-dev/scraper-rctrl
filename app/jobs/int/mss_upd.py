@@ -125,6 +125,7 @@ def run_script_MSS(params):
     if(params["updType"] == "full"):
         time.sleep(5)
         data = get_drivers(driver, params)
+
         ret["drivers"] = api_request(
             "put", params["urlApi"]+"/driver/update", data)
 
@@ -240,7 +241,7 @@ def compareEvents(olds, news):
     cld = []
     try:
         cant = len(news)
-        for i in range(1, len(olds)):
+        for i in range(0, len(olds)):
             for j in range(0, len(news)):
                 if(olds[i]["idMss"] == news[j]["idMss"]):
                     equal = True

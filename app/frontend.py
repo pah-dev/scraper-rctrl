@@ -325,13 +325,14 @@ def run_job_upd(params):
 def load_ALL(params):
     ret = []
     ret.append(load_ACTC(params))
-    ret.append(load_APAT(params))
     wake_up()
+    ret.append(load_APAT(params))
     ret.append(load_APTP(params))
+    wake_up()
     ret.append(load_AUVO(params))
     ret.append(load_CARX(params))
-    wake_up()
     ret.append(load_CUR(params))
+    wake_up()
     ret.append(load_TC(params))
     ret.append(load_TR(params))
     wake_up()

@@ -1,7 +1,7 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from ...tools import api_request, get_id_link_AUVO, logger, parse_float
+from ...tools import api_request, clean_duplicate, get_id_link_AUVO, logger, parse_float
 from ...tools import parse_int, run_chrome
 
 
@@ -45,10 +45,13 @@ def run_script_AUVOCat(params):
         driver.close()
         return ret
 
-    data = get_drivers(driver, params)
+    d_scrap = get_drivers(driver, params)
     # ret["drivers"] = data
+    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                         + "/" + params["year"])
+    d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", data)
+        "post", params["urlApi"]+"/driver/create", d_clean)
 
     # time.sleep(5)
     # t_data = get_teams(driver, params)
@@ -67,15 +70,21 @@ def run_script_AUVO(params):
     url = "/calendario"
     driver.get(params["urlBase"] + url)
 
-    events = get_events(driver, params)
-    # ret["circuits"] = events[0]
-    # ret["events"] = events[1]
+    e_scrap = get_events(driver, params)
+    # ret["circuits"] = e_scrap[0]
+    # ret["events"] = e_scrap[1]
+    c_base = api_request(
+        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+    c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", events[0])
+        "post", params["urlApi"]+"/circuit/create", c_clean)
 
     time.sleep(5)
+    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+                         + "/" + params["year"])
+    e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", events[1])
+        "post", params["urlApi"]+"/event/create", e_clean)
 
     driver.close()
 
@@ -233,6 +242,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": strCircuit,
                 "idRCtrl": event["idCircuit"],
+                "strLeague": params["catRCtrl"],
                 "strCountry": "Uruguay",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "URY",

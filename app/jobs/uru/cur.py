@@ -1,6 +1,6 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from ...tools import api_request, logger, parse_float, parse_int, run_chrome
+from ...tools import api_request, clean_duplicate, logger, parse_float, parse_int, run_chrome
 
 
 def load_CUR(params):
@@ -26,23 +26,32 @@ def run_script_CUR(params):
     url = "http://www.rally.org.uy/rallylive/2020/1/PE1.html"
     driver.get(url)
 
-    data = get_drivers(driver, params)
-    # ret["drivers"] = data
+    d_scrap = get_drivers(driver, params)
+    # ret["drivers"] = d_scrap
+    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                         + "/" + params["year"])
+    d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", data)
+        "post", params["urlApi"]+"/driver/create", d_clean)
 
     url = "https://www.cur.com.uy/calendario-2020"
     driver.get(url)
 
     time.sleep(5)
-    events = get_events(driver, params)
+    e_scrap = get_events(driver, params)
     # ret["events"] = events
+    c_base = api_request(
+        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+    c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", events[0])
+        "post", params["urlApi"]+"/circuit/create", c_clean)
 
     time.sleep(5)
+    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+                         + "/" + params["year"])
+    e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", events[1])
+        "post", params["urlApi"]+"/event/create", e_clean)
 
     # url = "/campeonato-" + catOrigen + "/"
     # driver.get(urlBase + url)
@@ -126,6 +135,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": event["strCircuit"],
                 "idRCtrl": event["idCircuit"],
+                "strLeague": params["catRCtrl"],
                 "strCountry": "Uruguay",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "URY",

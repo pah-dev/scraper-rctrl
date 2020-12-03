@@ -54,14 +54,14 @@ def get_circuit_detail(driver, params, event):
             strCorners = info[2]
             strDirection = info[3]
             intFormedYear = info[4]
-        except Exception as e:
-            logger(e, True, "Circuits")
+        except Exception:
             pass
         circuit = {
             "idCircuit": event["idCircuit"],
             "strCircuit": strCircuit,
             "idRCtrl": event["idCircuit"],
             "idMss": event["idCircuit"],
+            "strLeague": "mss",
             "strAddress": trs[1].text,
             "strCountry": trs[0].text,
             "strType": strType,

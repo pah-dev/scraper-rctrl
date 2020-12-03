@@ -1,3 +1,5 @@
+import json
+from logging import error
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import sentry_sdk
@@ -10,7 +12,7 @@ def logger(txt, err=False, module="", obj=None):
         sentry_sdk.set_tag('Module', module)
         sentry_sdk.set_extra(module, obj)
         sentry_sdk.capture_exception(txt)
-    elif(DEBUG):
+    if(DEBUG):
         print(txt)
 
 
@@ -47,12 +49,16 @@ def run_chrome():
 def api_request(method, url, data=None):
     r = None
     try:
-        if(method == "post"):
-            r = requests.post(url, json=data)
-        elif(method == "get"):
+        if(method == "get"):
             r = requests.get(url)
-        elif(method == "put"):
-            r = requests.put(url, json=data)
+        else:
+            if(len(data) > 0):
+                if(method == "post"):
+                    r = requests.post(url, json=data)
+                elif(method == "put"):
+                    r = requests.put(url, json=data)
+            else:
+                return "Request with empty data"
         logger(r.json())
         return r.json()
     except Exception as e:
@@ -61,6 +67,29 @@ def api_request(method, url, data=None):
 
 def wake_up():
     api_request("get", "https://scraper-rctrl.herokuapp.com/")
+
+
+def clean_duplicate(field, news, base):
+    try:
+        for i in range(0, len(base)):
+            for j in range(0, len(news)):
+                if(base[i][field] == news[j][field]):
+                    news.pop(j)
+                    break
+    except Exception as e:
+        logger(e, True, "Duplicate", [base, news])
+    return news
+
+
+def clean_duplicate_ch(field, new, base):
+    try:
+        for i in range(0, len(base)):
+            if(base[i][field] == new[field]):
+                new = []
+                break
+    except Exception as e:
+        logger(e, True, "Duplicate", [base, new])
+    return new
 
 
 def get_link_MSS(td):

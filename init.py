@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
+import rq_dashboard
 from settings import DEBUG, PORT, HOST_URL, SECRET_KEY
 from app.frontend import frontend
 from app.nav import nav
@@ -21,8 +22,9 @@ def create_app(configfile=None):
 
     Bootstrap(app)
 
+    app.config.from_object(rq_dashboard.default_settings)
+    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
     app.register_blueprint(frontend)
-
     # Because we're security-conscious developers, we also hard-code disabling
     # the CDN support (this might become a default in later versions):
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True

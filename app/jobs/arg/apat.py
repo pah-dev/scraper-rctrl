@@ -1,6 +1,6 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from ...tools import api_request, get_brand_logo, get_id_link_APAT, logger
+from ...tools import api_request, clean_duplicate, clean_duplicate_ch, get_brand_logo, get_id_link_APAT, logger
 from ...tools import parse_float, parse_int, run_chrome
 
 
@@ -28,32 +28,44 @@ def run_script_APAT(params):
     url = "/pilotoslistado" + "/" + params["catOrigen"]
     driver.get(params["urlBase"] + url)
 
-    data = get_drivers(driver, params)
+    d_scrap = get_drivers(driver, params)
     # ret["drivers"] = pilots
+    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                         + "/" + params["year"])
+    d_clean = clean_duplicate("idPlayer", d_scrap[0], d_base)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", data[0])
+        "post", params["urlApi"]+"/driver/create", d_clean)
 
     time.sleep(5)
+    ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
+                          + "/" + params["year"])
+    chd_clean = clean_duplicate_ch("idChamp", d_scrap[1], ch_base)
     ret["champD"] = api_request(
-        "post", params["urlApi"]+"/champ/create", data[1])
+        "post", params["urlApi"]+"/champ/create", chd_clean)
 
     url = "/calendario/" + params["year"]
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    events = get_events(driver, params)
+    e_scrap = get_events(driver, params)
     # ret["events"] = events
+    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+                         + "/" + params["year"])
+    e_clean = clean_duplicate("idEvent", e_scrap, e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", events)
+        "post", params["urlApi"]+"/event/create", e_clean)
 
     url = "/circuitos/todos"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    circuits = get_circuits(driver, params)
+    c_scrap = get_circuits(driver, params)
     # ret["circuits"] = circuits
+    c_base = api_request(
+        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+    c_clean = clean_duplicate("idCircuit", c_scrap, c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", circuits)
+        "post", params["urlApi"]+"/circuit/create", c_clean)
 
     driver.close()
 
@@ -204,6 +216,7 @@ def get_circuits(driver, params):
                 "strCircuit": items[it].find_element_by_xpath(
                     ".//div[@class='CirTitulo']").text,
                 "idRCtrl": idCircuit,
+                "strLeague": params["catRCtrl"],
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",

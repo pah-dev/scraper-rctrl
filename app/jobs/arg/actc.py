@@ -1,6 +1,6 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from ...tools import api_request, get_id_link_ACTC, get_link_ACTC, logger
+from ...tools import api_request, clean_duplicate, clean_duplicate_ch, get_id_link_ACTC, get_link_ACTC, logger
 from ...tools import parse_float, parse_int, run_chrome
 
 
@@ -13,6 +13,7 @@ def load_ACTC(params):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
+            params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
             ans = run_script_ACTC(params)
@@ -28,37 +29,52 @@ def run_script_ACTC(params):
     url = "/" + params["catOrigen"] + "/pilotos.html"
     driver.get(params["urlBase"] + url)
 
-    data = get_drivers(driver, params)
-    # ret["drivers"] = data
-    teams = get_teams(data, params)
-    # ret["teams"] = teams
+    d_scrap = get_drivers(driver, params)
+    # ret["drivers"] = d_scrap
+    t_scrap = get_teams(d_scrap, params)
+    # ret["teams"] = t_scrap
+    t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
+                         + "/" + params["year"])
+    t_clean = clean_duplicate("idTeam", t_scrap, t_base)
     ret["teams"] = api_request(
-        "post", params["urlApi"]+"/team/create", teams)
+        "post", params["urlApi"]+"/team/create", t_clean)
 
     time.sleep(5)
+    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                         + "/" + params["year"])
+    d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", data)
+        "post", params["urlApi"]+"/driver/create", d_clean)
 
     url = "/" + params["catOrigen"] + "/calendario/" + params["year"] + ".html"
     driver.get(params["urlBase"] + url)
 
-    events = get_events(driver, params)
+    e_scrap = get_events(driver, params)
     # ret["events"] = events
     time.sleep(5)
+    c_base = api_request(
+        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+    c_clean = clean_duplicate("idEvent", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", events[1])
+        "post", params["urlApi"]+"/circuit/create", c_clean)
 
     time.sleep(5)
+    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+                         + "/" + params["year"])
+    e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", events[0])
+        "post", params["urlApi"]+"/event/create", e_clean)
 
     url = "/" + params["catOrigen"] + "/campeonato/" + params["year"] + ".html"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    champ = get_champD(driver, params)
+    ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
+                          + "/" + params["year"])
+    chd_scrap = get_champD(driver, params)
+    chd_clean = clean_duplicate_ch("idChamp", chd_scrap, ch_base)
     ret["champD"] = api_request(
-        "post", params["urlApi"]+"/champ/create", champ)
+        "post", params["urlApi"]+"/champ/create", chd_clean)
 
     driver.close()
 
@@ -197,6 +213,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": strCircuit,
                 "idRCtrl": event["idCircuit"],
+                "strLeague": params["catRCtrl"],
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
@@ -205,8 +222,8 @@ def get_events(driver, params):
             if(circuit["idCircuit"] not in circList):
                 circuits.append(circuit)
                 circList.append(circuit["idCircuit"])
-        data.append(events)
         data.append(circuits)
+        data.append(events)
         logger(data)
         print("::: PROCESS FINISHED :::")
         return data
