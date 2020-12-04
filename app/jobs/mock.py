@@ -4589,7 +4589,7 @@ cats = [
         "idEspn": "",
         "idTsdb": "",
         "idMss": "",
-        "idRCtrl": "clase-3",
+        "idRCtrl": "clase-2",
         "intFormedYear": "",
         "strSport": "",
         "strDivision": "",
@@ -6485,7 +6485,7 @@ def load_init(params):
 
     ret["cats"] = api_request("post", params["urlApi"]+"/cat/create", cats)
 
-    time.sleep(10)
+    time.sleep(20)
 
     ret["catsInt"] = api_request(
         "post", params["urlApi"]+"/cat/create", catsInt)

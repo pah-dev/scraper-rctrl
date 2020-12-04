@@ -18,6 +18,7 @@ def upd_MSS(params):
                 for it in range(0, len(cats)):
                     print(cats[it]["idRCtrl"])
                     if(cats[it]["idMss"] != ""):
+                        params["catId"] = cats[it]["_id"]
                         params["catRCtrl"] = cats[it]["idLeague"]
                         params["catOrigen"] = cats[it]["idMss"]
                         params["chTypes"] = cats[it]["chTypes"]

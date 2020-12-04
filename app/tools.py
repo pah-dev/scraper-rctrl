@@ -1,5 +1,4 @@
-import json
-from logging import error
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import sentry_sdk
@@ -83,6 +82,8 @@ def clean_duplicate(field, news, base):
 
 def clean_duplicate_ch(field, new, base):
     try:
+        if(new == {}):
+            return []
         for i in range(0, len(base)):
             if(base[i][field] == new[field]):
                 new = []
@@ -217,9 +218,9 @@ def get_id_link_CARX(params, link, type):
 def get_id_link_APTP(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER 02/riestra
-        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
-            ".jpg", "").replace("2020/", "").replace(
-            "/", "_", 9).replace("-", "_", 9).replace("ok", "")
+        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace("c1", "").replace("c2", "").replace("c3", "").replace(
+            "m.jpg", "").replace(".jpg", "").replace("2020/", "").replace("/", "", 9).replace("-", "_", 9).replace("ok", "")
+        ret = re.sub("\d+", "", ret)
     elif(type == 'E'):       # EVENT
         ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
             ".jpg", "").replace(".png", "").replace("2020/", "").replace(
@@ -304,7 +305,7 @@ def get_brand_logo(txt: str):
         ret = urlBase4+"2017/10/Beta-Logo-500x393.png"
     elif ("BMW" in txt):
         ret = urlBase+"logo-bmw-sm.png"
-    elif any(word in txt for word in ["CHEV", "CRUZE", "ONIX"]):
+    elif any(word in txt for word in ["CHEV", "CRUZE", "ONIX", "CORSA", "CELTA"]):
         ret = urlBase+"logo-chevrolet-sm.png"
     elif any(word in txt for word in ["CITROEN", "CITROËN", "C4", "DS3"]):
         ret = urlBase+"logo-citroen-sm.png"
@@ -312,9 +313,9 @@ def get_brand_logo(txt: str):
         ret = urlBase3+"logo-dodge-xs.png"
     elif ("DUCATI" in txt):
         ret = urlBase4+"2016/07/ducati-logo-500x188.png"
-    elif any(word in txt for word in ["FIAT", "TIPO", "PALIO", "ARGO"]):
+    elif any(word in txt for word in ["FIAT", "TIPO", "PALIO", "ARGO", "MOBI"]):
         ret = urlBase+"logo-fiat-sm.png"
-    elif any(word in txt for word in ["FORD", "FOCUS", "FIESTA"]):
+    elif any(word in txt for word in ["FORD", "FOCUS", "FIESTA", "KINETIC"]):
         ret = urlBase+"logo-ford-sm.png"
     elif any(word in txt for word in ["GEELY"]):
         ret = urlBase+"logo-geely-sm.png"
@@ -356,7 +357,7 @@ def get_brand_logo(txt: str):
         ret = urlBase+"logo-toyota-sm.png"
     elif any(word in txt for word in ["TRIUMPH", "NTS"]):
         ret = urlBase4+"2016/08/triumph-logo-500x188.png"
-    elif any(word in txt for word in ["VW", "VOLKS", "VENTO", "GOL"]):
+    elif any(word in txt for word in ["VW", "VOLKS", "VENTO", "GOL", "VOYAGE"]):
         ret = urlBase+"logo-vw-sm.png"
     elif ("VOLVO" in txt):
         ret = urlBase+"logo-volvo-sm.png"

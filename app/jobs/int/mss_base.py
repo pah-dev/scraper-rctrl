@@ -81,6 +81,8 @@ def run_script_MSS(params):
 
     if("C" in params["chTypes"]):
         time.sleep(5)
+        t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
+                             + "/" + params["year"])
         chc_scrap = get_champC(driver, params)
         tc_clean = clean_duplicate("idTeam", chc_scrap[0], t_base)
         chc_clean = clean_duplicate_ch("idChamp", chc_scrap[1], ch_base)
@@ -107,6 +109,7 @@ def run_script_MSS(params):
 
 def get_drivers(driver, params):
     pilots = []
+    pilotList = []
     try:
         print("::: DRIVERS")
         tables = WebDriverWait(driver, 30).until(
@@ -146,7 +149,9 @@ def get_drivers(driver, params):
                             "numSeason": parse_int(params["year"]),
                             "strRSS": linkDriver,
                         }
-                        pilots.append(pilot)
+                        if(pilot["idPlayer"] not in pilotList):
+                            pilots.append(pilot)
+                            pilotList.append(pilot["idPlayer"])
                 break
         logger(pilots)
         print("::: PROCESS FINISHED :::")
@@ -158,6 +163,7 @@ def get_drivers(driver, params):
 
 def get_teams(driver, params):
     teams = []
+    teamList = []
     try:
         print("::: TEAMS")
         tables = WebDriverWait(driver, 30).until(
@@ -183,11 +189,14 @@ def get_teams(driver, params):
                                 "idCategory": params["catRCtrl"],
                                 "idRCtrl": idTeam,
                                 "idMss": idTeam,
+                                "strTeamFanart4": get_brand_logo(strTeam),
                                 "numSeason": parse_int(params["year"]),
                                 "strGender": "T",
                                 "strRSS": linkTeam,
                             }
-                            teams.append(team)
+                            if(team["idTeam"] not in teamList):
+                                teams.append(team)
+                                teamList.append(team["idTeam"])
                             break
                 break
         logger(teams)
@@ -261,6 +270,7 @@ def get_champD(driver, params):
     data = []
     try:
         print("::: CHAMPIONSHIP DRIVERS")
+        btn_show = None
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
@@ -394,6 +404,7 @@ def get_champC(driver, params):
     champ = {}
     try:
         print("::: CHAMPIONSHIP CONSTRUCTORS")
+        btn_show = None
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(

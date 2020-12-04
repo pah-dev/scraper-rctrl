@@ -1,7 +1,7 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from ...tools import api_request, clean_duplicate, clean_duplicate_ch, get_id_link_TC, logger, parse_float
-from ...tools import parse_int, run_chrome
+from ...tools import api_request, clean_duplicate, clean_duplicate_ch
+from ...tools import parse_int, run_chrome, get_id_link_TC, logger, parse_float
 
 
 def load_TC(params):
@@ -9,10 +9,11 @@ def load_TC(params):
     urlBase = "https://#CAT#.com.ar"
 
     data = api_request("get", params["urlApi"]+"/org/find/tc")
-    if(len(data["categories"]) > 0):
+    if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
+            params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
             params["chTypes"] = cats[it]["chTypes"]
@@ -28,16 +29,6 @@ def run_script_TC(params):
     ret = {}
 
     driver = run_chrome()
-
-    url = "/equipos.php?accion=pilotos"
-    driver.get(params["urlBase"] + url)
-
-    d_scrap = get_drivers(driver, params)
-    t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
-                         + "/" + params["year"])
-    t_clean = clean_duplicate("idTeam", d_scrap[0], t_base)
-    ret["teams"] = api_request(
-        "post", params["urlApi"]+"/team/create", t_clean)
 
     url = "/carreras.php?evento=calendario"
     driver.get(params["urlBase"] + url)
@@ -57,11 +48,16 @@ def run_script_TC(params):
     ret["events"] = api_request(
         "post", params["urlApi"]+"/event/create", e_clean)
 
+    url = "/equipos.php?accion=pilotos"
+    driver.get(params["urlBase"] + url)
+
+    d_scrap = get_drivers(driver, params)
+
     url = "/estadisticas.php?accion=posiciones"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    chd_scrap = get_champD(driver, d_scrap[1], params)
+    chd_scrap = get_champD(driver, d_scrap[0], params)
     # ret["champD"] = chd_scrap
     d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
                          + "/" + params["year"])
@@ -76,10 +72,25 @@ def run_script_TC(params):
     ret["champD"] = api_request(
         "post", params["urlApi"]+"/champ/create", chd_clean)
 
+    time.sleep(5)
+    t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
+                         + "/" + params["year"])
+    t_clean = clean_duplicate("idTeam", d_scrap[1], t_base)
+    ret["teams"] = api_request(
+        "post", params["urlApi"]+"/team/create", t_clean)
+
     if("T" in params["chTypes"]):
         time.sleep(5)
-        cht_scrap = get_champT(driver, d_scrap[0], params)
-        cht_clean = clean_duplicate_ch("idChamp", cht_scrap, ch_base)
+        cht_scrap = get_champT(driver, d_scrap[1], params)
+        # ret["champT"] = cht_scrap
+        t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
+                             + "/" + params["year"])
+        t_clean = clean_duplicate("idTeam", cht_scrap[0], t_base)
+        ret["teamsT"] = api_request(
+            "post", params["urlApi"]+"/team/create", t_clean)
+
+        time.sleep(3)
+        cht_clean = clean_duplicate_ch("idChamp", cht_scrap[1], ch_base)
         ret["champT"] = api_request(
             "post", params["urlApi"]+"/champ/create", cht_clean)
 
@@ -158,8 +169,8 @@ def get_drivers(driver, params):
                     "strRSS": linkDriver,
                 }
                 pilots.append(pilot)
-        data.append(teams)
         data.append(pilots)
+        data.append(teams)
         logger(data)
         print("::: PROCESS FINISHED :::")
         return data
@@ -311,9 +322,11 @@ def get_champD(driver, pilots, params):
         return "::: ERROR CHAMP DRIVERS :::"
 
 
-def get_champT(driver, pilots, params):
+def get_champT(driver, teams, params):
     champ = {}
     data = []
+    team = {}
+    ret = []
     try:
         print("::: CHAMPIONSHIP TEAMS")
         items = WebDriverWait(driver, 30).until(
@@ -321,18 +334,37 @@ def get_champT(driver, pilots, params):
                 "//div[@id='tabs-2']/div/ul[@class='puntajes']")
         )
         points = 0
+        print(str(len(items)))
         for it in range(0, len(items)):
             tds = items[it].find_elements_by_xpath("./li")
-            nameTeam = tds[2].find_element_by_xpath("./span").text
+            nameTeam = tds[2].find_element_by_xpath(
+                "./span").get_attribute("innerHTML")
             idTeam = ""
-            for p in range(0, len(pilots)):
-                if(pilots[p]["strTeam"].upper() == nameTeam.upper()):
-                    idTeam = pilots[p]["idRCtrl"]
+            for p in range(0, len(teams)):
+                if(teams[p]["strTeam"].upper().strip() == nameTeam.upper().strip()):
+                    idTeam = teams[p]["idRCtrl"]
                     break
+            if(idTeam == ""):
+                idTeam = params["catRCtrl"].upper() + "-" + \
+                    nameTeam.lower().replace(" ", "_", 9)
+                linkTeam = tds[1].find_element_by_xpath(
+                    "./img").get_attribute("src")
+                team = {
+                    "idTeam":  idTeam,
+                    "strTeam": nameTeam,
+                    "idCategory": params["catRCtrl"],
+                    "idRCtrl": idTeam,
+                    "numSeason": parse_int(params["year"]),
+                    "strGender": "T",
+                    "strTeamLogo": linkTeam,
+                    "strTeamFanart4":  linkTeam
+                }
+                teams.append(team)
             line = {
                 "idPlayer": idTeam,
-                "position": parse_int(tds[0].text.replace("°", "")),
-                "totalPoints": parse_float(tds[3].text),
+                "position": parse_int((tds[0].get_attribute(
+                    "innerHTML")).replace("°", "")),
+                "totalPoints": parse_float(tds[3].get_attribute("innerHTML")),
             }
             points += line["totalPoints"]
             data.append(line)
@@ -346,11 +378,13 @@ def get_champT(driver, pilots, params):
             "sumPoints": points,
             "typeChamp": "T"
         }
-        logger(champ)
+        ret.append(teams)
+        ret.append(champ)
+        logger(ret)
         print("::: PROCESS FINISHED :::")
-        return champ
+        return ret
     except Exception as e:
-        logger(e, True, "Championship", champ)
+        logger(e, True, "Championship", [teams, champ])
         return "::: ERROR CHAMP TEAMS :::"
 
 
@@ -402,7 +436,7 @@ def get_champC(driver, params):
             "idRCtrl": params["catOrigen"],
             "data": data,
             "sumPoints": points,
-            "typeChamp": "T"
+            "typeChamp": "C"
         }
         ret.append(teams)
         ret.append(champ)

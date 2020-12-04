@@ -10,16 +10,15 @@ def load_AUVO(params):
     params["urlBase"] = "http://www.auvo.com.uy"
 
     data = api_request("get", params["urlApi"]+"/org/find/auvo")
-    if(len(data["categories"]) > 0):
+    if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
+            params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
             ans = run_script_AUVOCat(params)
             ret[cats[it]["idLeague"]] = ans
-        ans = run_script_AUVO(params)
-        ret["events"] = ans
     return ret
 
 
@@ -57,6 +56,10 @@ def run_script_AUVOCat(params):
     # t_data = get_teams(driver, params)
     # ret["teams"] = api_request(
     # "post", params["urlApi"]+"/team/create", t_data)
+
+    ans = run_script_AUVO(params)
+    ret["events"] = ans
+
     driver.close()
 
     return ret
@@ -226,12 +229,12 @@ def get_events(driver, params):
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" +
                 params["year"] + "-" + str(it+1)+"-"+idEvent,
-                "strEvent": strCircuit,
+                "strEvent": "Fecha #"+str(it+1),
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it+1),
                 "idCircuit": idCircuit,
-                "strCircuit": strCircuit,
+                "strCircuit": "AUVO",
                 "numSeason": parse_int(params["year"]),
                 "strSeason": params["year"],
                 "strPostponed": "",

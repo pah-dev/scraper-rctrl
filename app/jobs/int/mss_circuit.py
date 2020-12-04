@@ -4,7 +4,7 @@ from ...tools import get_id_link_MSS, get_link_MSS, logger, parse_int, run_chrom
 
 def run_script_circuits(params, events):
     circuits = []
-
+    circuitList = []
     driver = run_chrome()
     url = "/venues/"
 
@@ -13,7 +13,9 @@ def run_script_circuits(params, events):
         uri = events[i]["idCircuit"]
         driver.get(params["urlBase"] + url + uri)
         circuit = get_circuit_detail(driver, params, events[i])
-        circuits.append(circuit)
+        if(circuit["idCircuit"] not in circuitList):
+            circuits.append(circuit)
+            circuitList.append(circuit["idCircuit"])
     logger(circuits)
     driver.close()
     print("::: PROCESS FINISHED :::")

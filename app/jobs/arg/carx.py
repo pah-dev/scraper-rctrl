@@ -9,10 +9,11 @@ def load_CARX(params):
     params["urlBase"] = "http://carxrallycross.com"
 
     data = api_request("get", params["urlApi"]+"/org/find/carx")
-    if(len(data["categories"]) > 0):
+    if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
+            params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
             ans = run_script_CARX(params)
@@ -61,6 +62,8 @@ def run_script_CARX(params):
     time.sleep(5)
     chd_scrap = get_champD(driver, params)
     # ret["champD"] = chd_scrap
+    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                         + "/" + params["year"])
     d_clean = clean_duplicate("idDriver", chd_scrap[0], d_base)
     ret["drivers_extra"] = api_request(
         "post", params["urlApi"]+"/driver/create", d_clean)
@@ -201,7 +204,7 @@ def get_champD(driver, params):
             }
             pilots.append(pilot)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"],
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],

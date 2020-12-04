@@ -9,10 +9,11 @@ def load_TR(params):
     params["urlBase"] = "https://www.toprace.com.ar"
 
     data = api_request("get", params["urlApi"]+"/org/find/toprace")
-    if(len(data["categories"]) > 0):
+    if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
+            params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
             ans = run_script_TR(params)

@@ -9,7 +9,7 @@ def load_ACTC(params):
     params["urlBase"] = "https://www.actc.org.ar"
 
     data = api_request("get", params["urlApi"]+"/org/find/actc")
-    if(len(data["categories"]) > 0):
+    if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
             print(cats[it]["idRCtrl"])
@@ -255,7 +255,7 @@ def get_champD(driver, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"D",
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],
