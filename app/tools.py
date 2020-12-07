@@ -364,3 +364,8 @@ def get_brand_logo(txt: str):
     elif ("YAMAHA" in txt):
         ret = urlBase4+"2016/08/Yamaha-logo-500x188.png"
     return ret
+
+
+# ratio = difflib.SequenceMatcher(
+#         None, line["idPlayer"].lower(), plist[p]["strDescriptionJP"].lower()).ratio()
+# ratio = int(ratio*1000)

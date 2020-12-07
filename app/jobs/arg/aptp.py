@@ -46,28 +46,29 @@ def run_script_APTP(params):
     ret["events"] = api_request(
         "post", params["urlApi"]+"/event/create", e_clean)
 
-    url = "/pilotos-" + params["catOrigen"] + "/"
-    driver.get(params["urlBase"] + url)
+    # url = "/pilotos-" + params["catOrigen"] + "/"
+    # driver.get(params["urlBase"] + url)
 
-    d_scrap = get_drivers(driver, params)
-    # ret["drivers"] = d_scrap
+    # d_scrap = get_drivers(driver, params)
+    # # ret["drivers"] = d_scrap
 
     url = "/campeonato-" + params["catOrigen"] + "/"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    chd_scrap = get_champD(driver, params, d_scrap)
+    chd_scrap = get_champD(driver, params)
     # ret["champD"] = chd_scrap
     d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
                          + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", chd_scrap[0], d_base)
     ret["drivers"] = api_request(
         "post", params["urlApi"]+"/driver/create", d_clean)
-    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
-                         + "/" + params["year"])
-    d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
-    ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", d_clean)
+
+    # d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+    #                      + "/" + params["year"])
+    # d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+    # ret["drivers_extra"] = api_request(
+    #     "post", params["urlApi"]+"/driver/create", d_clean)
 
     time.sleep(5)
     ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
@@ -146,7 +147,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": "",
                 "idRCtrl": event["idCircuit"],
-                "strLeague": "carx",
+                "strLeague": "aptp",
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
@@ -165,7 +166,7 @@ def get_events(driver, params):
         return "::: ERROR EVENTS :::"
 
 
-def get_champD(driver, params, plist):
+def get_champD(driver, params):
     champ = {}
     data = []
     pilots = []
@@ -181,46 +182,31 @@ def get_champD(driver, params, plist):
         for it in range(0, len(items)):
             tds = items[it].find_elements_by_xpath("./td")
             idDriver = tds[2].text
+            idPlayer = params["catRCtrl"].upper()+"-" + \
+                idDriver.replace(" ", "_", 9).replace(",", "")
             line = {
-                "idPlayer": idDriver.replace(",", ""),
+                "idPlayer": idPlayer,
                 "position": parse_int(tds[0].text),
                 "totalPoints": parse_float(tds[4].text),
                 "cups": parse_int(tds[5].text.replace("x", "")),
             }
-            enter = False
             strFanart4 = get_brand_logo(tds[3].text)
-            for p in range(0, len(plist)):
-                ratio = difflib.SequenceMatcher(
-                    None, line["idPlayer"].lower(), plist[p]["strDescriptionJP"].lower()).ratio()
-                ratio = int(ratio*1000)
-                if(ratio > 610):
-                    line["idPlayer"] = plist[p]["idRCtrl"]
-                    plist[p]["strPlayer"] = idDriver.title()
-                    plist[p]["strTeam"] = tds[3].text
-                    plist[p]["strNumber"] = tds[1].text
-                    plist[p]["strFanart4"] = strFanart4
-                    enter = True
-                    pilots.append(plist[p])
-                    break
-            if(not enter):
-                line["idPlayer"] = params["catRCtrl"].upper()+"-" + \
-                    idDriver.replace(" ", "_", 9).replace(",", "")
-                pilot = {
-                    "idPlayer": line["idPlayer"],
-                    "idCategory": params["catRCtrl"],
-                    "idRCtrl": line["idPlayer"],
-                    "strPlayer": idDriver.title(),
-                    "strTeam": tds[3].text,
-                    "strNumber": tds[1].text,
-                    "strFanart4": strFanart4,
-                    "numSeason": parse_int(params["year"]),
-                    "isOnlyImg": False
-                }
-                pilots.append(pilot)
+            pilot = {
+                "idPlayer": idPlayer,
+                "idCategory": params["catRCtrl"],
+                "idRCtrl": idPlayer,
+                "strPlayer": idDriver.title(),
+                "strTeam": tds[3].text,
+                "strNumber": tds[1].text,
+                "strFanart4": strFanart4,
+                "numSeason": parse_int(params["year"]),
+                "isOnlyImg": False
+            }
+            pilots.append(pilot)
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"D",
+            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],
@@ -235,5 +221,5 @@ def get_champD(driver, params, plist):
         print("::: PROCESS FINISHED :::")
         return ret
     except Exception as e:
-        logger(e, True, "Championship", [plist, champ])
+        logger(e, True, "Championship", [pilots, champ])
         return "::: ERROR CHAMP DRIVERS :::"
