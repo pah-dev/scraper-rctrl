@@ -36,78 +36,82 @@ def load_MSS(params):
 
 def run_script_MSS(params):
     ret = {}
+    try:
+        if(parse_int(params["year"]) >= params["chYearIni"] and parse_int(params["year"]) <= params["chYearFin"]):
 
-    if(params["year"] >= params["chYearIni"] and params["year"] <= params["chYearFin"]):
+            driver = run_chrome()
 
-        driver = run_chrome()
+            url = "/series/" + params["catOrigen"] + \
+                "/season/" + params["year"] + ""
+            driver.get(params["urlBase"] + url)
 
-        url = "/series/" + params["catOrigen"] + \
-            "/season/" + params["year"] + ""
-        driver.get(params["urlBase"] + url)
+            d_scrap = get_drivers(driver, params)
+            d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+                                 + "/" + params["year"])
+            d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+            ret["drivers"] = api_request(
+                "post", params["urlApi"]+"/driver/create", d_clean)
 
-        d_scrap = get_drivers(driver, params)
-        d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
-                             + "/" + params["year"])
-        d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
-        ret["drivers"] = api_request(
-            "post", params["urlApi"]+"/driver/create", d_clean)
-
-        time.sleep(5)
-        t_scrap = get_teams(driver, params)
-        t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
-                             + "/" + params["year"])
-        t_clean = clean_duplicate("idTeam", t_scrap, t_base)
-        ret["teams"] = api_request(
-            "post", params["urlApi"]+"/team/create", t_clean)
-
-        time.sleep(5)
-        e_scrap = get_events(driver, params)
-        c_scrap = run_script_circuits(params, e_scrap)
-        c_base = api_request("get", params["urlApi"]+"/circuit/ids/mss")
-        c_clean = clean_duplicate("idCircuit", c_scrap, c_base)
-        ret["circuits"] = api_request(
-            "post", params["urlApi"]+"/circuit/create", c_clean)
-
-        time.sleep(5)
-        e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
-                             + "/" + params["year"])
-        e_clean = clean_duplicate("idEvent", e_scrap, e_base)
-        ret["events"] = api_request(
-            "post", params["urlApi"]+"/event/create", e_clean)
-
-        time.sleep(5)
-        ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
-                              + "/" + params["year"])
-        if("D" in params["chTypes"]):
-            chd_scrap = get_champD(driver, params)
-            chd_clean = clean_duplicate_ch("idChamp", chd_scrap, ch_base)
-            ret["champD"] = api_request(
-                "post", params["urlApi"]+"/champ/create", chd_clean)
-
-        if("C" in params["chTypes"]):
             time.sleep(5)
+            t_scrap = get_teams(driver, params)
             t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
                                  + "/" + params["year"])
-            chc_scrap = get_champC(driver, params)
-            tc_clean = clean_duplicate("idTeam", chc_scrap[0], t_base)
-            chc_clean = clean_duplicate_ch("idChamp", chc_scrap[1], ch_base)
-            # ret["champC"] = chc_clean
-            ret["teamsC"] = api_request(
-                "post", params["urlApi"]+"/team/create", tc_clean)
+            t_clean = clean_duplicate("idTeam", t_scrap, t_base)
+            ret["teams"] = api_request(
+                "post", params["urlApi"]+"/team/create", t_clean)
 
             time.sleep(5)
-            ret["champC"] = api_request(
-                "post", params["urlApi"]+"/champ/create", chc_clean)
+            e_scrap = get_events(driver, params)
+            c_scrap = run_script_circuits(params, e_scrap)
+            c_base = api_request("get", params["urlApi"]+"/circuit/ids/mss")
+            c_clean = clean_duplicate("idCircuit", c_scrap, c_base)
+            ret["circuits"] = api_request(
+                "post", params["urlApi"]+"/circuit/create", c_clean)
 
-        if("T" in params["chTypes"]):
             time.sleep(5)
-            cdd_scrap = get_champT(driver, params)
-            chd_clean = clean_duplicate_ch("idChamp", cdd_scrap, ch_base)
-            # ret["champT"] = chd_clean
-            ret["champT"] = api_request(
-                "post", params["urlApi"]+"/champ/create", chd_clean)
+            e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+                                 + "/" + params["year"])
+            e_clean = clean_duplicate("idEvent", e_scrap, e_base)
+            ret["events"] = api_request(
+                "post", params["urlApi"]+"/event/create", e_clean)
 
-        driver.close()
+            time.sleep(5)
+            ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
+                                  + "/" + params["year"])
+            if("D" in params["chTypes"]):
+                chd_scrap = get_champD(driver, params)
+                chd_clean = clean_duplicate_ch("idChamp", chd_scrap, ch_base)
+                ret["champD"] = api_request(
+                    "post", params["urlApi"]+"/champ/create", chd_clean)
+
+            if("C" in params["chTypes"]):
+                time.sleep(5)
+                t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
+                                     + "/" + params["year"])
+                chc_scrap = get_champC(driver, params)
+                tc_clean = clean_duplicate("idTeam", chc_scrap[0], t_base)
+                chc_clean = clean_duplicate_ch(
+                    "idChamp", chc_scrap[1], ch_base)
+                # ret["champC"] = chc_clean
+                ret["teamsC"] = api_request(
+                    "post", params["urlApi"]+"/team/create", tc_clean)
+
+                time.sleep(5)
+                ret["champC"] = api_request(
+                    "post", params["urlApi"]+"/champ/create", chc_clean)
+
+            if("T" in params["chTypes"]):
+                time.sleep(5)
+                cdd_scrap = get_champT(driver, params)
+                chd_clean = clean_duplicate_ch("idChamp", cdd_scrap, ch_base)
+                # ret["champT"] = chd_clean
+                ret["champT"] = api_request(
+                    "post", params["urlApi"]+"/champ/create", chd_clean)
+
+            driver.close()
+    except Exception as e:
+        logger(e, True, "Script", params)
+        return "::: ERROR SCRIPT :::"
 
     return ret
 

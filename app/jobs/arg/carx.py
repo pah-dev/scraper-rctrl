@@ -64,7 +64,7 @@ def run_script_CARX(params):
     # ret["champD"] = chd_scrap
     d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
                          + "/" + params["year"])
-    d_clean = clean_duplicate("idDriver", chd_scrap[0], d_base)
+    d_clean = clean_duplicate("idPlayer", chd_scrap[0], d_base)
     ret["drivers_extra"] = api_request(
         "post", params["urlApi"]+"/driver/create", d_clean)
 
