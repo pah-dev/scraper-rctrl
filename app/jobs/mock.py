@@ -261,7 +261,7 @@ orgs = [
         "strPoster": "https://www.auvo.com.uy/wp-content/uploads/2016/07/publicidad-derecha-1-1.png",
         "strTrophy": "",
         "rank": 10,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "gpu",
@@ -309,7 +309,7 @@ orgs = [
         "strPoster": "http://www.19capitaleshistorico.com/addons/default/themes/sl/img/historia-gpu/historia002.jpg",
         "strTrophy": "",
         "rank": 70,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "fuk",
@@ -357,7 +357,7 @@ orgs = [
         "strPoster": "https://pbs.twimg.com/profile_images/722602294441820160/Jc9iRCQK_400x400.jpg",
         "strTrophy": "",
         "rank": 20,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "cur",
@@ -405,7 +405,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 30,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "fumcmv",
@@ -453,7 +453,7 @@ orgs = [
         "strPoster": "http://www.fum.org.uy/sitio/templates/rt_camber_j15/images/logo/light/logo2.png",
         "strTrophy": "",
         "rank": 50,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "fummx",
@@ -501,7 +501,7 @@ orgs = [
         "strPoster": "http://www.fum.org.uy/sitio/templates/rt_camber_j15/images/logo/light/logo2.png",
         "strTrophy": "",
         "rank": 40,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "fumvt",
@@ -549,7 +549,7 @@ orgs = [
         "strPoster": "http://www.fum.org.uy/sitio/templates/rt_camber_j15/images/logo/light/logo2.png",
         "strTrophy": "",
         "rank": 60,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "actc",
@@ -597,7 +597,7 @@ orgs = [
         "strPoster": "https://www.actc.org.ar/vistas/v3/images/historia/historia_7007.jpg",
         "strTrophy": "",
         "rank": 10,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "apat",
@@ -645,7 +645,7 @@ orgs = [
         "strPoster": "http://www.apat.org.ar/img/elemento/grande/400/310/310-9985-20160427-institucional.jpg",
         "strTrophy": "",
         "rank": 40,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "aptp",
@@ -693,7 +693,7 @@ orgs = [
         "strPoster": "https://aptpweb.com.ar/wp-content/uploads/2020/03/fondo.jpg",
         "strTrophy": "",
         "rank": 50,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "tc",
@@ -741,7 +741,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 20,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "toprace",
@@ -789,7 +789,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 30,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "carx",
@@ -837,7 +837,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 60,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "otherar",
@@ -885,7 +885,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 70,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "plusmoto",
@@ -933,7 +933,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 80,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "pluscars",
@@ -981,7 +981,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 60,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "f1",
@@ -1029,7 +1029,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 10,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "fe",
@@ -1077,7 +1077,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 40,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "indycar",
@@ -1125,7 +1125,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 20,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "nascar",
@@ -1173,7 +1173,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 30,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "dakar",
@@ -1196,7 +1196,7 @@ orgs = [
         "strTwitter": "www.twitter.com/dakar",
         "strYoutube": "www.youtube.com/user/dakar",
         "strInstagram": "www.instagram.com/dakarrally",
-        "strDescriptionEN": "The Dakar Rally (or simply 'The Dakar' formerly known as the 'Paris–Dakar Rally') is an annual rally raid organised by the Amaury Sport Organisation. Most events since the inception in 1978 were from Paris, France, to Dakar, Senegal, but due to security threats in Mauritania, which led to the cancellation of the 2008 rally, the 2009 Dakar Rally was run in South America (Argentina and Chile). It has been held in South America each year since 2009. The race is open to amateur and professional entries, amateurs typically making up about eighty percent of the participants. Despite its 'rally' name, it is an off-road endurance race, properly called a 'rally raid' rather than a conventional rally. The terrain that the competitors traverse is much tougher and the vehicles used are true off-road vehicles rather than the modified on-road vehicles used in rallies. Most of the competitive special sections are off-road, crossing dunes, mud, camel grass, rocks, and erg among others. The distances of each stage covered vary from short distances up to 800–900 kilometres (500–560 mi) per day. The race originated in December 1978, a year after Thierry Sabine got lost in the Ténéré desert whilst competing in the Abidjan-Nice rally and decided that the desert would be a good location for a regular rally. 182 vehicles took the start of the inaugural rally in Paris, with 74 surviving the 10,000-kilometre (6,200 mi) trip to the Senegalese capital of Dakar. Cyril Neveu holds the distinction of being the event's first winner, riding a Yamaha motorcycle. The event rapidly grew in popularity, with 216 vehicles taking the start in 1980 and 291 in 1981. Neveu won the event for a second time in 1980, Hubert Auriol taking honours in 1981 for BMW. By this stage, the rally had already begun to attract the participation of famous names from elsewhere in motorsport, such as Henri Pescarolo and Jacky Ickx. Now boasting 382 competitors, more than double the amount that took the start in 1979, Neveu won the event for a third time in 1982, this time riding a Honda motorcycle, while victory in the car class went to the Marreau brothers, driving a privately entered Renault 20, whose buccaneering exploits seemed to perfectly capture the spirit of the early years of the rally. Auriol captured his second bikes class victory in 1983, the first year that Japanese manufacturer Mitsubishi competed in the rally, beginning an association that would last all the way until 2009. At the behest of 1983 car class winner Jacky Ickx, Porsche entered the Dakar in 1984, with the total number of entries now at 427. The German marque won the event at their first attempt courtesy of René Metge, who had previously won in the car category in 1981, whilst Ickx finished sixth. Gaston Rahier meanwhile continued BMW's success in the motorcycle category with back-to-back wins in 1984 and 1985, the year of Mitsubishi's first victory of 12 in the car category, Patrick Zaniroli taking the spoils. The 1986 event, won by Metge and Neveu, was marred by the death of event founder Sabine in a helicopter crash, his father Gilbert taking over organisation of the rally.",
+        "strDescriptionEN": "The Dakar Rally (or simply 'The Dakar' formerly known as the 'Paris–Dakar Rally') is an annual rally raid organised by the Amaury Sport Organisation. Most events since the inception in 1978 were from Paris, France, to Dakar, Senegal, but due to security threats in Mauritania, which led to the cancellation of the 2008 rally, the 2009 Dakar Rally was run in South America (Argentina and Chile). It has been held in South America each year since 2009. The race is open to amateur and professional entries, amateurs typically making up about eighty percent of the participants. Despite its 'rally' name, it is an off-road endurance race, properly called a 'rally raid' rather than a conventional rally. The terrain that the competitors traverse is much tougher and the vehicles used are True off-road vehicles rather than the modified on-road vehicles used in rallies. Most of the competitive special sections are off-road, crossing dunes, mud, camel grass, rocks, and erg among others. The distances of each stage covered vary from short distances up to 800–900 kilometres (500–560 mi) per day. The race originated in December 1978, a year after Thierry Sabine got lost in the Ténéré desert whilst competing in the Abidjan-Nice rally and decided that the desert would be a good location for a regular rally. 182 vehicles took the start of the inaugural rally in Paris, with 74 surviving the 10,000-kilometre (6,200 mi) trip to the Senegalese capital of Dakar. Cyril Neveu holds the distinction of being the event's first winner, riding a Yamaha motorcycle. The event rapidly grew in popularity, with 216 vehicles taking the start in 1980 and 291 in 1981. Neveu won the event for a second time in 1980, Hubert Auriol taking honours in 1981 for BMW. By this stage, the rally had already begun to attract the participation of famous names from elsewhere in motorsport, such as Henri Pescarolo and Jacky Ickx. Now boasting 382 competitors, more than double the amount that took the start in 1979, Neveu won the event for a third time in 1982, this time riding a Honda motorcycle, while victory in the car class went to the Marreau brothers, driving a privately entered Renault 20, whose buccaneering exploits seemed to perfectly capture the spirit of the early years of the rally. Auriol captured his second bikes class victory in 1983, the first year that Japanese manufacturer Mitsubishi competed in the rally, beginning an association that would last all the way until 2009. At the behest of 1983 car class winner Jacky Ickx, Porsche entered the Dakar in 1984, with the total number of entries now at 427. The German marque won the event at their first attempt courtesy of René Metge, who had previously won in the car category in 1981, whilst Ickx finished sixth. Gaston Rahier meanwhile continued BMW's success in the motorcycle category with back-to-back wins in 1984 and 1985, the year of Mitsubishi's first victory of 12 in the car category, Patrick Zaniroli taking the spoils. The 1986 event, won by Metge and Neveu, was marred by the death of event founder Sabine in a helicopter crash, his father Gilbert taking over organisation of the rally.",
         "strDescriptionDE": "",
         "strDescriptionFR": "",
         "strDescriptionIT": "",
@@ -1221,7 +1221,7 @@ orgs = [
         "strPoster": "https://www.thesportsdb.com/images/media/league/poster/sptwuw1454431961.jpg",
         "strTrophy": "https://www.thesportsdb.com/images/media/league/trophy/wuyqwy1463909513.png",
         "rank": 50,
-        "isWorking": true
+        "isWorking": True
     },
     {
         "idOrg": "motogp",
@@ -1269,7 +1269,7 @@ orgs = [
         "strPoster": "",
         "strTrophy": "",
         "rank": 70,
-        "isWorking": true
+        "isWorking": True
     }
 ]
 
