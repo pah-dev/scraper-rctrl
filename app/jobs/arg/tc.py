@@ -36,7 +36,7 @@ def run_script_TC(params):
     time.sleep(5)
     e_scrap = get_events(driver, params)
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+        "get", params["urlApi"]+"/circuit/ids/tc")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
         "post", params["urlApi"]+"/circuit/create", c_clean)
@@ -244,7 +244,7 @@ def get_events(driver, params):
                 "strCircuit": event["strEvent"],
                 "idRCtrl": event["idCircuit"],
                 "strCountry": "Argentina",
-                "strLeague": params["catRCtrl"],
+                "strLeague": "tc",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
                 "strLogo": linkCircuit,
@@ -334,7 +334,6 @@ def get_champT(driver, teams, params):
                 "//div[@id='tabs-2']/div/ul[@class='puntajes']")
         )
         points = 0
-        print(str(len(items)))
         for it in range(0, len(items)):
             tds = items[it].find_elements_by_xpath("./li")
             nameTeam = tds[2].find_element_by_xpath(

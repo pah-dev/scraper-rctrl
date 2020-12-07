@@ -63,7 +63,7 @@ def run_script_APAT(params):
     c_scrap = get_circuits(driver, params)
     # ret["circuits"] = circuits
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+        "get", params["urlApi"]+"/circuit/ids/apat")
     c_clean = clean_duplicate("idCircuit", c_scrap, c_base)
     ret["circuits"] = api_request(
         "post", params["urlApi"]+"/circuit/create", c_clean)
@@ -217,7 +217,7 @@ def get_circuits(driver, params):
                 "strCircuit": items[it].find_element_by_xpath(
                     ".//div[@class='CirTitulo']").text,
                 "idRCtrl": idCircuit,
-                "strLeague": params["catRCtrl"],
+                "strLeague": "apat",
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",

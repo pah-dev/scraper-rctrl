@@ -42,7 +42,7 @@ def run_script_CUR(params):
     e_scrap = get_events(driver, params)
     # ret["events"] = events
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+        "get", params["urlApi"]+"/circuit/ids/cur")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
         "post", params["urlApi"]+"/circuit/create", c_clean)
@@ -136,7 +136,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": event["strCircuit"],
                 "idRCtrl": event["idCircuit"],
-                "strLeague": params["catRCtrl"],
+                "strLeague": "cur",
                 "strCountry": "Uruguay",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "URY",

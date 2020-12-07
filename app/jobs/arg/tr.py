@@ -53,7 +53,7 @@ def run_script_TR(params):
     time.sleep(5)
     e_scrap = get_events(driver, params)
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+        "get", params["urlApi"]+"/circuit/ids/toprace")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
         "post", params["urlApi"]+"/circuit/create", c_clean)
@@ -195,6 +195,7 @@ def get_events(driver, params):
         )
         for it in range(0, len(items)):
             linkEvent, linkCircuit = "", ""
+            linkDriver, strResult = "", ""
             try:
                 linkEvent = items[it].find_element_by_xpath(
                     ".//a[contains(@class, 'skew')]").get_attribute("href")
@@ -207,21 +208,26 @@ def get_events(driver, params):
             except Exception:
                 pass
             idCircuit = get_id_link_TR(params, linkCircuit, "C")
-            linkDriver, strResult = "", ""
             try:
                 linkDriver = items[it].find_element_by_xpath(
                     ".//ul[@class='mb0']/li[1]/a").get_attribute("href")
                 strResult = items[it].find_element_by_xpath(
                     ".//ul[@class='mb0']/li[1]/a").text
             except Exception:
-                linkDriver = ""
+                pass
             idDriver = get_id_link_TR(params, linkDriver, "D")
             strCircuit = items[it].find_element_by_xpath(
                 ".//span[contains(@class, 'circuit-name')]").get_attribute("innerHTML")
+            strEvent = items[it].find_element_by_xpath(".//h2").text
+            if(idEvent == ""):
+                idEvent = params["catRCtrl"].upper() + "-" + \
+                    strEvent.replace(" ", "_", 9)
+            if(idCircuit == ""):
+                idCircuit = idEvent
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" + params["year"] +
                 "-" + str(it+1) + "-" + idEvent,
-                "strEvent": items[it].find_element_by_xpath(".//h2").text,
+                "strEvent": strEvent,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it+1),
@@ -240,7 +246,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": event["strEvent"],
                 "idRCtrl": event["idCircuit"],
-                "strLeague": params["catRCtrl"],
+                "strLeague": "toprace",
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",

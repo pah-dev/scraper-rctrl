@@ -53,7 +53,7 @@ def run_script_ACTC(params):
     # ret["events"] = events
     time.sleep(5)
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+        "get", params["urlApi"]+"/circuit/ids/actc")
     c_clean = clean_duplicate("idEvent", e_scrap[0], c_base)
     ret["circuits"] = api_request(
         "post", params["urlApi"]+"/circuit/create", c_clean)
@@ -213,7 +213,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": strCircuit,
                 "idRCtrl": event["idCircuit"],
-                "strLeague": params["catRCtrl"],
+                "strLeague": "actc",
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",

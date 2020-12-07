@@ -34,7 +34,7 @@ def run_script_APTP(params):
     e_scrap = get_events(driver, params)
     # ret["events"] = e_scrap
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/"+params["catRCtrl"])
+        "get", params["urlApi"]+"/circuit/ids/aptp")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
         "post", params["urlApi"]+"/circuit/create", c_clean)
@@ -146,7 +146,7 @@ def get_events(driver, params):
                 "idCircuit": event["idCircuit"],
                 "strCircuit": "",
                 "idRCtrl": event["idCircuit"],
-                "strLeague": params["catRCtrl"],
+                "strLeague": "carx",
                 "strCountry": "Argentina",
                 "numSeason": parse_int(params["year"]),
                 "intSoccerXMLTeamID": "ARG",
