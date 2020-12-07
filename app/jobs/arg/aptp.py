@@ -195,7 +195,7 @@ def get_champD(driver, params, plist):
                 ratio = int(ratio*1000)
                 if(ratio > 610):
                     line["idPlayer"] = plist[p]["idRCtrl"]
-                    plist[p]["strPlayer"] = idDriver.title(),
+                    plist[p]["strPlayer"] = idDriver.title()
                     plist[p]["strTeam"] = tds[3].text
                     plist[p]["strNumber"] = tds[1].text
                     plist[p]["strFanart4"] = strFanart4

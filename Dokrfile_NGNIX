@@ -1,0 +1,5 @@
+# FROM ngnix:1.19.5
+
+# WORKDIR /uar/share/ngnix/html
+
+# COPY . .

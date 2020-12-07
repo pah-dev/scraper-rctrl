@@ -4218,12 +4218,12 @@ cats = [
         "strCountry": "Argentina",
         "strBadge": "",
         "strJersey": "",
-        "strLogo": "https://www.formulas-argentinas.com.ar/assets/images/logo-f2.0-Pirelli.jpg",
+        "strLogo": "https://tc2000.com.ar/images/banners/formulas/banner-2020-11-30-resize-Portada-FR.jpg",
         "strFanart1": "",
         "strFanart2": "",
         "strFanart3": "",
         "strFanart4": "",
-        "strBanner": "https://www.formulas-argentinas.com.ar/assets/images/logo-f2.0-Pirelli.jpg",
+        "strBanner": "https://formulas-argentinas.com.ar/assets/images/logo-formula-2020.png",
         "strPoster": "",
         "strLocked": "",
         "rank": 30,
@@ -6474,20 +6474,28 @@ catsInt = [
 def load_init(params):
     ret = {}
 
+    print("::: SECTIONS")
     ret["sections"] = api_request(
         "post", params["urlApi"]+"/section/create", sections)
+    print("::: PROCESS FINISHED :::")
 
     time.sleep(10)
 
+    print("::: ORGANIZATIONS")
     ret["orgs"] = api_request("post", params["urlApi"]+"/org/create", orgs)
+    print("::: PROCESS FINISHED :::")
 
     time.sleep(10)
 
+    print("::: CATEGORIES")
     ret["cats"] = api_request("post", params["urlApi"]+"/cat/create", cats)
+    print("::: PROCESS FINISHED :::")
 
     time.sleep(20)
 
+    print("::: CATEGORIES INT")
     ret["catsInt"] = api_request(
         "post", params["urlApi"]+"/cat/create", catsInt)
+    print("::: PROCESS FINISHED :::")
 
     return ret

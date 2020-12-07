@@ -216,17 +216,18 @@ def get_events(driver, params):
             except Exception:
                 linkDriver = ""
             idDriver = get_id_link_TR(params, linkDriver, "D")
+            strCircuit = items[it].find_element_by_xpath(
+                ".//span[contains(@class, 'circuit-name')]").get_attribute("innerHTML")
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" + params["year"] +
                 "-" + str(it+1) + "-" + idEvent,
-                "strEvent": items[it].find_element_by_xpath(
-                    ".//span[contains(@class, 'circuit-name')]").text,
+                "strEvent": items[it].find_element_by_xpath(".//h2").text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it+1),
                 "strDate": items[it].find_element_by_xpath(".//h5").text,
                 "idCircuit": idCircuit,
-                "strCircuit": items[it].find_element_by_xpath(".//h2").text,
+                "strCircuit": strCircuit,
                 "idWinner": idDriver,
                 "strResult": strResult,
                 "numSeason": parse_int(params["year"]),
