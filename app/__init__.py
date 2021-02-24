@@ -13,11 +13,8 @@ def create_app(configfile=None):
 
     app.config.from_object("app.config.Config")
 
-    sentry_sdk.init(
-        dsn="https://eaef5cda595b4281897db9b2dde23f28@o469906.ingest.sentry.io/5499976",
-        integrations=[FlaskIntegration()],
-        traces_sample_rate=1.0
-    )
+    sentry_sdk.init(app.config["SENTRY_URL"], integrations=[FlaskIntegration()],
+                    traces_sample_rate=app.config["SENTRY_RATE"])
 
     app.redis = redis.from_url(app.config['REDISTOGO_URL'])
     app.task_queue = rq.Queue(
