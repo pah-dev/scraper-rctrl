@@ -1,15 +1,14 @@
 from rq import Worker, Connection
 from flask.cli import FlaskGroup
-from app import create_app, db
-from app.common.tools import log
+from app import create_app
 
 app = create_app()
 
-with app.app_context():
-    try:
-        db.create_all(bind='importer')
-    except Exception as e:
-        log(e, True, 'create_all', app)
+# with app.app_context():
+#     try:
+#         db.create_all(bind='importer')
+#     except Exception as e:
+#         log(e, True, 'create_all', app)
 
 cli = FlaskGroup(create_app=create_app)
 
@@ -23,5 +22,4 @@ def run_worker():
 
 if __name__ == "__main__":
     cli()
-
     import app.worker
