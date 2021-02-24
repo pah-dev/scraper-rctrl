@@ -35,7 +35,7 @@ def run_scripts():
 
     if form.validate_on_submit():
         org = form.id_org.data
-        year = form.year.data
+        year = str(form.year.data)
         return job(org, year)
 
     return render_template('./run_scripts.html', form=form)
