@@ -16,5 +16,7 @@ class Config(object):
     REDISTOGO_URL = os.environ.get('REDISTOGO_URL')
     REDIS_QUEUES = os.environ.get("REDIS_QUEUES")
     REDIS_TTL = int(os.environ.get("REDIS_TTL", 10800))
+    RQ_DASHBOARD_REDIS_URL = os.environ.get('REDISTOGO_URL')
+    REDIS_URL = os.environ.get('REDIS_URL')
     SENTRY_URL = os.environ.get('SENTRY_URL')
     SENTRY_RATE = float(os.environ.get('SENTRY_RATE'))

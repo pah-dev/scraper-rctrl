@@ -17,6 +17,7 @@ from app.backend.jobs.int.mss_base import load_MSS
 from app.backend.jobs.int.mss_upd import upd_MSS
 from app.frontend import public_bp
 from app.frontend.forms import RunForm
+from app.backend.jobs.update import upd_CATS
 
 
 @public_bp.route('/')
@@ -39,6 +40,18 @@ def run_scripts():
         return job(org, year)
 
     return render_template('./run_scripts.html', form=form)
+
+
+@public_bp.route('/cats_upd/<int:year>', methods=['GET'])
+def cats_upd(year):
+    params = {}
+    params["urlApi"] = current_app.config["API_URL"]
+    params["year"] = year
+
+    ans = upd_CATS(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
 
 
 @public_bp.route('/mss_upd', methods=['GET'])

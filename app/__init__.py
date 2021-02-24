@@ -1,8 +1,8 @@
 import redis
 import rq
-import rqmonitor
-import rq_dashboard
-import rq_scheduler_dashboard
+# import rqmonitor
+# import rq_dashboard
+# import rq_scheduler_dashboard
 import sentry_sdk
 from flask import Flask
 from flask_bootstrap import Bootstrap
@@ -29,17 +29,17 @@ def create_app(configfile=None):
     from app.frontend import public_bp
     app.register_blueprint(public_bp)
 
-    app.config.from_object(rqmonitor.defaults)
-    app.config['RQ_MONITOR_REDIS_URL'] = app.config['REDISTOGO_URL']
-    app.register_blueprint(rqmonitor.monitor_blueprint, url_prefix="/rq")
+    # app.config.from_object(rqmonitor.defaults)
+    # app.config['RQ_MONITOR_REDIS_URL'] = app.config['REDISTOGO_URL']
+    # app.register_blueprint(rqmonitor.monitor_blueprint, url_prefix="/rq")
 
-    app.config.from_object(rq_dashboard.default_settings)
-    app.config['RQ_DASHBOARD_REDIS_URL'] = app.config['REDISTOGO_URL']
-    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rqd")
+    # app.config.from_object(rq_dashboard.default_settings)
+    # app.config['RQ_DASHBOARD_REDIS_URL'] = app.config['REDISTOGO_URL']
+    # app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rqd")
 
-    app.config.from_object(rq_scheduler_dashboard.default_settings)
-    app.register_blueprint(
-        rq_scheduler_dashboard.blueprint, url_prefix="/rqsd")
+    # app.config.from_object(rq_scheduler_dashboard.default_settings)
+    # app.register_blueprint(
+    #     rq_scheduler_dashboard.blueprint, url_prefix="/rqsd")
 
     return app
 
