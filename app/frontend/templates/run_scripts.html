@@ -1,0 +1,55 @@
+{%- extends "base.html" %}{% import "bootstrap/wtf.html" as wtf %} {% import
+"bootstrap/utils.html" as utils %} {% block content %}
+<div class="container">
+  <div class="col-md-12">
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div
+      class="alert alert-{{ category }} alert-dismissible fade show"
+      role="alert"
+    >
+      {{ message }}
+      <button
+        type="button"
+        class="close"
+        data-dismiss="alert"
+        aria-label="Close"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+    <div class="jumbotron">
+      <form
+        action=""
+        method="post"
+        enctype="multipart/form-data"
+        class="needs-validation"
+        novalidate
+      >
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          <div class="row">
+            <div class="col-md-4">
+              {{ wtf.form_field(form.id_org, class='form-control', placeholder=''
+              ) }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-8">
+              {{ wtf.form_field(form.year, class='form-control',
+              placeholder='') }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              {{ wtf.form_field(form.submit, class='btn btn-primary btn-block')
+              }}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{%- endblock %}

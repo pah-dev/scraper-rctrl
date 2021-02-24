@@ -16,8 +16,10 @@
         "titleBar.inactiveForeground": "#15202b99"
     },
     "peacock.color": "#f9e64f",
-    "python.pythonPath": "C:\\Users\\JPB\\AppData\\Local\\Programs\\Python\\Python38-32\\python.exe",
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.pythonPath": "d:\\DESA\\scraper-rctrl\\venv\\Scripts\\python.exe",
+    "python.formatting.autopep8Args": ["--ignore","E402"],
+    "python.linting.flake8Args": [
+        "--max-line-length=120",
+        "--ignore=E402,E501,E226",
+    ]
 }

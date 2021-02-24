@@ -1,26 +1,64 @@
-{# ``base.html`` is the template all our other templates derive from. While
-Flask-Bootstrap ships with its own base, it is good form to create a custom one
-for our app, as it allows customizing some aspects. Deriving from
-bootstap/base.html gives us a basic page scaffoling. You can find additional
-information about template inheritance at
-http://jinja.pocoo.org/docs/templates/#template-inheritance #} {%- extends
-"bootstrap/base.html" %} {# We also set a default title, usually because we
-might forget to set one. In our sample app, we will most likely just opt not to
-change it #} {% block title %}Sample App for Flask-Bootstrap{% endblock %} {#
-While we are at it, we also enable fixes for legacy browsers. First we import
-the necessary macros: #} {% import "bootstrap/fixes.html" as fixes %} {# Then,
-inside the head block, we apply these. To not replace the header, ``super()`` is
-used: #} {% block head %} {{super()}} {#- Docs:
-http://pythonhosted.org/Flask-Bootstrap/macros.html#fixes The sample application
-already contains the required static files. #} {{fixes.ie8()}} {%- endblock %}
-{# Adding our own CSS files is also done here. Check the documentation at
-http://pythonhosted.org/Flask-Bootstrap/basic-usage.html#available-blocks for an
-overview. #} {% block styles -%} {{super()}} {# do not forget to call super or
-Bootstrap's own stylesheets will disappear! #}
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="{{url_for('static', filename='app.css')}}"
-/>
-{% endblock %} {# Finally, round things out with navigation #} {% block navbar
-%} {{nav.frontend_top.render()}} {% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{url_for('static', filename='app.css')}}"
+    />
+    <title>{% block title %}SCRAPER{% endblock %}</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">SCRAPER</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarText"
+        aria-controls="navbarText"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">Inicio</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <!-- <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+      integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+      crossorigin="anonymous"
+    ></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"
+      integrity="sha512-WNLxfP/8cVYL9sj8Jnp6et0BkubLP31jhTG9vhL/F5uEZmg5wEzKoXp1kJslzPQWwPT1eyMiSxlKCgzHLOTOTQ=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../static/importer.js"></script>
+  </body>
+</html>

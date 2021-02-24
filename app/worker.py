@@ -1,14 +1,10 @@
-import redis
-from rq import Worker, Queue, Connection
-from settings import REDISTOGO_URL
+from flask import current_app
+from rq import Worker, Connection
 
-listen = ['default']
 
-redis_url = REDISTOGO_URL
-
-conn = redis.from_url(redis_url)
+conn = current_app.redis
 
 if __name__ == '__main__':
     with Connection(conn):
-        worker = Worker(list(map(Queue, listen)))
+        worker = Worker(current_app.config["REDIS_QUEUES"])
         worker.work()
