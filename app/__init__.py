@@ -7,18 +7,12 @@ from flask_bootstrap import Bootstrap
 from sentry_sdk.integrations.flask import FlaskIntegration
 from rq_scheduler import Scheduler
 
-sentry_sdk.init(
-    dsn="https://eaef5cda595b4281897db9b2dde23f28@o469906.ingest.sentry.io/5499976",
-    integrations=[FlaskIntegration()],
-    traces_sample_rate=1.0
-)
-
 
 def create_app(configfile=None):
     app = Flask(__name__)
 
     app.config.from_object("app.config.Config")
-    
+
     sentry_sdk.init(
         dsn="https://eaef5cda595b4281897db9b2dde23f28@o469906.ingest.sentry.io/5499976",
         integrations=[FlaskIntegration()],
