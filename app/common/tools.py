@@ -58,7 +58,7 @@ def api_request(method, url, data=None):
                     r = requests.put(url, json=data)
             else:
                 return "Request with empty data"
-        logger(r.json())
+        # logger(r.json())
         return r.json()
     except Exception as e:
         logger(e, True, method.upper(), data)
@@ -114,16 +114,16 @@ def get_link_CMSS(td):
 def get_id_link_MSS(urlBase, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
-        ret = link.replace("/career", "").replace(urlBase+"/drivers/", "")
+        ret = link.replace("/career", "").replace(urlBase + "/drivers/", "")
     elif(type == 'T'):      # TEAM
-        ret = link.replace("/history", "").replace(urlBase+"/teams/", "")
+        ret = link.replace("/history", "").replace(urlBase + "/teams/", "")
     elif(type == 'E'):       # EVENT
         ret = link.replace("/classification",
-                           "").replace(urlBase+"/results/", "")
+                           "").replace(urlBase + "/results/", "")
     elif (type == 'C'):     # CIRCUIT
-        ret = link.replace(urlBase+"/venues/", "")
+        ret = link.replace(urlBase + "/venues/", "")
     elif (type == 'W'):     # COUNTRY
-        ret = link.replace(urlBase+"/countries/", "")
+        ret = link.replace(urlBase + "/countries/", "")
     return ret
 
 
@@ -131,21 +131,21 @@ def get_id_link_ACTC(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
         ret = link.replace(".html", "").replace(
-            params["urlBase"]+"/"+params["catOrigen"]+"/pilotos/" +
-            params["year"]+"/", "")
+            params["urlBase"] + "/" + params["catOrigen"] + "/pilotos/" +
+            params["year"] + "/", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(
-            "/history", "").replace(params["urlBase"]+"/teams/", "")
+            "/history", "").replace(params["urlBase"] + "/teams/", "")
     elif(type == 'E'):       # EVENT
         ret = link.replace(".html", "").replace(
-            params["urlBase"]+"/"+params["catOrigen"] +
-            "/carrera-online/"+params["year"]
+            params["urlBase"] + "/" + params["catOrigen"] +
+            "/carrera-online/" + params["year"]
             + "/tanda-finalizada/", "")
     elif (type == 'C'):     # CIRCUIT
         ret = link.replace(".html", "").replace(
-            params["urlBase"]+"/"+params["catOrigen"]+"/circuitos/", "")
+            params["urlBase"] + "/" + params["catOrigen"] + "/circuitos/", "")
     elif (type == 'W'):     # COUNTRY
-        ret = link.replace(params["urlBase"]+"/countries/", "")
+        ret = link.replace(params["urlBase"] + "/countries/", "")
     return ret
 
 
@@ -169,7 +169,7 @@ def get_id_link_TC(params, link, type):
         ret = link.replace(".jpg", "").replace(
             "/images/autodromos/aut-", "").replace("http://XXXX.com.ar", "")
     elif (type == 'W'):     # COUNTRY
-        ret = link.replace(params["urlBase"]+"/countries/", "")
+        ret = link.replace(params["urlBase"] + "/countries/", "")
     return ret
 
 
@@ -218,11 +218,11 @@ def get_id_link_CARX(params, link, type):
 def get_id_link_APTP(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER 02/riestra
-        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace("c1", "").replace("c2", "").replace("c3", "").replace(
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace("c1", "").replace("c2", "").replace("c3", "").replace(
             "m.jpg", "").replace(".jpg", "").replace("2020/", "").replace("/", "", 9).replace("-", "_", 9).replace("ok", "")
         ret = re.sub("\d+", "", ret)
     elif(type == 'E'):       # EVENT
-        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(
             ".jpg", "").replace(".png", "").replace("2020/", "").replace(
                 "/", "_", 9).replace("-", "_", 9).replace("ok", "")
     return ret
@@ -234,11 +234,11 @@ def get_id_link_AUVO(params, link, type):
         ret = link.replace(params["urlBase"], "").replace(
             "/", "", 4).replace("-", "_", 9).replace("ok", "")
     elif(type == 'T'):      # TEAM
-        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(
             ".jpg", "").replace(".png", "").replace("-min", "").replace(
                 "/", "_", 9).replace("-", "_", 9)
     elif(type == 'E'):       # EVENT
-        ret = link.replace(params["urlBase"]+"/wp-content/uploads/", "").replace(
+        ret = link.replace(params["urlBase"] + "/wp-content/uploads/", "").replace(
             ".jpg", "").replace(".png", "").replace("Horarios-blanco-", "").replace(
                 "/", "_", 9).replace("-", "_", 9)
     return ret
@@ -298,71 +298,71 @@ def get_brand_logo(txt: str):
     urlBase4 = "http://motorcycle-brands.com/wp-content/uploads/"
     txt = txt.upper()
     if any(word in txt for word in ["AUDI"]):
-        ret = urlBase+"logo-audi-sm.png"
+        ret = urlBase + "logo-audi-sm.png"
     elif ("APRILIA" in txt):
-        ret = urlBase4+"2016/08/Aprilia-logo-500x188.png"
+        ret = urlBase4 + "2016/08/Aprilia-logo-500x188.png"
     elif ("BETA" in txt):
-        ret = urlBase4+"2017/10/Beta-Logo-500x393.png"
+        ret = urlBase4 + "2017/10/Beta-Logo-500x393.png"
     elif any(word in txt for word in ["BMW", "B.M.W."]):
-        ret = urlBase+"logo-bmw-sm.png"
+        ret = urlBase + "logo-bmw-sm.png"
     elif any(word in txt for word in ["CHEV", "CRUZE", "ONIX", "CORSA", "CELTA"]):
-        ret = urlBase+"logo-chevrolet-sm.png"
+        ret = urlBase + "logo-chevrolet-sm.png"
     elif any(word in txt for word in ["CITROEN", "CITROËN", "C4", "DS3"]):
-        ret = urlBase+"logo-citroen-sm.png"
+        ret = urlBase + "logo-citroen-sm.png"
     elif any(word in txt for word in ["DODGE"]):
-        ret = urlBase3+"logo-dodge-xs.png"
+        ret = urlBase3 + "logo-dodge-xs.png"
     elif ("DUCATI" in txt):
-        ret = urlBase4+"2016/07/ducati-logo-500x188.png"
+        ret = urlBase4 + "2016/07/ducati-logo-500x188.png"
     elif any(word in txt for word in ["FIAT", "TIPO", "PALIO", "ARGO", "MOBI"]):
-        ret = urlBase+"logo-fiat-sm.png"
+        ret = urlBase + "logo-fiat-sm.png"
     elif any(word in txt for word in ["FORD", "FOCUS", "FIESTA", "KINETIC"]):
-        ret = urlBase+"logo-ford-sm.png"
+        ret = urlBase + "logo-ford-sm.png"
     elif any(word in txt for word in ["GEELY"]):
-        ret = urlBase+"logo-geely-sm.png"
+        ret = urlBase + "logo-geely-sm.png"
     elif ("HRC" in txt):
-        ret = urlBase4+"2016/08/honda-motorcycle-logo-500x188.png"
+        ret = urlBase4 + "2016/08/honda-motorcycle-logo-500x188.png"
     elif any(word in txt for word in ["HONDA", "CIVIC"]):
-        ret = urlBase2+"logo_honda.png"
+        ret = urlBase2 + "logo_honda.png"
     elif ("HUSQVARNA" in txt):
-        ret = urlBase4+"2016/08/Husqvarna-logo-500x188.png"
+        ret = urlBase4 + "2016/08/Husqvarna-logo-500x188.png"
     elif any(word in txt for word in ["HYUNDAI", "VELOSTER"]):
         ret = ""
     elif any(word in txt for word in ["KAWASAKI", "NINJA"]):
-        ret = urlBase4+"2016/08/Kawasaki-logo-500x188.png"
+        ret = urlBase4 + "2016/08/Kawasaki-logo-500x188.png"
     elif any(word in txt for word in ["KIA", "CERATO"]):
         ret = ""
     elif ("KTM" in txt):
-        ret = urlBase4+"2016/08/KTM-logo-500x188.png"
+        ret = urlBase4 + "2016/08/KTM-logo-500x188.png"
     elif any(word in txt for word in ["MERCEDES", "BENZ"]):
-        ret = urlBase+"logo-mbenz-sm.png"
+        ret = urlBase + "logo-mbenz-sm.png"
     elif any(word in txt for word in ["MITSU", "LANCER"]):
-        ret = urlBase+"logo-mitsubishi-sm.png"
+        ret = urlBase + "logo-mitsubishi-sm.png"
     elif any(word in txt for word in ["MV AGUSTA", "AGUSTA"]):
-        ret = urlBase4+"2017/10/mv-agusta-logo-500x345.png"
+        ret = urlBase4 + "2017/10/mv-agusta-logo-500x345.png"
     elif any(word in txt for word in ["NISSAN", "MARCH"]):
-        ret = urlBase3+"logo-nissan-xs.png"
+        ret = urlBase3 + "logo-nissan-xs.png"
     elif any(word in txt for word in ["PEUGEOT", "408", "208"]):
-        ret = urlBase+"logo-peugeot-sm.png"
+        ret = urlBase + "logo-peugeot-sm.png"
     elif ("POLARIS" in txt):
-        ret = urlBase4+"2017/01/Polaris-Logo-500x276.png"
+        ret = urlBase4 + "2017/01/Polaris-Logo-500x276.png"
     elif any(word in txt for word in ["PORSCHE", "911"]):
-        ret = urlBase+"logo-porsche-sm.png"
+        ret = urlBase + "logo-porsche-sm.png"
     elif any(word in txt for word in ["RENAULT", "CLIO"]):
-        ret = urlBase2+"logo_renault.png"
+        ret = urlBase2 + "logo_renault.png"
     elif any(word in txt for word in ["SUZUKI"]):
-        ret = urlBase4+"2016/08/suzuki-motorcycle-logo-500x188.png"
+        ret = urlBase4 + "2016/08/suzuki-motorcycle-logo-500x188.png"
     elif ("TORINO" in txt):
-        ret = urlBase3+"logo-torino-xs.png"
+        ret = urlBase3 + "logo-torino-xs.png"
     elif any(word in txt for word in ["TOYOTA", "COROLLA", "ETIOS"]):
-        ret = urlBase+"logo-toyota-sm.png"
+        ret = urlBase + "logo-toyota-sm.png"
     elif any(word in txt for word in ["TRIUMPH", "NTS"]):
-        ret = urlBase4+"2016/08/triumph-logo-500x188.png"
+        ret = urlBase4 + "2016/08/triumph-logo-500x188.png"
     elif any(word in txt for word in ["VW", "VOLKS", "VENTO", "GOL", "VOYAGE"]):
-        ret = urlBase+"logo-vw-sm.png"
+        ret = urlBase + "logo-vw-sm.png"
     elif ("VOLVO" in txt):
-        ret = urlBase+"logo-volvo-sm.png"
+        ret = urlBase + "logo-volvo-sm.png"
     elif ("YAMAHA" in txt):
-        ret = urlBase4+"2016/08/Yamaha-logo-500x188.png"
+        ret = urlBase4 + "2016/08/Yamaha-logo-500x188.png"
     return ret
 
 
