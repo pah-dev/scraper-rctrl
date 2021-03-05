@@ -20,35 +20,44 @@
     </div>
     {% endfor %} {% endif %} {% endwith %}
     <div class="jumbotron">
-      <form
-        action=""
-        method="post"
-        enctype="multipart/form-data"
-        class="needs-validation"
-        novalidate
-      >
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-          <div class="row">
-            <div class="col-md-4">
-              {{ wtf.form_field(form.id_org, class='form-control', placeholder=''
-              ) }}
+      <div class="row align-items-center">
+        <div class="col-md-6 offset-3">
+          <form
+            action=""
+            method="post"
+            enctype="multipart/form-data"
+            class="needs-validation"
+            novalidate
+          >
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-10 offset-1">
+                  {{ wtf.form_field(form.id_org, class='form-control',
+                  placeholder='' ) }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="row"><br /></div>
+                  {{ wtf.form_field(form.manual, class='form-control',
+                  placeholder='') }}
+                </div>
+                <div class="col-md-6">
+                  {{ wtf.form_field(form.year, class='form-control',
+                  placeholder='') }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  {{ wtf.form_field(form.submit, class='btn btn-primary
+                  btn-block') }}
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-8">
-              {{ wtf.form_field(form.year, class='form-control',
-              placeholder='') }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              {{ wtf.form_field(form.submit, class='btn btn-primary btn-block')
-              }}
-            </div>
-          </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

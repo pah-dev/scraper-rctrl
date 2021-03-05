@@ -17,7 +17,7 @@ from app.backend.jobs.int.mss_base import load_MSS
 from app.backend.jobs.int.mss_upd import upd_MSS
 from app.frontend import public_bp
 from app.frontend.forms import RunForm
-from app.backend.jobs.update import upd_CATS
+from app.backend.jobs.update import create_career, fix_drivers, upd_CATS
 
 
 @public_bp.route('/')
@@ -37,6 +37,9 @@ def run_scripts():
     if form.validate_on_submit():
         org = form.id_org.data
         year = str(form.year.data)
+        if(form.manual.data):
+            return load_org(org, year)
+
         return job(org, year)
 
     return render_template('./run_scripts.html', form=form)
@@ -54,11 +57,27 @@ def cats_upd(year):
     return str(json_data)
 
 
-@public_bp.route('/mss_upd', methods=['GET'])
-def mss_upd():
+@public_bp.route('/careers', methods=['GET'])
+def create_careers():
+    ans = create_career()
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@public_bp.route('/fix_drivers', methods=['GET'])
+def fix_driver():
+    ans = fix_drivers()
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@public_bp.route('/mss_upd/<year>', methods=['GET'])
+def mss_upd(year):
     params = {}
     params["urlApi"] = current_app.config["API_URL"]
-    params["year"] = request.args.get('year', default="2021")
+    params["year"] = year
 
     ans = upd_MSS(params)
 

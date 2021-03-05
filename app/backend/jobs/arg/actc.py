@@ -8,7 +8,7 @@ def load_ACTC(params):
     ret = {}
     params["urlBase"] = "https://www.actc.org.ar"
 
-    data = api_request("get", params["urlApi"]+"/org/find/actc")
+    data = api_request("get", params["urlApi"] + "/org/find/actc")
     if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -33,18 +33,22 @@ def run_script_ACTC(params):
     # ret["drivers"] = d_scrap
     t_scrap = get_teams(d_scrap, params)
     # ret["teams"] = t_scrap
-    t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
-                         + "/" + params["year"])
+    t_base = api_request(
+        "get", params["urlApi"] + "/team/ids/" + params["catId"] + "/" + params["year"])
     t_clean = clean_duplicate("idTeam", t_scrap, t_base)
+    # ret["teams"] = api_request(
+    #     "post", params["urlApi"] + "/team/create", t_clean)
     ret["teams"] = api_request(
-        "post", params["urlApi"]+"/team/create", t_clean)
+        "put", params["urlApi"] + "/team/update/0", t_clean)
 
     time.sleep(5)
-    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
-                         + "/" + params["year"])
+    d_base = api_request(
+        "get", params["urlApi"] + "/driver/ids/" + params["catId"] + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+    # ret["drivers"] = api_request(
+    #     "post", params["urlApi"]+"/driver/create", d_clean)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", d_clean)
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
 
     url = "/" + params["catOrigen"] + "/calendario/" + params["year"] + ".html"
     driver.get(params["urlBase"] + url)
@@ -53,28 +57,28 @@ def run_script_ACTC(params):
     # ret["events"] = events
     time.sleep(5)
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/actc")
+        "get", params["urlApi"] + "/circuit/ids/actc")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", c_clean)
+        "post", params["urlApi"] + "/circuit/create", c_clean)
 
     time.sleep(5)
-    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
-                         + "/" + params["year"])
+    e_base = api_request(
+        "get", params["urlApi"] + "/event/ids/" + params["catId"] + "/" + params["year"])
     e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", e_clean)
+        "post", params["urlApi"] + "/event/create", e_clean)
 
     url = "/" + params["catOrigen"] + "/campeonato/" + params["year"] + ".html"
     driver.get(params["urlBase"] + url)
 
     time.sleep(5)
-    ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
-                          + "/" + params["year"])
+    ch_base = api_request(
+        "get", params["urlApi"] + "/champ/ids/" + params["catId"] + "/" + params["year"])
     chd_scrap = get_champD(driver, params)
     chd_clean = clean_duplicate_ch("idChamp", chd_scrap, ch_base)
     ret["champD"] = api_request(
-        "post", params["urlApi"]+"/champ/create", chd_clean)
+        "post", params["urlApi"] + "/champ/create", chd_clean)
 
     driver.close()
 
@@ -101,24 +105,20 @@ def get_drivers(driver, params):
             if("avatar-torso" in thumb):
                 thumb = ""
             pilot = {
-                "idPlayer": params["catRCtrl"].upper() + "-"
-                + idDriver,
+                "idPlayer": params["catRCtrl"].upper() + "-" + idDriver,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idDriver,
                 "strPlayer": strPlayer.replace("<br>", "", 2).replace(
                     ",", ", ").strip(),
                 "strNumber": items[it].find_element_by_xpath(
                     ".//div[@class='car-data']/span").text,
-                "idTeam": params["catRCtrl"].upper() + "-" +
-                team.replace(" ", "_", 10),
+                "idTeam": params["catRCtrl"].upper() + "-" + team.replace(" ", "_", 10),
                 "strTeam": team,
                 "numSeason": parse_int(params["year"]),
                 "strThumb": thumb,
                 "strCutout": thumb,
-                "strFanart4": params["urlBase"] +
-                items[it].find_element_by_xpath(
-                    ".//div[@class='logo']/img").get_attribute(
-                        "data-original"),
+                "strFanart4": params["urlBase"] + items[it].find_element_by_xpath(
+                    ".//div[@class='logo']/img").get_attribute("data-original"),
                 "strRSS": linkDriver,
             }
             pilots.append(pilot)
@@ -187,13 +187,12 @@ def get_events(driver, params):
                 linkDriver = ""
             idDriver = get_id_link_ACTC(params, linkDriver, "D")
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" +
-                params["year"] + "-" + str(it+1)+"-"+idEvent,
+                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + idEvent,
                 "strEvent": items[it].find_element_by_xpath(
                     ".//div[@class='hd']/h2").text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
-                "intRound": str(it+1),
+                "intRound": str(it + 1),
                 "strDate": items[it].find_element_by_xpath(
                     ".//div[@class='date']").text,
                 "idWinner": idDriver,
@@ -255,7 +254,7 @@ def get_champD(driver, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
+            "idChamp": params["catRCtrl"].upper() + "-" + params["year"] + "-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],

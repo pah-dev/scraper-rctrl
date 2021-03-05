@@ -130,9 +130,11 @@ def get_id_link_MSS(urlBase, link, type):
 def get_id_link_ACTC(params, link, type):
     ret = ""
     if(type == 'D'):        # DRIVER
-        ret = link.replace(".html", "").replace(
+        ret = link.replace(
             params["urlBase"] + "/" + params["catOrigen"] + "/pilotos/" +
             params["year"] + "/", "")
+        ret = re.sub("\d", "", ret)
+        ret = ret.replace("_.html", "")
     elif(type == 'T'):      # TEAM
         ret = link.replace(
             "/history", "").replace(params["urlBase"] + "/teams/", "")

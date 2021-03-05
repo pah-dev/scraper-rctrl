@@ -7,7 +7,7 @@ def load_CUR(params):
     ret = {}
     params["urlBase"] = "https://www.cur.com.uy"
 
-    data = api_request("get", params["urlApi"]+"/org/find/cur")
+    data = api_request("get", params["urlApi"] + "/org/find/cur")
     if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -29,11 +29,13 @@ def run_script_CUR(params):
 
     d_scrap = get_drivers(driver, params)
     # ret["drivers"] = d_scrap
-    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+    d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
                          + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+    # ret["drivers"] = api_request(
+    #     "post", params["urlApi"]+"/driver/create", d_clean)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", d_clean)
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
 
     url = "https://www.cur.com.uy/calendario-2020"
     driver.get(url)
@@ -42,17 +44,17 @@ def run_script_CUR(params):
     e_scrap = get_events(driver, params)
     # ret["events"] = events
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/cur")
+        "get", params["urlApi"] + "/circuit/ids/cur")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", c_clean)
+        "post", params["urlApi"] + "/circuit/create", c_clean)
 
     time.sleep(5)
-    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+    e_base = api_request("get", params["urlApi"] + "/event/ids/" + params["catId"]
                          + "/" + params["year"])
     e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", e_clean)
+        "post", params["urlApi"] + "/event/create", e_clean)
 
     # url = "/campeonato-" + catOrigen + "/"
     # driver.get(urlBase + url)
@@ -120,11 +122,11 @@ def get_events(driver, params):
                 "//img[@id='comp-kebyzopeimgimage']").get_attribute("src")
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" + params["year"] +
-                "-" + str(it+1) + "-" + idEvent,
+                "-" + str(it + 1) + "-" + idEvent,
                 "strEvent": text[0].strip(),
                 "idCategory": params["catRCtrl"],
-                "idRCtrl": str(it+1) + "_" + idEvent,
-                "intRound": str(it+1),
+                "idRCtrl": str(it + 1) + "_" + idEvent,
+                "intRound": str(it + 1),
                 "strDate": text[2].strip(),
                 "idCircuit": "CUR_" + text[1].strip(),
                 "strCircuit": text[1].strip(),
@@ -175,12 +177,12 @@ def get_champD(driver, params):
             line = {
                 "idPlayer": idDriver.lower(),
                 "position": parse_int(tds[0].text),
-                "totalPoints": parse_float(tds[len(tds)-1].text),
+                "totalPoints": parse_float(tds[len(tds) - 1].text),
             }
             points += line["totalPoints"]
             data.append(line)
             pilot = {
-                "idPlayer": params["catRCtrl"].upper()+"-"+idDriver.lower(),
+                "idPlayer": params["catRCtrl"].upper() + "-" + idDriver.lower(),
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idDriver.lower(),
                 "strPlayer": (text[1].strip() + " " + text[0].strip()).title(),
@@ -189,7 +191,7 @@ def get_champD(driver, params):
             }
             pilots.append(pilot)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"D",
+            "idChamp": params["catRCtrl"].upper() + "-" + params["year"] + "D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],

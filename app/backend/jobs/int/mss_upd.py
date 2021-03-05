@@ -8,7 +8,7 @@ from app.backend.jobs.int.mss_circuit import run_script_circuits
 def upd_MSS(params):
     ret = {}
     params["urlBase"] = "https://results.motorsportstats.com"
-    params["updType"] = "eveeeents"
+    params["updType"] = "full"
 
     data = api_request("get", params["urlApi"] + "/org/find/sec/int")
     try:
@@ -41,7 +41,7 @@ def run_script_MSS(params):
 
     if("D" in params["chTypes"]):
         res = api_request(
-            "get", params["urlApi"] + "/champ/cat /" + params["catId"] + "/" +
+            "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
             params["year"] + "/D")
 
         url = "/series/" + params["catOrigen"] + \
@@ -50,37 +50,37 @@ def run_script_MSS(params):
 
         if(res):
             champId = res["_id"]
-            sumPoints = res["sumPoints"]
+            sumPoints = res.get("sumPoints", 0)
             data = get_champD(driver, params)
-            if(len(data) > 0 and data["sumPoints"] > sumPoints):
+            if(len(data) > 0 and data.get("sumPoints", 0) > sumPoints):
                 ret["champD"] = api_request(
                     "put", params["urlApi"] + "/champ/update/" + champId, data)
 
     if("C" in params["chTypes"]):
         time.sleep(5)
         res = api_request(
-            "get", params["urlApi"] + "/champ/cat /" + params["catId"] + "/" +
+            "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
             params["year"] + "/C")
 
         if(res):
             champId = res["_id"]
-            sumPoints = res["sumPoints"]
+            sumPoints = res.get("sumPoints", 0)
             data = get_champC(driver, params)
-            if(len(data) > 0 and data["sumPoints"] > sumPoints):
+            if(len(data) > 0 and data.get("sumPoints", 0) > sumPoints):
                 ret["champT"] = api_request(
                     "put", params["urlApi"] + "/champ/update/" + champId, data)
 
-    if("D" in params["chTypes"]):
+    if("T" in params["chTypes"]):
         time.sleep(5)
         res = api_request(
-            "get", params["urlApi"] + "/champ/cat /" + params["catId"] + "/" +
+            "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
             params["year"] + "/T")
 
         if(res):
             champId = res["_id"]
-            sumPoints = res["sumPoints"]
+            sumPoints = res.get("sumPoints", 0)
             data = get_champT(driver, params)
-            if(len(data) > 0 and data["sumPoints"] > sumPoints):
+            if(len(data) > 0 and data.get("sumPoints", 0) > sumPoints):
                 ret["champT"] = api_request(
                     "put", params["urlApi"] + "/champ/update/" + champId, data)
 
@@ -88,7 +88,7 @@ def run_script_MSS(params):
     if(params["updType"] == "events" or params["updType"] == "full"):
         time.sleep(5)
         res = api_request(
-            "get", params["urlApi"] + "/event/cat /" + params["catId"] + "/" +
+            "get", params["urlApi"] + "/event/cat/" + params["catId"] + "/" +
             params["year"])
 
         events = get_events(driver, params)
@@ -409,6 +409,7 @@ def get_champT(driver, params):
                 logger(e, True, "Championship", btn)
                 pass
         try:
+            btn_show = None
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
                     '//button[@class="hFZZS"]'))
@@ -465,7 +466,7 @@ def get_champC(driver, params):
     champ = {}
     data = []
     try:
-        print("::: CHAMPIONSHIP TEAMS")
+        print("::: CHAMPIONSHIP CONSTRUCTORS")
         time.sleep(5)
         try:
             btn_show = WebDriverWait(driver, 30).until(

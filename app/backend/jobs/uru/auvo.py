@@ -9,7 +9,7 @@ def load_AUVO(params):
     ret = {}
     params["urlBase"] = "http://www.auvo.com.uy"
 
-    data = api_request("get", params["urlApi"]+"/org/find/auvo")
+    data = api_request("get", params["urlApi"] + "/org/find/auvo")
     if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -33,24 +33,26 @@ def run_script_AUVOCat(params):
     driver.get("https://speedhive.mylaps.com/Organizations/95827")
     driver.get("https://speedhive.mylaps.com/Events/1814191")
     if(params["catRCtrl"] == 'uyst'):
-        driver.get(url+"5866106")
+        driver.get(url + "5866106")
     elif(params["catRCtrl"] == 'uyse'):
-        driver.get(url+"5866101")
+        driver.get(url + "5866101")
     elif(params["catRCtrl"] == 'uyth'):
-        driver.get(url+"5865717")
+        driver.get(url + "5865717")
     elif(params["catRCtrl"] == 'uyss'):
-        driver.get(url+"5865709")
+        driver.get(url + "5865709")
     else:
         driver.close()
         return ret
 
     d_scrap = get_drivers(driver, params)
     # ret["drivers"] = data
-    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
+    d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
                          + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+    # ret["drivers"] = api_request(
+    #     "post", params["urlApi"]+"/driver/create", d_clean)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", d_clean)
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
 
     # time.sleep(5)
     # t_data = get_teams(driver, params)
@@ -77,17 +79,17 @@ def run_script_AUVO(params):
     # ret["circuits"] = e_scrap[0]
     # ret["events"] = e_scrap[1]
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/auvo")
+        "get", params["urlApi"] + "/circuit/ids/auvo")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", c_clean)
+        "post", params["urlApi"] + "/circuit/create", c_clean)
 
     time.sleep(5)
-    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
+    e_base = api_request("get", params["urlApi"] + "/event/ids/" + params["catId"]
                          + "/" + params["year"])
     e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", e_clean)
+        "post", params["urlApi"] + "/event/create", e_clean)
 
     driver.close()
 
@@ -141,7 +143,7 @@ def get_driversST(driver, params):
             strPlayer = ""
             strNumber = txt[0]
             for t in range(1, len(txt)):
-                strPlayer += txt[t]+" "
+                strPlayer += txt[t] + " "
             thumb = items[it].find_element_by_xpath(
                 ".//img").get_attribute("src"),
             pilot = {
@@ -181,7 +183,7 @@ def get_teamsST(driver, params):
             txt = idTeam.split("_")
             strTeam = ""
             for t in range(2, len(txt)):
-                strTeam += txt[t]+" "
+                strTeam += txt[t] + " "
             team = {
                 "idTeam": idTeam,
                 "strTeam": "",
@@ -224,15 +226,15 @@ def get_events(driver, params):
             linkCircuit = tds[11].get_attribute("href")
             if(linkCircuit == ""):
                 linkCircuit = thumb
-            idCircuit = "AUVO-"+params["year"]+"-"+str(it+1)
-            strCircuit = "AUVO-"+str(it+1)
+            idCircuit = "AUVO-" + params["year"] + "-" + str(it + 1)
+            strCircuit = "AUVO-" + str(it + 1)
             event = {
                 "idEvent": params["catRCtrl"].upper() + "-" +
-                params["year"] + "-" + str(it+1)+"-"+idEvent,
-                "strEvent": "Fecha #"+str(it+1),
+                params["year"] + "-" + str(it + 1) + "-" + idEvent,
+                "strEvent": "Fecha #" + str(it + 1),
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
-                "intRound": str(it+1),
+                "intRound": str(it + 1),
                 "idCircuit": idCircuit,
                 "strCircuit": "AUVO",
                 "numSeason": parse_int(params["year"]),
@@ -288,7 +290,7 @@ def get_champD(driver, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]-"D",
+            "idChamp": params["catRCtrl"].upper() + "-" + params["year"] - "D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],

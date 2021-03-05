@@ -8,7 +8,7 @@ def load_APAT(params):
     ret = {}
     params["urlBase"] = "http://www.apat.org.ar"
 
-    data = api_request("get", params["urlApi"]+"/org/find/apat")
+    data = api_request("get", params["urlApi"] + "/org/find/apat")
     if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -31,18 +31,33 @@ def run_script_APAT(params):
 
     d_scrap = get_drivers(driver, params)
     # ret["drivers"] = pilots
-    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
-                         + "/" + params["year"])
+    d_base = api_request(
+        "get", params["urlApi"] + "/driver/ids/" + params["catId"] + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", d_scrap[0], d_base)
-    ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", d_clean)
+
+    time.sleep(2)
+    t_scrap = get_teams(d_scrap[0], params)
+    # ret["teams"] = t_scrap
+    t_base = api_request(
+        "get", params["urlApi"] + "/team/ids/" + params["catId"] + "/" + params["year"])
+    t_clean = clean_duplicate("idTeam", t_scrap, t_base)
+    # ret["teams"] = api_request(
+    #     "post", params["urlApi"] + "/team/create", t_clean)
+    ret["teams"] = api_request(
+        "put", params["urlApi"] + "/team/update/0", t_clean)
 
     time.sleep(5)
-    ch_base = api_request("get", params["urlApi"]+"/champ/ids/"+params["catId"]
-                          + "/" + params["year"])
+    # ret["drivers"] = api_request(
+    #     "post", params["urlApi"] + "/driver/create", d_clean)
+    ret["drivers"] = api_request(
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
+
+    time.sleep(5)
+    ch_base = api_request(
+        "get", params["urlApi"] + "/champ/ids/" + params["catId"] + "/" + params["year"])
     chd_clean = clean_duplicate_ch("idChamp", d_scrap[1], ch_base)
     ret["champD"] = api_request(
-        "post", params["urlApi"]+"/champ/create", chd_clean)
+        "post", params["urlApi"] + "/champ/create", chd_clean)
 
     url = "/calendario/" + params["year"]
     driver.get(params["urlBase"] + url)
@@ -50,11 +65,11 @@ def run_script_APAT(params):
     time.sleep(5)
     e_scrap = get_events(driver, params)
     # ret["events"] = events
-    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
-                         + "/" + params["year"])
+    e_base = api_request(
+        "get", params["urlApi"] + "/event/ids/" + params["catId"] + "/" + params["year"])
     e_clean = clean_duplicate("idEvent", e_scrap, e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", e_clean)
+        "post", params["urlApi"] + "/event/create", e_clean)
 
     url = "/circuitos/todos"
     driver.get(params["urlBase"] + url)
@@ -63,10 +78,10 @@ def run_script_APAT(params):
     c_scrap = get_circuits(driver, params)
     # ret["circuits"] = circuits
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/apat")
+        "get", params["urlApi"] + "/circuit/ids/apat")
     c_clean = clean_duplicate("idCircuit", c_scrap, c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", c_clean)
+        "post", params["urlApi"] + "/circuit/create", c_clean)
 
     driver.close()
 
@@ -85,7 +100,7 @@ def get_drivers(driver, params):
                 "//tbody/tr[@class='TabResData']")
         )
         points = 0
-        for it in range(0, len(items)-1):
+        for it in range(0, len(items) - 1):
             tds = items[it].find_elements_by_xpath("./td")
             thumb = tds[0].find_element_by_xpath(".//img").get_attribute("src")
             if("sin_foto" in thumb or "sin_foto" in thumb):
@@ -96,16 +111,17 @@ def get_drivers(driver, params):
             idDriver = tds[2].text + "_" + strPlayer.replace(" ", "_", 9)
             text = text[1].strip().replace("  ", "@", 1).split("@")
             strTeam = text[0].strip()
+            idTeam = strTeam.lower().replace(" ", "_", 9)
             strBirth = ""
             if(len(text) > 1):
                 strBirth = text[1].strip()
             pilot = {
-                "idPlayer": params["catRCtrl"].upper() + "-"
-                + idDriver,
+                "idPlayer": params["catRCtrl"].upper() + "-" + idDriver,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idDriver,
                 "strPlayer": strPlayer,
                 "strNumber": tds[2].text,
+                "idTeam": params["catRCtrl"].upper() + "-" + idTeam,
                 "strTeam": strTeam,
                 "strTeam2": tds[5].text,
                 "dateBorn": tds[8].text,
@@ -121,13 +137,13 @@ def get_drivers(driver, params):
             pilots.append(pilot)
             line = {
                 "idPlayer": idDriver,
-                "position": it+1,
+                "position": it + 1,
                 "totalPoints": parse_float(tds[3].text),
             }
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
+            "idChamp": params["catRCtrl"].upper() + "-" + params["year"] + "-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],
@@ -146,6 +162,31 @@ def get_drivers(driver, params):
         return "::: ERROR DRIVERS :::"
 
 
+def get_teams(data, params):
+    teams = []
+    teamList = []
+    try:
+        print("::: TEAMS")
+        for i in range(0, len(data)):
+            team = {
+                "idTeam": data[i]["idTeam"],
+                "strTeam": data[i]["strTeam"],
+                "idCategory": params["catRCtrl"],
+                "idRCtrl": data[i]["idTeam"],
+                "numSeason": parse_int(params["year"]),
+                "strGender": "T",
+            }
+            if(data[i]["idTeam"] not in teamList):
+                teams.append(team)
+                teamList.append(data[i]["idTeam"])
+        logger(teams)
+        print("::: PROCESS FINISHED :::")
+        return teams
+    except Exception as e:
+        logger(e, True, "Teams", teams)
+        return "::: ERROR TEAMS :::"
+
+
 def get_events(driver, params):
     events = []
     try:
@@ -160,7 +201,7 @@ def get_events(driver, params):
                 idd = 0
             else:
                 idd = 1
-            linkEvent = tds[3+idd].find_element_by_xpath(
+            linkEvent = tds[3 + idd].find_element_by_xpath(
                 "./a").get_attribute("href")
             idEvent = get_id_link_APAT(params, linkEvent, "E")
             link = tds[2].find_elements_by_xpath(
@@ -172,14 +213,13 @@ def get_events(driver, params):
                 linkCircuit = tds[2].text
                 idCircuit = tds[2].text.replace(" ", "_")
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" +
-                params["year"] + "-" + str(it+1)+"-"+idEvent,
+                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + idEvent,
                 "strEvent": tds[2].text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
-                "intRound": str(it+1),
+                "intRound": str(it + 1),
                 "strDate": tds[1].text,
-                "strResult": tds[3+idd].text,
+                "strResult": tds[3 + idd].text,
                 "idCircuit": idCircuit,
                 "strCircuit": tds[2].text,
                 "numSeason": parse_int(params["year"]),

@@ -34,8 +34,10 @@ def run_script_CARX(params):
     d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
                          + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+    # ret["drivers"] = api_request(
+    #     "post", params["urlApi"] + "/driver/create", d_clean)
     ret["drivers"] = api_request(
-        "post", params["urlApi"] + "/driver/create", d_clean)
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
 
     url = "/calendario/"
     driver.get(params["urlBase"] + url)
@@ -65,8 +67,10 @@ def run_script_CARX(params):
     d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
                          + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", chd_scrap[0], d_base)
+    # ret["drivers_extra"] = api_request(
+    #     "post", params["urlApi"] + "/driver/create", d_clean)
     ret["drivers_extra"] = api_request(
-        "post", params["urlApi"] + "/driver/create", d_clean)
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
 
     time.sleep(5)
     ch_base = api_request("get", params["urlApi"] + "/champ/ids/" + params["catId"]

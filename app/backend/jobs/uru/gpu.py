@@ -8,7 +8,7 @@ def load_GPU(params):
     ret = {}
     params["urlBase"] = "http://www.19capitaleshistorico.com"
 
-    data = api_request("get", params["urlApi"]+"/org/find/gpu")
+    data = api_request("get", params["urlApi"] + "/org/find/gpu")
     if(data and len(data["categories"]) > 0):
         cats = data["categories"]
         for it in range(0, len(cats)):
@@ -33,18 +33,22 @@ def run_script_GPU(params):
     # ret["drivers"] = d_scrap
     t_scrap = get_teams(d_scrap, params)
     # ret["teams"] = t_scrap
-    t_base = api_request("get", params["urlApi"]+"/team/ids/"+params["catId"]
-                         + "/" + params["year"])
+    t_base = api_request(
+        "get", params["urlApi"] + "/team/ids/" + params["catId"] + "/" + params["year"])
     t_clean = clean_duplicate("idTeam", t_scrap, t_base)
+    # ret["teams"] = api_request(
+    #     "post", params["urlApi"] + "/team/create", t_clean)
     ret["teams"] = api_request(
-        "post", params["urlApi"]+"/team/create", t_clean)
+        "put", params["urlApi"] + "/team/update/0", t_clean)
 
     time.sleep(5)
-    d_base = api_request("get", params["urlApi"]+"/driver/ids/"+params["catId"]
-                         + "/" + params["year"])
+    d_base = api_request(
+        "get", params["urlApi"] + "/driver/ids/" + params["catId"] + "/" + params["year"])
     d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
+    # ret["drivers"] = api_request(
+    #     "post", params["urlApi"]+"/driver/create", d_clean)
     ret["drivers"] = api_request(
-        "post", params["urlApi"]+"/driver/create", d_clean)
+        "put", params["urlApi"] + "/driver/update/0", d_clean)
 
     url = "/edicion/" + params["year"] + "/rutas-y-etapas"
     driver.get(params["urlBase"] + url)
@@ -53,17 +57,17 @@ def run_script_GPU(params):
     # ret["events"] = events
     time.sleep(5)
     c_base = api_request(
-        "get", params["urlApi"]+"/circuit/ids/gpu")
+        "get", params["urlApi"] + "/circuit/ids/gpu")
     c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
     ret["circuits"] = api_request(
-        "post", params["urlApi"]+"/circuit/create", c_clean)
+        "post", params["urlApi"] + "/circuit/create", c_clean)
 
     time.sleep(5)
-    e_base = api_request("get", params["urlApi"]+"/event/ids/"+params["catId"]
-                         + "/" + params["year"])
+    e_base = api_request(
+        "get", params["urlApi"] + "/event/ids/" + params["catId"] + "/" + params["year"])
     e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
-        "post", params["urlApi"]+"/event/create", e_clean)
+        "post", params["urlApi"] + "/event/create", e_clean)
 
     # url = "/" + params["catOrigen"] + "/campeonato/" + params["year"] + ".html"
     # driver.get(params["urlBase"] + url)
@@ -97,14 +101,12 @@ def get_drivers(driver, params):
                 strTeam = tds[4].text + " " + tds[5].text + " " + tds[6].text
                 idTeam = strTeam.replace(" ", "_", 9)
                 pilot = {
-                    "idPlayer": params["catRCtrl"].upper() + "-"
-                    + idDriver,
+                    "idPlayer": params["catRCtrl"].upper() + "-" + idDriver,
                     "idCategory": params["catRCtrl"],
                     "idRCtrl": idDriver,
                     "strPlayer": strPlayer,
                     "strNumber": tds[7].text,
-                    "idTeam": params["catRCtrl"].upper() + "-" +
-                    idTeam.lower(),
+                    "idTeam": params["catRCtrl"].upper() + "-" + idTeam.lower(),
                     "strTeam": strTeam,
                     "numSeason": parse_int(params["year"]),
                     "strFanart4": get_brand_logo(tds[4].text),
@@ -163,12 +165,11 @@ def get_events(driver, params):
             strCircuit = track[0].text
             idEvent = strCircuit.replace(" ", "", 9).replace("-", "_", 9)
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" +
-                params["year"] + "-" + str(it+1)+"-"+idEvent,
+                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + idEvent,
                 "strEvent": items[it].find_element_by_xpath(".//h3").text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": params["catRCtrl"].upper() + "-" + idEvent,
-                "intRound": str(it+1),
+                "intRound": str(it + 1),
                 "strDate": ps[0].text,
                 "idCircuit": idEvent,
                 "strCircuit": strCircuit,
@@ -226,7 +227,7 @@ def get_champD(driver, params):
             points += line["totalPoints"]
             data.append(line)
         champ = {
-            "idChamp": params["catRCtrl"].upper()+"-"+params["year"]+"-D",
+            "idChamp": params["catRCtrl"].upper() + "-" + params["year"] + "-D",
             "numSeason": parse_int(params["year"]),
             "strSeason": params["year"],
             "idCategory": params["catRCtrl"],

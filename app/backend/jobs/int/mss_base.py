@@ -46,19 +46,25 @@ def run_script_MSS(params):
             driver.get(params["urlBase"] + url)
 
             d_scrap = get_drivers(driver, params)
-            d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
-                                 + "/" + params["year"])
+            d_base = api_request(
+                "get", params["urlApi"] + "/driver/ids/" + params["catId"] + "/" + params["year"])
             d_clean = clean_duplicate("idPlayer", d_scrap, d_base)
-            ret["drivers"] = api_request(
-                "post", params["urlApi"] + "/driver/create", d_clean)
+
+            time.sleep(2)
+            t_scrap = get_teams(driver, params)
+            t_base = api_request(
+                "get", params["urlApi"] + "/team/ids/" + params["catId"] + "/" + params["year"])
+            t_clean = clean_duplicate("idTeam", t_scrap, t_base)
+            # ret["teams"] = api_request(
+            #     "post", params["urlApi"] + "/team/create", t_clean)
+            ret["teams"] = api_request(
+                "put", params["urlApi"] + "/team/update/0", t_clean)
 
             time.sleep(5)
-            t_scrap = get_teams(driver, params)
-            t_base = api_request("get", params["urlApi"] + "/team/ids/" + params["catId"]
-                                 + "/" + params["year"])
-            t_clean = clean_duplicate("idTeam", t_scrap, t_base)
-            ret["teams"] = api_request(
-                "post", params["urlApi"] + "/team/create", t_clean)
+            # ret["drivers"] = api_request(
+            #     "post", params["urlApi"] + "/driver/create", d_clean)
+            ret["drivers"] = api_request(
+                "put", params["urlApi"] + "/driver/update/0", d_clean)
 
             time.sleep(5)
             e_scrap = get_events(driver, params)
@@ -69,15 +75,15 @@ def run_script_MSS(params):
                 "post", params["urlApi"] + "/circuit/create", c_clean)
 
             time.sleep(5)
-            e_base = api_request("get", params["urlApi"] + "/event/ids/" + params["catId"]
-                                 + "/" + params["year"])
+            e_base = api_request(
+                "get", params["urlApi"] + "/event/ids/" + params["catId"] + "/" + params["year"])
             e_clean = clean_duplicate("idEvent", e_scrap, e_base)
             ret["events"] = api_request(
                 "post", params["urlApi"] + "/event/create", e_clean)
 
             time.sleep(5)
-            ch_base = api_request("get", params["urlApi"] + "/champ/ids/" + params["catId"]
-                                  + "/" + params["year"])
+            ch_base = api_request(
+                "get", params["urlApi"] + "/champ/ids/" + params["catId"] + "/" + params["year"])
             if("D" in params["chTypes"]):
                 chd_scrap = get_champD(driver, params)
                 chd_clean = clean_duplicate_ch("idChamp", chd_scrap, ch_base)
@@ -86,15 +92,17 @@ def run_script_MSS(params):
 
             if("C" in params["chTypes"]):
                 time.sleep(5)
-                t_base = api_request("get", params["urlApi"] + "/team/ids/" + params["catId"]
-                                     + "/" + params["year"])
+                t_base = api_request(
+                    "get", params["urlApi"] + "/team/ids/" + params["catId"] + "/" + params["year"])
                 chc_scrap = get_champC(driver, params)
                 tc_clean = clean_duplicate("idTeam", chc_scrap[0], t_base)
                 chc_clean = clean_duplicate_ch(
                     "idChamp", chc_scrap[1], ch_base)
-                # ret["champC"] = chc_clean
+                # # ret["champC"] = chc_clean
+                # ret["teamsC"] = api_request(
+                #     "post", params["urlApi"] + "/team/create", tc_clean)
                 ret["teamsC"] = api_request(
-                    "post", params["urlApi"] + "/team/create", tc_clean)
+                    "put", params["urlApi"] + "/team/update/0", tc_clean)
 
                 time.sleep(5)
                 ret["champC"] = api_request(
@@ -144,8 +152,7 @@ def get_drivers(driver, params):
                         idDriver = get_id_link_MSS(
                             params["urlBase"], linkDriver, "D")
                         pilot = {
-                            "idPlayer": params["catRCtrl"].upper() + "-"
-                            + idDriver,
+                            "idPlayer": params["catRCtrl"].upper() + "-" + idDriver,
                             "idCategory": params["catRCtrl"],
                             "idRCtrl": idDriver,
                             "idMss": idDriver,
@@ -192,8 +199,7 @@ def get_teams(driver, params):
                                 params["urlBase"], linkTeam, "T")
                             strTeam = tds[0].text
                             team = {
-                                "idTeam": params["catRCtrl"].upper() + "-" +
-                                idTeam.strip(),
+                                "idTeam": params["catRCtrl"].upper() + "-" + idTeam.strip(),
                                 "strTeam": strTeam,
                                 "idCategory": params["catRCtrl"],
                                 "idRCtrl": idTeam,
@@ -247,8 +253,7 @@ def get_events(driver, params):
                             " - Cancelled", "").replace("Cancelled", "")
                         strPostponed = "Cancelled"
                     event = {
-                        "idEvent": params["catRCtrl"].upper() + "-" +
-                        tds[0].text + "-" + idEvent.strip(),
+                        "idEvent": params["catRCtrl"].upper() + "-" + tds[0].text + "-" + idEvent.strip(),
                         "strEvent": strEvent,
                         "idCategory": params["catRCtrl"],
                         "idRCtrl": idEvent,
