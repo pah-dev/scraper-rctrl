@@ -430,7 +430,6 @@ def get_champC(driver, params):
             btn_show.click()
         except Exception as e:
             logger(e, True, "Championship", btn_show)
-            pass
         time.sleep(5)
         tables = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath("//table")
