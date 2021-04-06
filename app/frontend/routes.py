@@ -88,8 +88,8 @@ def run_update(org_id, upd_type):
     params["year"] = str(date.today().year)
 
     ans = run_job_upd(params)
-
-    flash('Job ID: ' + ans['job'], 'danger')
+    print(ans)
+    flash('Job ID: ' + ans, 'danger')
 
     form = RunForm()
 

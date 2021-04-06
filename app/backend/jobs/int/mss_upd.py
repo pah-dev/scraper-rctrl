@@ -8,7 +8,6 @@ from app.backend.jobs.int.mss_circuit import run_script_circuits
 def upd_MSS(params):
     ret = {}
     params["urlBase"] = "https://results.motorsportstats.com"
-    params["updType"] = "full"
 
     data = api_request("get", params["urlApi"] + "/org/find/sec/int")
     try:
@@ -26,7 +25,6 @@ def upd_MSS(params):
                         ret[cats[it]["idLeague"]] = ans
                         if(it % 2 == 0):
                             wake_up()
-            # break
     except Exception as e:
         logger(e, True, "Load", data)
     return ret
@@ -306,7 +304,6 @@ def get_champD(driver, params):
             btn_show.click()
         except Exception as e:
             logger(e, True, "Championship", btn_show)
-            pass
         tables = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath("//table")
         )
@@ -367,7 +364,6 @@ def get_champT(driver, params):
                     btn.click()
             except Exception as e:
                 logger(e, True, "Championship", btn)
-                pass
         try:
             btn_show = None
             btn_show = WebDriverWait(driver, 30).until(
@@ -376,7 +372,6 @@ def get_champT(driver, params):
             btn_show.click()
         except Exception as e:
             logger(e, True, "Championship", btn_show)
-            pass
         tables = WebDriverWait(driver, 30).until(
             lambda d: d.find_elements_by_xpath("//table")
         )
