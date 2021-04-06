@@ -1,7 +1,7 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from app.common.tools import api_request, get_id_link_MSS, get_link_CMSS, get_link_MSS
-from app.common.tools import logger, parse_float, parse_int, run_chrome, wake_up
+from app.common.tools import logger, parse_float, parse_int, run_chrome, wake_up, compareEvents
 from app.backend.jobs.int.mss_circuit import run_script_circuits
 
 
@@ -22,7 +22,6 @@ def upd_MSS(params):
                         params["catRCtrl"] = cats[it]["idLeague"]
                         params["catOrigen"] = cats[it]["idMss"]
                         params["chTypes"] = cats[it]["chTypes"]
-                        params["catId"] = cats[it]["_id"]
                         ans = run_script_MSS(params)
                         ret[cats[it]["idLeague"]] = ans
                         if(it % 2 == 0):
@@ -85,7 +84,7 @@ def run_script_MSS(params):
                     "put", params["urlApi"] + "/champ/update/" + champId, data)
 
     # EVENTS AND CIRCUITS
-    if(params["updType"] == "events" or params["updType"] == "full"):
+    if(params["updType"] == "events" or params["updType"] == "all"):
         time.sleep(5)
         res = api_request(
             "get", params["urlApi"] + "/event/cat/" + params["catId"] + "/" +
@@ -96,7 +95,7 @@ def run_script_MSS(params):
 
         circuits = run_script_circuits(params, events)
 
-        compared = compareEvents(res, events)
+        compared = compareEvents(res, events, True)
         ret["compared"] = compared
 
         ret["circuits"] = api_request(
@@ -123,7 +122,7 @@ def run_script_MSS(params):
         ret["updEvents"] = items
 
     # DRIVERS AND TEAMS
-    if(params["updType"] == "full"):
+    if(params["updType"] == "all"):
         time.sleep(5)
         data = get_drivers(driver, params)
 
@@ -234,45 +233,6 @@ def get_teams(driver, params):
     except Exception as e:
         logger(e, True, "Teams", teams)
         return "::: ERROR TEAMS :::"
-
-
-def compareEvents(olds, news):
-    ret = {}
-    upd = []
-    cld = []
-    try:
-        cant = len(news)
-        for i in range(0, len(olds)):
-            for j in range(0, len(news)):
-                if(olds[i]["idMss"] == news[j]["idMss"]):
-                    equal = True
-                    equal = (olds[i]["intRound"] == news[j]
-                             ["intRound"]) and equal
-                    equal = (olds[i]["strDate"] == news[j]
-                             ["strDate"]) and equal
-                    equal = (olds[i]["strResult"] == news[j]
-                             ["strResult"]) and equal
-                    equal = (olds[i]["strEvent"] == news[j]
-                             ["strEvent"]) and equal
-                    equal = (olds[i]["strCircuit"] == news[j]
-                             ["strCircuit"]) and equal
-                    if(not equal):
-                        upd.append({"id": olds[i]["_id"], "new": news[j]})
-                    news.pop(j)
-                    break
-            if(cant == len(news)):
-                olds[i]["strPostponed"] = "Cancelled"
-                cld.append({"id": olds[i]["_id"], "new": olds[i]})
-            else:
-                cant = len(news)
-        ret["updated"] = upd
-        ret["cancelled"] = cld
-        ret["news"] = news
-        logger(ret)
-    except Exception as e:
-        logger(e, True, "Compare Events", [upd, cld, news])
-        return "::: ERROR COMPARE EVENTS :::"
-    return ret
 
 
 def get_events(driver, params):

@@ -1,10 +1,10 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from app.common.tools import api_request, clean_duplicate, clean_duplicate_ch, get_brand_logo, get_id_link_APTP, logger
-from app.common.tools import parse_float, parse_int, run_chrome
+from app.common.tools import parse_float, parse_int, run_chrome, compareEvents
 
 
-def load_APTP(params):
+def load_APTP(params, upd=False):
     ret = {}
     params["urlBase"] = "https://aptpweb.com.ar"
 
@@ -16,12 +16,16 @@ def load_APTP(params):
             params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
-            ans = run_script_APTP(params)
+            params["chTypes"] = cats[it]["chTypes"]
+            if(upd):
+                ans = update_APTP(params)
+            else:
+                ans = create_APTP(params)
             ret[cats[it]["idLeague"]] = ans
     return ret
 
 
-def run_script_APTP(params):
+def create_APTP(params):
     ret = {}
 
     driver = run_chrome()
@@ -77,6 +81,89 @@ def run_script_APTP(params):
     chd_clean = clean_duplicate_ch("idChamp", chd_scrap[1], ch_base)
     ret["champD"] = api_request(
         "post", params["urlApi"] + "/champ/create", chd_clean)
+
+    driver.close()
+
+    return ret
+
+
+def update_APTP(params):
+    ret = {}
+
+    driver = run_chrome()
+
+    # CHAMPIONSHIPS
+    # DRIVERS AND TEAMS
+    chd_base = api_request(
+        "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
+        params["year"] + "/D")
+
+    url = "/campeonato-" + params["catOrigen"] + "/"
+    driver.get(params["urlBase"] + url)
+
+    time.sleep(3)
+    if(chd_base):
+        champId = chd_base["_id"]
+        sumPoints = chd_base.get("sumPoints", 0)
+        chd_scrap = get_champD(driver, params)
+        if(len(chd_scrap[1]) > 0 and chd_scrap[1].get("sumPoints", 0) > sumPoints):
+
+            d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
+                                 + "/" + params["year"])
+            d_clean = clean_duplicate("idPlayer", chd_scrap[0], d_base)
+            ret["drivers"] = api_request(
+                "put", params["urlApi"] + "/driver/update/0", d_clean)
+
+            ret["champD"] = api_request(
+                "put", params["urlApi"] + "/champ/update/" + champId, chd_scrap[1])
+
+    # EVENTS AND CIRCUITS
+    if(params["updType"] == "events" or params["updType"] == "all"):
+
+        url = "/circuitos/todos"
+        driver.get(params["urlBase"] + url)
+
+        time.sleep(3)
+        e_scrap = get_events(driver, params)
+
+        c_base = api_request(
+            "get", params["urlApi"] + "/circuit/ids/aptp")
+        c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
+        ret["circuits"] = api_request(
+            "post", params["urlApi"] + "/circuit/create", c_clean)
+
+        time.sleep(3)
+        e_base = api_request(
+            "get", params["urlApi"] + "/event/cat/" + params["catId"] + "/" +
+            params["year"])
+
+        url = "/calendario-" + params["year"] + "/"
+        driver.get(params["urlBase"] + url)
+
+        ret["events"] = e_base
+
+        compared = compareEvents(e_base, e_scrap[1])
+        ret["compared"] = compared
+
+        if(len(compared["news"]) > 0):
+            time.sleep(5)
+            ret["newEvents"] = api_request(
+                "post", params["urlApi"] + "/event/create", compared["news"])
+
+        upds = compared["updated"]
+        clds = compared["cancelled"]
+        items = []
+        for it in range(0, len(upds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + upds[it]["id"],
+                upds[it]["new"]))
+        for it in range(0, len(clds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + clds[it]["id"],
+                clds[it]["new"]))
+        ret["updEvents"] = items
 
     driver.close()
 

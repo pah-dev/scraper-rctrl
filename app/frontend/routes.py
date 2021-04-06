@@ -1,7 +1,7 @@
 import json
 import sentry_sdk
-from flask import request, render_template
-from flask import Blueprint, flash, redirect, url_for, current_app
+from datetime import date
+from flask import render_template, current_app, flash
 from app.common.tools import wake_up
 from app.backend.jobs.mock import load_init
 from app.backend.jobs.arg.actc import load_ACTC
@@ -18,6 +18,9 @@ from app.backend.jobs.int.mss_upd import upd_MSS
 from app.frontend import public_bp
 from app.frontend.forms import RunForm
 from app.backend.jobs.update import create_career, fix_drivers, upd_CATS
+
+orgs_list = ['all', 'mss', 'actc', 'apat', 'aptp', 'auvo',
+             'carx', 'cur', 'gpu', 'tc', 'tr']
 
 
 @public_bp.route('/')
@@ -43,6 +46,54 @@ def run_scripts():
         return job(org, year)
 
     return render_template('./run_scripts.html', form=form)
+
+
+@public_bp.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    params = {}
+    form = RunForm()
+    print("DASHHHHH")
+    if form.validate_on_submit():
+        org = form.id_org.data
+        year = str(form.year.data)
+        params["urlApi"] = current_app.config["API_URL"]
+        params["org"] = org
+        params["year"] = year
+
+        ret = run_job(params)
+        flash('Job ID: ' + ret['job'], 'danger')
+
+    return render_template('./dashboard.html', form=form, orgs=orgs_list)
+
+
+@public_bp.route('/create/<org_id>/<year>', methods=['GET', 'POST'])
+def run_create(org_id, year):
+    params = {}
+    params["urlApi"] = current_app.config["API_URL"]
+    params["year"] = str(year)
+
+    print(params)
+    ans = upd_CATS(params)
+
+    json_data = json.dumps(ans, indent=3)
+    return str(json_data)
+
+
+@public_bp.route('/update/<org_id>/<upd_type>', methods=['GET', 'POST'])
+def run_update(org_id, upd_type):
+    params = {}
+    params["org"] = org_id
+    params["updType"] = upd_type
+    params["urlApi"] = current_app.config["API_URL"]
+    params["year"] = str(date.today().year)
+
+    ans = run_job_upd(params)
+
+    flash('Job ID: ' + ans['job'], 'danger')
+
+    form = RunForm()
+
+    return render_template('./dashboard.html', form=form, orgs=orgs_list)
 
 
 @public_bp.route('/cats_upd/<int:year>', methods=['GET'])
@@ -168,14 +219,13 @@ def upd_job(org, year, type):
 @public_bp.route("/results/<job_key>", methods=['GET'])
 def get_results(job_key):
     job = current_app.task_queue.fetch_job(job_key)
-
-    if (job.is_finished):
-        json_data = json.dumps(job.result, indent=3)
-        return str(json_data), 200
-    elif(job.is_failed):
-        return str("Error"), 400
-    else:
-        return "Nay!", 202
+    if(job):
+        if (job.is_finished):
+            json_data = json.dumps(job.result, indent=3)
+            return str(json_data), 200
+        elif(job.is_failed):
+            return str("Error"), 400
+    return "Nay!", 202
 
 
 def load_manual(params):

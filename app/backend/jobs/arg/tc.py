@@ -1,10 +1,10 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
-from app.common.tools import api_request, clean_duplicate, clean_duplicate_ch
+from app.common.tools import api_request, clean_duplicate, clean_duplicate_ch, compareEvents
 from app.common.tools import parse_int, run_chrome, get_id_link_TC, logger, parse_float
 
 
-def load_TC(params):
+def load_TC(params, upd=False):
     ret = {}
     urlBase = "https://#CAT#.com.ar"
 
@@ -20,12 +20,15 @@ def load_TC(params):
             params["urlBaseO"] = urlBase
             params["urlBase"] = urlBase.replace(
                 "#CAT#", params["catOrigen"])
-            ans = run_script_TC(params)
+            if(upd):
+                ans = update_TC(params)
+            else:
+                ans = create_TC(params)
             ret[cats[it]["idLeague"]] = ans
     return ret
 
 
-def run_script_TC(params):
+def create_TC(params):
     ret = {}
 
     driver = run_chrome()
@@ -104,18 +107,143 @@ def run_script_TC(params):
 
     if("C" in params["chTypes"]):
         time.sleep(5)
-        chc_srcap = get_champC(driver, params)
-        # ret["champC"] = chc_srcap
-        t_clean = clean_duplicate("idTeam", chc_srcap[0], t_base)
+        chc_scrap = get_champC(driver, params)
+        # ret["champC"] = chc_scrap
+        t_clean = clean_duplicate("idTeam", chc_scrap[0], t_base)
         # ret["teamsC"] = api_request(
         #     "post", params["urlApi"] + "/team/create", t_clean)
         ret["teams"] = api_request(
             "put", params["urlApi"] + "/team/update/0", t_clean)
 
         time.sleep(5)
-        chc_clean = clean_duplicate_ch("idChamp", chc_srcap[1], ch_base)
+        chc_clean = clean_duplicate_ch("idChamp", chc_scrap[1], ch_base)
         ret["champC"] = api_request(
             "post", params["urlApi"] + "/champ/create", chc_clean)
+
+    driver.close()
+
+    return ret
+
+
+def update_TC(params):
+    ret = {}
+
+    # CHAMPIONSHIPS
+    driver = run_chrome()
+
+    url = "/equipos.php?accion=pilotos"
+    driver.get(params["urlBase"] + url)
+
+    d_scrap = get_drivers(driver, params)
+
+    if("D" in params["chTypes"]):
+        url = "/estadisticas.php?accion=posiciones"
+        driver.get(params["urlBase"] + url)
+
+        time.sleep(3)
+        chd_scrap = get_champD(driver, d_scrap[0], params)
+
+        chd_base = api_request(
+            "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
+            params["year"] + "/D")
+
+        time.sleep(3)
+        if(chd_base):
+            champId = chd_base["_id"]
+            sumPoints = chd_base.get("sumPoints", 0)
+            chd_scrap = get_champD(driver, params)
+            if(len(chd_scrap[1]) > 0 and chd_scrap[1].get("sumPoints", 0) > sumPoints):
+
+                ret["teams"] = api_request(
+                    "put", params["urlApi"] + "/team/update/0", d_scrap[1])
+
+                time.sleep(3)
+                ret["drivers"] = api_request(
+                    "put", params["urlApi"] + "/driver/update/0", chd_scrap[0])
+
+                time.sleep(3)
+                ret["champD"] = api_request(
+                    "put", params["urlApi"] + "/champ/update/" + champId, chd_scrap[1])
+
+    if("T" in params["chTypes"]):
+        cht_base = api_request(
+            "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
+            params["year"] + "/T")
+
+        if(cht_base):
+            champId = cht_base["_id"]
+            sumPoints = cht_base.get("sumPoints", 0)
+            cht_scrap = get_champT(driver, d_scrap[1], params)
+            if(len(cht_scrap[1]) > 0 and cht_scrap[1].get("sumPoints", 0) > sumPoints):
+
+                ret["teams"] = api_request(
+                    "put", params["urlApi"] + "/team/update/0", cht_scrap[0])
+
+                time.sleep(3)
+                ret["champD"] = api_request(
+                    "put", params["urlApi"] + "/champ/update/" + champId, cht_scrap[1])
+
+    if("C" in params["chTypes"]):
+        chc_base = api_request(
+            "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
+            params["year"] + "/C")
+
+        if(chc_base):
+            champId = chc_base["_id"]
+            sumPoints = chc_base.get("sumPoints", 0)
+            chc_scrap = get_champC(driver, params)
+            if(len(chc_scrap[1]) > 0 and chc_scrap[1].get("sumPoints", 0) > sumPoints):
+
+                ret["teams"] = api_request(
+                    "put", params["urlApi"] + "/team/update/0", chc_scrap[0])
+
+                time.sleep(3)
+                ret["champD"] = api_request(
+                    "put", params["urlApi"] + "/champ/update/" + champId, chc_scrap[1])
+
+    # EVENTS AND CIRCUITS
+    if(params["updType"] == "events" or params["updType"] == "all"):
+        time.sleep(3)
+        e_base = api_request(
+            "get", params["urlApi"] + "/event/cat/" + params["catId"] + "/" +
+            params["year"])
+
+        url = "/carreras.php?evento=calendario"
+        driver.get(params["urlBase"] + url)
+
+        e_scrap = get_events(driver, params)
+
+        ret["events"] = e_base
+
+        time.sleep(3)
+        c_base = api_request(
+            "get", params["urlApi"] + "/circuit/ids/tc")
+        c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
+        ret["circuits"] = api_request(
+            "post", params["urlApi"] + "/circuit/create", c_clean)
+
+        compared = compareEvents(e_base, e_scrap[1])
+        ret["compared"] = compared
+
+        if(len(compared["news"]) > 0):
+            time.sleep(5)
+            ret["newEvents"] = api_request(
+                "post", params["urlApi"] + "/event/create", compared["news"])
+
+        upds = compared["updated"]
+        clds = compared["cancelled"]
+        items = []
+        for it in range(0, len(upds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + upds[it]["id"],
+                upds[it]["new"]))
+        for it in range(0, len(clds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + clds[it]["id"],
+                clds[it]["new"]))
+        ret["updEvents"] = items
 
     driver.close()
 

@@ -371,3 +371,47 @@ def get_brand_logo(txt: str):
 # ratio = difflib.SequenceMatcher(
 #         None, line["idPlayer"].lower(), plist[p]["strDescriptionJP"].lower()).ratio()
 # ratio = int(ratio*1000)
+
+
+def compareEvents(olds, news, mss=False):
+    ret = {}
+    upd = []
+    cld = []
+    try:
+        cant = len(news)
+        key = "idRCtrl"
+        if(mss):
+            key = "idMss"
+        for i in range(0, len(olds)):
+            for j in range(0, len(news)):
+                if(olds[i][key] == news[j][key]):
+                    equal = True
+                    equal = (olds[i]["intRound"] == news[j]
+                             ["intRound"]) and equal
+                    equal = (olds[i]["strDate"] == news[j]
+                             ["strDate"]) and equal
+                    equal = (olds[i]["strResult"] == news[j]
+                             ["strResult"]) and equal
+                    equal = (olds[i]["strEvent"] == news[j]
+                             ["strEvent"]) and equal
+                    equal = (olds[i]["strCircuit"] == news[j]
+                             ["strCircuit"]) and equal
+                    equal = (olds[i]["idCircuit"] == news[j]
+                             ["idCircuit"]) and equal
+                    if(not equal):
+                        upd.append({"id": olds[i]["_id"], "new": news[j]})
+                    news.pop(j)
+                    break
+            if(cant == len(news)):
+                olds[i]["strPostponed"] = "Cancelled"
+                cld.append({"id": olds[i]["_id"], "new": olds[i]})
+            else:
+                cant = len(news)
+        ret["updated"] = upd
+        ret["cancelled"] = cld
+        ret["news"] = news
+        logger(ret)
+    except Exception as e:
+        logger(e, True, "Compare Events", [upd, cld, news])
+        return "::: ERROR COMPARE EVENTS :::"
+    return ret

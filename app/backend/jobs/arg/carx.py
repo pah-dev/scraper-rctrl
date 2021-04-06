@@ -1,10 +1,10 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from app.common.tools import api_request, clean_duplicate, clean_duplicate_ch, get_id_link_CARX, logger, parse_float
-from app.common.tools import parse_int, run_chrome
+from app.common.tools import parse_int, run_chrome, compareEvents
 
 
-def load_CARX(params):
+def load_CARX(params, upd=False):
     ret = {}
     params["urlBase"] = "http://carxrallycross.com"
 
@@ -16,12 +16,16 @@ def load_CARX(params):
             params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
-            ans = run_script_CARX(params)
+            params["chTypes"] = cats[it]["chTypes"]
+            if(upd):
+                ans = update_CARX(params)
+            else:
+                ans = create_CARX(params)
             ret[cats[it]["idLeague"]] = ans
     return ret
 
 
-def run_script_CARX(params):
+def create_CARX(params):
     ret = {}
 
     driver = run_chrome()
@@ -78,6 +82,95 @@ def run_script_CARX(params):
     chd_clean = clean_duplicate_ch("idChamp", chd_scrap[1], ch_base)
     ret["champD"] = api_request(
         "post", params["urlApi"] + "/champ/create", chd_clean)
+
+    driver.close()
+
+    return ret
+
+
+def update_CARX(params):
+    ret = {}
+
+    # CHAMPIONSHIPS
+    driver = run_chrome()
+
+    chd_base = api_request(
+        "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
+        params["year"] + "/D")
+
+    url = "/campeonato-" + params["catOrigen"] + "/"
+    driver.get(params["urlBase"] + url)
+
+    time.sleep(3)
+    if(chd_base):
+        champId = chd_base["_id"]
+        sumPoints = chd_base.get("sumPoints", 0)
+        chd_scrap = get_champD(driver, params)
+        if(len(chd_scrap[1]) > 0 and chd_scrap[1].get("sumPoints", 0) > sumPoints):
+
+            d_base = api_request("get", params["urlApi"] + "/driver/ids/" + params["catId"]
+                                 + "/" + params["year"])
+            d_clean = clean_duplicate("idPlayer", chd_scrap[0], d_base)
+            ret["drivers_extra"] = api_request(
+                "put", params["urlApi"] + "/driver/update/0", d_clean)
+
+            time.sleep(3)
+            ret["champD"] = api_request(
+                "put", params["urlApi"] + "/champ/update/" + champId, chd_scrap[1])
+
+    # EVENTS AND CIRCUITS
+    if(params["updType"] == "events" or params["updType"] == "all"):
+        time.sleep(3)
+        e_base = api_request(
+            "get", params["urlApi"] + "/event/cat/" + params["catId"] + "/" +
+            params["year"])
+
+        url = "/calendario/"
+        driver.get(params["urlBase"] + url)
+
+        e_scrap = get_events(driver, params)
+
+        ret["events"] = e_base
+
+        c_base = api_request("get", params["urlApi"] + "/circuit/ids/carx")
+        c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
+        ret["circuits"] = api_request(
+            "post", params["urlApi"] + "/circuit/create", c_clean)
+
+        time.sleep(3)
+        compared = compareEvents(e_base, e_scrap[1])
+        ret["compared"] = compared
+
+        if(len(compared["news"]) > 0):
+            time.sleep(5)
+            ret["newEvents"] = api_request(
+                "post", params["urlApi"] + "/event/create", compared["news"])
+
+        upds = compared["updated"]
+        clds = compared["cancelled"]
+        items = []
+        for it in range(0, len(upds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + upds[it]["id"],
+                upds[it]["new"]))
+        for it in range(0, len(clds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + clds[it]["id"],
+                clds[it]["new"]))
+        ret["updEvents"] = items
+
+    # DRIVERS AND TEAMS
+    if(params["updType"] == "drivers" or params["updType"] == "all"):
+        time.sleep(3)
+        url = "/pilotos/"
+        driver.get(params["urlBase"] + url)
+
+        d_scrap = get_drivers(driver, params)
+
+        ret["drivers"] = api_request(
+            "put", params["urlApi"] + "/driver/update/0", d_scrap)
 
     driver.close()
 

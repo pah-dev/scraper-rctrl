@@ -37,7 +37,7 @@ def run_script_CUR(params):
     ret["drivers"] = api_request(
         "put", params["urlApi"] + "/driver/update/0", d_clean)
 
-    url = "https://www.cur.com.uy/calendario-2020"
+    url = "https://www.cur.com.uy/calendario-" + params["year"]
     driver.get(url)
 
     time.sleep(5)

@@ -68,7 +68,7 @@ def run_script_MSS(params):
 
             time.sleep(5)
             e_scrap = get_events(driver, params)
-            c_scrap = run_script_circuits(params, e_scrap)
+            c_scrap = run_script_circuits(driver, params, e_scrap)
             c_base = api_request("get", params["urlApi"] + "/circuit/ids/mss")
             c_clean = clean_duplicate("idCircuit", c_scrap, c_base)
             ret["circuits"] = api_request(

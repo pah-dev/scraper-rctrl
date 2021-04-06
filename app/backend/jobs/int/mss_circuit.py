@@ -2,10 +2,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from app.common.tools import get_id_link_MSS, get_link_MSS, logger, parse_int, run_chrome
 
 
-def run_script_circuits(params, events):
+def run_script_circuits(driver, params, events):
     circuits = []
     circuitList = []
-    driver = run_chrome()
+    # driver = run_chrome()
     url = "/venues/"
 
     print("::: CIRCUIT DETAIL")
@@ -17,7 +17,7 @@ def run_script_circuits(params, events):
             circuits.append(circuit)
             circuitList.append(circuit["idCircuit"])
     logger(circuits)
-    driver.close()
+    # driver.close()
     print("::: PROCESS FINISHED :::")
 
     return circuits

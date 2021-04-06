@@ -2,10 +2,10 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from app.common.tools import api_request, clean_duplicate, get_id_link_AUVO, logger, parse_float
-from app.common.tools import parse_int, run_chrome
+from app.common.tools import parse_int, run_chrome, compareEvents
 
 
-def load_AUVO(params):
+def load_AUVO(params, upd=False):
     ret = {}
     params["urlBase"] = "http://www.auvo.com.uy"
 
@@ -17,7 +17,10 @@ def load_AUVO(params):
             params["catId"] = cats[it]["_id"]
             params["catRCtrl"] = cats[it]["idLeague"]
             params["catOrigen"] = cats[it]["idRCtrl"]
-            ans = run_script_AUVOCat(params)
+            if(upd):
+                ans = update_AUVO(params)
+            else:
+                ans = run_script_AUVOCat(params)
             ret[cats[it]["idLeague"]] = ans
     return ret
 
@@ -59,7 +62,7 @@ def run_script_AUVOCat(params):
     # ret["teams"] = api_request(
     # "post", params["urlApi"]+"/team/create", t_data)
 
-    ans = run_script_AUVO(params)
+    ans = create_AUVO(params)
     ret["events"] = ans
 
     driver.close()
@@ -67,7 +70,7 @@ def run_script_AUVOCat(params):
     return ret
 
 
-def run_script_AUVO(params):
+def create_AUVO(params):
     ret = {}
 
     driver = run_chrome()
@@ -90,6 +93,78 @@ def run_script_AUVO(params):
     e_clean = clean_duplicate("idEvent", e_scrap[1], e_base)
     ret["events"] = api_request(
         "post", params["urlApi"] + "/event/create", e_clean)
+
+    driver.close()
+
+    return ret
+
+
+def update_AUVO(params):
+    ret = {}
+
+    driver = run_chrome()
+
+    # CHAMPIONSHIPS
+
+    # EVENTS AND CIRCUITS
+    if(params["updType"] == "events" or params["updType"] == "all"):
+        time.sleep(3)
+        e_base = api_request(
+            "get", params["urlApi"] + "/event/cat/" + params["catId"] + "/" +
+            params["year"])
+
+        url = "/calendario"
+        driver.get(params["urlBase"] + url)
+
+        e_scrap = get_events(driver, params)
+
+        ret["events"] = e_base
+
+        time.sleep(3)
+        c_base = api_request(
+            "get", params["urlApi"] + "/circuit/ids/auvo")
+        c_clean = clean_duplicate("idCircuit", e_scrap[0], c_base)
+        ret["circuits"] = api_request(
+            "post", params["urlApi"] + "/circuit/create", c_clean)
+
+        compared = compareEvents(e_base, e_scrap[1])
+        ret["compared"] = compared
+
+        if(len(compared["news"]) > 0):
+            time.sleep(5)
+            ret["newEvents"] = api_request(
+                "post", params["urlApi"] + "/event/create", compared["news"])
+
+        upds = compared["updated"]
+        clds = compared["cancelled"]
+        items = []
+        for it in range(0, len(upds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + upds[it]["id"],
+                upds[it]["new"]))
+        for it in range(0, len(clds)):
+            time.sleep(2)
+            items.append(api_request(
+                "put", params["urlApi"] + "/event/update/" + clds[it]["id"],
+                clds[it]["new"]))
+        ret["updEvents"] = items
+
+    # DRIVERS AND TEAMS
+    if(params["updType"] == "drivers" or params["updType"] == "all"):
+        time.sleep(5)
+        url = "/" + params["catOrigen"] + "/pilotos.html"
+        driver.get(params["urlBase"] + url)
+
+        d_scrap = get_drivers(driver, params)
+        t_scrap = get_teams(d_scrap, params)
+
+        ret["teams"] = api_request(
+            "put", params["urlApi"] + "/team/update/0", t_scrap)
+
+        time.sleep(5)
+        ret["drivers"] = api_request(
+            "put", params["urlApi"] + "/driver/update/0", d_scrap)
 
     driver.close()
 

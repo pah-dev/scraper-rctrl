@@ -11,4 +11,5 @@ class RunForm(FlaskForm):
         "auvo", "AUVO"), ("carx", "CARX"), ("cur", "CUR"), ("gpu", "GPU"), ("mss", "MSS"), ("tc", "TC"), ("tr", "TR")])
     year = IntegerField('Year')
     manual = BooleanField('Manual')
-    submit = SubmitField('Run')
+    org = HiddenField('org')
+    submit = SubmitField('create')
