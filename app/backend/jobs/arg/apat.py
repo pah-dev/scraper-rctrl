@@ -359,6 +359,17 @@ def get_circuits(driver, params):
                 "strLogo": logo
             }
             circuits.append(circuit)
+        circuit = {
+            "idCircuit": "A_confirmar",
+            "strCircuit": "A confirmar",
+            "idRCtrl": "A_confirmar",
+            "strLeague": "apat",
+            "strCountry": "Argentina",
+            "numSeason": parse_int(params["year"]),
+            "intSoccerXMLTeamID": "ARG",
+            "strLogo": "https://www.actc.org.ar/upload/circuitos/31/imgs_v3/calendario/circuito-a-confirmar.png"
+        }
+        circuits.append(circuit)
         logger(circuits)
         print("::: PROCESS FINISHED :::")
         return circuits
