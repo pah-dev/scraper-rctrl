@@ -259,27 +259,27 @@ def load_manual(params):
 def upd_manual(params):
     ret = {}
     if(params["org"] == 'all'):
-        ret = load_ALL(params)
+        ret = load_ALL(params, True)
     elif(params["org"] == 'actc'):
-        ret = load_ACTC(params)
+        ret = load_ACTC(params, True)
     elif (params["org"] == 'apat'):
-        ret = load_APAT(params)
+        ret = load_APAT(params, True)
     elif (params["org"] == 'aptp'):
-        ret = load_APTP(params)
+        ret = load_APTP(params, True)
     elif (params["org"] == 'auvo'):
-        ret = load_AUVO(params)
+        ret = load_AUVO(params, True)
     elif (params["org"] == 'carx'):
-        ret = load_CARX(params)
+        ret = load_CARX(params, True)
     elif (params["org"] == 'cur'):
-        ret = load_CUR(params)
+        ret = load_CUR(params, True)
     elif (params["org"] == 'gpu'):
-        ret = load_GPU(params)
+        ret = load_GPU(params, True)
     elif (params["org"] == 'mss'):
-        ret = upd_MSS(params)
+        ret = upd_MSS(params, True)
     elif (params["org"] == 'tc'):
-        ret = load_TC(params)
+        ret = load_TC(params, True)
     elif (params["org"] == 'tr'):
-        ret = load_TR(params)
+        ret = load_TR(params, True)
     json_data = json.dumps(ret, indent=3)
     return str(json_data)
 
@@ -396,21 +396,24 @@ def run_job_upd(params):
     return str(json_data)
 
 
-def load_ALL(params):
+def load_ALL(params, upd=False):
     ret = []
-    ret.append(load_ACTC(params))
+    ret.append(load_ACTC(params, upd))
     wake_up()
-    ret.append(load_APAT(params))
-    ret.append(load_APTP(params))
+    ret.append(load_APAT(params, upd))
+    ret.append(load_APTP(params, upd))
     wake_up()
-    ret.append(load_AUVO(params))
-    ret.append(load_CARX(params))
+    ret.append(load_AUVO(params, upd))
+    ret.append(load_CARX(params, upd))
     wake_up()
-    ret.append(load_CUR(params))
-    ret.append(load_GPU(params))
+    ret.append(load_CUR(params, upd))
+    ret.append(load_GPU(params, upd))
     wake_up()
-    ret.append(load_TC(params))
-    ret.append(load_TR(params))
+    ret.append(load_TC(params, upd))
+    ret.append(load_TR(params, upd))
     wake_up()
-    ret.append(load_MSS(params))
+    if(upd):
+        ret.append(upd_MSS(params))
+    else:
+        ret.append(load_MSS(params))
     return ret
