@@ -141,7 +141,6 @@ def update_TC(params):
         driver.get(params["urlBase"] + url)
 
         time.sleep(3)
-        chd_scrap = get_champD(driver, d_scrap[0], params)
 
         chd_base = api_request(
             "get", params["urlApi"] + "/champ/cat/" + params["catId"] + "/" +
@@ -151,7 +150,7 @@ def update_TC(params):
         if(chd_base):
             champId = chd_base["_id"]
             sumPoints = chd_base.get("sumPoints", 0)
-            chd_scrap = get_champD(driver, params)
+            chd_scrap = get_champD(driver, d_scrap[0], params)
             if(len(chd_scrap[1]) > 0 and chd_scrap[1].get("sumPoints", 0) > sumPoints):
 
                 ret["teams"] = api_request(
