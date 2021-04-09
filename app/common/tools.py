@@ -307,7 +307,7 @@ def get_brand_logo(txt: str):
         ret = urlBase4 + "2017/10/Beta-Logo-500x393.png"
     elif any(word in txt for word in ["BMW", "B.M.W."]):
         ret = urlBase + "logo-bmw-sm.png"
-    elif any(word in txt for word in ["CHEV", "CRUZE", "ONIX", "CORSA", "CELTA"]):
+    elif any(word in txt for word in ["CHEV", "CRUZE", "ONIX", "CORSA", "CELTA", "CLASSIC"]):
         ret = urlBase + "logo-chevrolet-sm.png"
     elif any(word in txt for word in ["CITROEN", "CITROËN", "C4", "DS3"]):
         ret = urlBase + "logo-citroen-sm.png"
@@ -379,7 +379,7 @@ def compareEvents(olds, news, mss=False):
     cld = []
     try:
         cant = len(news)
-        key = "idRCtrl"
+        key = "idEvent"
         if(mss):
             key = "idMss"
         for i in range(0, len(olds)):

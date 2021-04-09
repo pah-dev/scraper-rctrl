@@ -297,6 +297,7 @@ def get_champD(driver, params):
     try:
         print("::: CHAMPIONSHIP DRIVERS")
         time.sleep(5)
+        btn_show = None
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
@@ -364,8 +365,8 @@ def get_champT(driver, params):
                     btn.click()
             except Exception as e:
                 logger(e, True, "Championship", btn)
+        btn_show = None
         try:
-            btn_show = None
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(
                     '//button[@class="hFZZS"]'))
@@ -423,6 +424,7 @@ def get_champC(driver, params):
     try:
         print("::: CHAMPIONSHIP CONSTRUCTORS")
         time.sleep(5)
+        btn_show = None
         try:
             btn_show = WebDriverWait(driver, 30).until(
                 lambda d: d.find_element_by_xpath(

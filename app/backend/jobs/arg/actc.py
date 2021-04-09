@@ -269,6 +269,8 @@ def get_events(driver, params):
             idCircuit = get_id_link_ACTC(params, linkCircuit, "C")
             strCircuit = items[it].find_element_by_xpath(
                 ".//div[@class='hd']/p").text
+            strDate = items[it].find_element_by_xpath(
+                ".//div[@class='date']").text
             linkDriver, strResult = "", ""
             try:
                 linkDriver = items[it].find_element_by_xpath(
@@ -279,14 +281,13 @@ def get_events(driver, params):
                 linkDriver = ""
             idDriver = get_id_link_ACTC(params, linkDriver, "D")
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + idEvent,
+                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + strDate.replace(" ", "-", 9),
                 "strEvent": items[it].find_element_by_xpath(
                     ".//div[@class='hd']/h2").text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it + 1),
-                "strDate": items[it].find_element_by_xpath(
-                    ".//div[@class='date']").text,
+                "strDate": strDate,
                 "idWinner": idDriver,
                 "strResult": strResult,
                 "idCircuit": idCircuit,

@@ -316,18 +316,19 @@ def get_events(driver, params):
             strCircuit = items[it].find_element_by_xpath(
                 ".//span[contains(@class, 'circuit-name')]").get_attribute("innerHTML")
             strEvent = items[it].find_element_by_xpath(".//h2").text
+            strDate = items[it].find_element_by_xpath(".//h5").text
             if(idEvent == ""):
                 idEvent = params["catRCtrl"].upper() + "-" + \
                     strEvent.replace(" ", "_", 9)
             if(idCircuit == ""):
                 idCircuit = idEvent
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + idEvent,
+                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + strDate.replace(" ", "-", 5),
                 "strEvent": strEvent,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it + 1),
-                "strDate": items[it].find_element_by_xpath(".//h5").text,
+                "strDate": strDate,
                 "idCircuit": idCircuit,
                 "strCircuit": strCircuit,
                 "idWinner": idDriver,

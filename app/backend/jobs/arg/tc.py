@@ -360,14 +360,15 @@ def get_events(driver, params):
             linkCircuit = items[it].find_element_by_xpath(
                 ".//img[@class='imagen_autodromo']").get_attribute("src")
             idCircuit = get_id_link_TC(params, linkCircuit, "C")
+            strDate = items[it].find_element_by_xpath(
+                ".//h2/span[@class='gris']").text
             event = {
-                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + idEvent,
+                "idEvent": params["catRCtrl"].upper() + "-" + params["year"] + "-" + str(it + 1) + "-" + strDate.replace(" ", "-", 5),
                 "strEvent": items[it].find_element_by_xpath(".//h3").text,
                 "idCategory": params["catRCtrl"],
                 "idRCtrl": idEvent,
                 "intRound": str(it + 1),
-                "strDate": items[it].find_element_by_xpath(
-                    ".//h2/span[@class='gris']").text,
+                "strDate": strDate,
                 "idCircuit": idCircuit,
                 "strCircuit": "",
                 "numSeason": parse_int(params["year"]),

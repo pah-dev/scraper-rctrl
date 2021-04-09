@@ -345,47 +345,47 @@ def run_job_upd(params):
 
     if(params["org"] == 'all'):
         job = current_app.task_queue.enqueue_call(
-            func=load_ALL, args=(params,), result_ttl=5000, timeout=3600
+            func=load_ALL, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif(params["org"] == 'actc'):
         job = current_app.task_queue.enqueue_call(
-            func=load_ACTC, args=(params,), result_ttl=5000, timeout=3600
+            func=load_ACTC, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'apat'):
         job = current_app.task_queue.enqueue_call(
-            func=load_APAT, args=(params,), result_ttl=5000, timeout=3600
+            func=load_APAT, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'aptp'):
         job = current_app.task_queue.enqueue_call(
-            func=load_APTP, args=(params,), result_ttl=5000, timeout=3600
+            func=load_APTP, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'auvo'):
         job = current_app.task_queue.enqueue_call(
-            func=load_AUVO, args=(params,), result_ttl=5000, timeout=3600
+            func=load_AUVO, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'carx'):
         job = current_app.task_queue.enqueue_call(
-            func=load_CARX, args=(params,), result_ttl=5000, timeout=3600
+            func=load_CARX, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'cur'):
         job = current_app.task_queue.enqueue_call(
-            func=load_CUR, args=(params,), result_ttl=5000, timeout=3600
+            func=load_CUR, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'gpu'):
         job = current_app.task_queue.enqueue_call(
-            func=load_GPU, args=(params,), result_ttl=5000, timeout=3600
+            func=load_GPU, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'mss'):
         job = current_app.task_queue.enqueue_call(
-            func=upd_MSS, args=(params,), result_ttl=5000, timeout=3600
+            func=upd_MSS, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tc'):
         job = current_app.task_queue.enqueue_call(
-            func=load_TC, args=(params,), result_ttl=5000, timeout=3600
+            func=load_TC, args=(params, True), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tr'):
         job = current_app.task_queue.enqueue_call(
-            func=load_TR, args=(params,), result_ttl=5000, timeout=3600
+            func=load_TR, args=(params, True), result_ttl=5000, timeout=3600
         )
 
     job_id = job.get_id()
