@@ -52,7 +52,7 @@ def run_scripts():
 def dashboard():
     params = {}
     form = RunForm()
-    print("DASHHHHH")
+
     if form.validate_on_submit():
         org = form.id_org.data
         year = str(form.year.data)
@@ -72,7 +72,6 @@ def run_create(org_id, year):
     params["urlApi"] = current_app.config["API_URL"]
     params["year"] = str(year)
 
-    print(params)
     ans = upd_CATS(params)
 
     json_data = json.dumps(ans, indent=3)
@@ -93,6 +92,7 @@ def run_update(org_id, upd_type):
 
     form = RunForm()
 
+    # URLTO DASHBOARF
     return render_template('./dashboard.html', form=form, orgs=orgs_list)
 
 
@@ -205,13 +205,13 @@ def job(org, year):
     return run_job(params)
 
 
-@public_bp.route('/job/upd/<org>/<year>/<type>', methods=['GET'])
-def upd_job(org, year, type):
+@public_bp.route('/job/upd/<org>/<year>/<upd_type>', methods=['GET'])
+def upd_job(org, year, upd_type):
     params = {}
     params["urlApi"] = current_app.config["API_URL"]
     params["org"] = org
     params["year"] = year
-    params["updType"] = type
+    params["updType"] = upd_type
 
     return run_job_upd(params)
 
