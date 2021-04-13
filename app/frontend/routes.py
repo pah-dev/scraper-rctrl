@@ -377,7 +377,7 @@ def run_job_upd(params):
         )
     elif (params["org"] == 'mss'):
         job = current_app.task_queue.enqueue_call(
-            func=upd_MSS, args=(params), result_ttl=5000, timeout=3600
+            func=upd_MSS, args=(params,), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tc'):
         job = current_app.task_queue.enqueue_call(
