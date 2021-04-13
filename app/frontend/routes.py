@@ -275,7 +275,7 @@ def upd_manual(params):
     elif (params["org"] == 'gpu'):
         ret = load_GPU(params, True)
     elif (params["org"] == 'mss'):
-        ret = upd_MSS(params, True)
+        ret = upd_MSS(params)
     elif (params["org"] == 'tc'):
         ret = load_TC(params, True)
     elif (params["org"] == 'tr'):
@@ -377,7 +377,7 @@ def run_job_upd(params):
         )
     elif (params["org"] == 'mss'):
         job = current_app.task_queue.enqueue_call(
-            func=upd_MSS, args=(params, True), result_ttl=5000, timeout=3600
+            func=upd_MSS, args=(params), result_ttl=5000, timeout=3600
         )
     elif (params["org"] == 'tc'):
         job = current_app.task_queue.enqueue_call(
