@@ -13,7 +13,7 @@ def run_script_circuits(driver, params, events):
         uri = events[i]["idCircuit"]
         driver.get(params["urlBase"] + url + uri)
         circuit = get_circuit_detail(driver, params, events[i])
-        if(circuit["idCircuit"] not in circuitList):
+        if(circuit and circuit["idCircuit"] not in circuitList):
             circuits.append(circuit)
             circuitList.append(circuit["idCircuit"])
     logger(circuits)
@@ -84,4 +84,4 @@ def get_circuit_detail(driver, params, event):
         return circuit
     except Exception as e:
         logger(e, True, "Circuits", circuit)
-        return "::: ERROR CIRCUIT " + event["idCircuit"]
+        return None  # "::: ERROR CIRCUIT " + event["idCircuit"]
