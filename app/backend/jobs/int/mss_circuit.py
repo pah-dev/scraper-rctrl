@@ -49,13 +49,14 @@ def get_circuit_detail(driver, params, event):
         idCountry = get_id_link_MSS(params["urlBase"], linkCountry, "W")
         info = driver.find_elements_by_xpath("//div[@class='ZfXR2']")
         strType, strLength, strCorners = "", "", ""
-        strDirection, intFormedYear = "", ""
+        strDirection, intFormedYear, strAddress = "", "", ""
         try:
             strType = info[0]
             strLength = info[1]
             strCorners = info[2]
             strDirection = info[3]
             intFormedYear = info[4]
+            strAddress = trs[1].text
         except Exception:
             pass
         circuit = {
@@ -64,7 +65,7 @@ def get_circuit_detail(driver, params, event):
             "idRCtrl": event["idCircuit"],
             "idMss": event["idCircuit"],
             "strLeague": "mss",
-            "strAddress": trs[1].text,
+            "strAddress": strAddress,
             "strCountry": trs[0].text,
             "strType": strType,
             "strLength": strLength,
