@@ -91,7 +91,7 @@ def run_script_MSS(params):
         events = get_events(driver, params)
         ret["events"] = res
 
-        circuits = run_script_circuits(params, events)
+        circuits = run_script_circuits(driver, params, events)
 
         compared = compareEvents(res, events, True)
         ret["compared"] = compared
