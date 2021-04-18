@@ -396,8 +396,11 @@ def compareEvents(olds, news, mss=False):
                              ["strEvent"]) and equal
                     equal = (olds[i]["strCircuit"] == news[j]
                              ["strCircuit"]) and equal
-                    equal = (olds[i]["idCircuit"] == news[j]
-                             ["idCircuit"]) and equal
+                    try:
+                        equal = (olds[i]["idCircuit"] == news[j]
+                                 ["idCircuit"]) and equal
+                    except Exception:
+                        pass
                     if(not equal):
                         upd.append({"id": olds[i]["_id"], "new": news[j]})
                     news.pop(j)
