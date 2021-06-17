@@ -392,8 +392,8 @@ def compareEvents(olds, news, mss=False):
                              ["strDate"]) and equal
                     equal = (olds[i]["strResult"] == news[j]
                              ["strResult"]) and equal
-                    equal = (olds[i]["strEvent"] == news[j]
-                             ["strEvent"]) and equal
+                    # equal = (olds[i]["strEvent"] == news[j]
+                    #          ["strEvent"]) and equal
                     equal = (olds[i]["strCircuit"] == news[j]
                              ["strCircuit"]) and equal
                     try:

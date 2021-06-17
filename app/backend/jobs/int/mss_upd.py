@@ -125,12 +125,12 @@ def run_script_MSS(params):
         data = get_drivers(driver, params)
 
         ret["drivers"] = api_request(
-            "put", params["urlApi"] + "/driver/update", data)
+            "put", params["urlApi"] + "/driver/update/0", data)
 
         data = get_teams(driver, params)
         if(len(data) > 0):
             ret["teams"] = api_request(
-                "put", params["urlApi"] + "/team/update", data)
+                "put", params["urlApi"] + "/team/update/0", data)
 
     driver.close()
 
