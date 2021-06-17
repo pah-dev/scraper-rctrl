@@ -97,7 +97,7 @@ def run_script_MSS(params):
         ret["compared"] = compared
 
         ret["circuits"] = api_request(
-            "post", params["urlApi"] + "/circuit/create", circuits)
+            "post", params["urlApi"] + "/circuit/update/0", circuits)
 
         if(len(compared["news"]) > 0):
             time.sleep(5)
