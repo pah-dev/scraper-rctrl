@@ -30,6 +30,7 @@ def get_circuit_detail(driver, params, event):
             lambda d: d.find_element_by_xpath(
                 "//img[@class='_3nEn_']").get_attribute("src")
         )
+        thumb = thumb.replace("cdn-images.", "images.")
         strCircuit = driver.find_element_by_xpath(
             "//div[@class='_2QxWx']").text
         trs = driver.find_elements_by_xpath("//div[@class='_3wj-5']")

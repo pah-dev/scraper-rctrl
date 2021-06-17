@@ -352,6 +352,7 @@ def get_champT(driver, params):
         print("::: CHAMPIONSHIP TEAMS")
         if(len(params["chTypes"]) > 2):
             time.sleep(5)
+            btn = None
             try:
                 combos = WebDriverWait(driver, 30).until(
                     lambda d: d.find_elements_by_xpath("//div[@class='-iMCB']")
